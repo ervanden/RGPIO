@@ -81,11 +81,10 @@ public class RGPIOInput extends RGPIOSelector {
 
         nrHigh = 0;
         nrLow = 0;
-System.out.println("state change count H/L");
+
         for (Device device : RGPIO.deviceMap.values()) {
             for (DeviceDigitalInput dip : device.digitalInputs.values()) {
                 if (dip.digitalInput == this) {
-                    System.out.println("state change count H/L: dip="+dip.name+" value="+dip.value);
                     if (dip.value.equals("High")) {
                         nrHigh++;
                     }

@@ -13,16 +13,8 @@ public class ExampleServer implements RGPIOInputEventListener, RGPIOMessageListe
     RGPIOOutput lights;
 
     public void onInputEvent(RGPIOInputEvent event) {
-        /*
-         System.out.println("on input event ..."
-         +event.rgpioInput.name+" "
-         +(event.rgpioInput==buttons) +" "
-         +event.rgpioInput.value+" "
-         +event.rgpioInput.isHigh()+" "
-         + lights.get());
-         */
+
         if (event.rgpioInput == buttons) {
-System.out.println("button state change nrHigh="+buttons.nrHigh);
             if (event.rgpioInput.nrHigh>0) {
                 if (lights.get().equals("High")) {
                     lights.set("Low");
