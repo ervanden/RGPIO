@@ -79,8 +79,8 @@ public class RGPIOInput extends RGPIOSelector {
     public void stateChange(RGPIOInputEvent event) {
 
 
-        int nrHigh = 0;
-        int nrLow = 0;
+        nrHigh = 0;
+        nrLow = 0;
 System.out.println("state change count H/L");
         for (Device device : RGPIO.deviceMap.values()) {
             for (DeviceDigitalInput dip : device.digitalInputs.values()) {
