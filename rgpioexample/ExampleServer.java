@@ -22,7 +22,7 @@ public class ExampleServer implements RGPIOInputEventListener, RGPIOMessageListe
          + lights.get());
          */
         if (event.rgpioInput == buttons) {
-
+System.out.println("button state change nrHigh="+buttons.nrHigh);
             if (event.rgpioInput.nrHigh>0) {
                 if (lights.get().equals("High")) {
                     lights.set("Low");
