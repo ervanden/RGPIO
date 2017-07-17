@@ -191,7 +191,7 @@
             var VIOTable = new TableGenerator();
             VIOTable.setDocument(document);
             VIOTable.setCellColors(cellColors);
-            VIOTable.setColumns(["name", "type", "value"]);
+            VIOTable.setColumns(["name", "type", "value", "nrHigh", "nrLow"]);
             VIOTable.setKeys(["name"]);
             table = VIOTable.createTable("VIOTable", "VIO");
             document.getElementById("tableDiv").appendChild(table);
