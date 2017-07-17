@@ -1,0 +1,372 @@
+package pidevice;
+
+import udputils.UDPSender;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import rgpio.*;
+import devices.TimeStamp;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Scanner;
+
+class MessagePrinter implements RGPIOMessageListener {
+
+    public void onMessage(RGPIOMessageEvent e) throws Exception {
+        System.out.println(e.toString());
+    }
+}
+
+class InitialReportThread extends Thread {
+
+    public InitialReportThread() {
+        super("InitialReportThread");
+    }
+
+    public void run() {
+        // device broadcasts  Report every second when it powers up, until it knows the server IP address
+        // (when server replies OK to Report)
+        System.out.println("Server IP address = " + PiDevice.serverIPAddress);
+        while (PiDevice.serverIPAddress == null) {
+            PiDevice.sendReport();
+            try {
+                sleep(1000);
+            } catch (InterruptedException ie) {
+            }
+        }
+    }
+}
+
+class CommandListener extends Thread {
+
+    public CommandListener() {
+        super("CommandListener");
+    }
+
+    public void run() {
+        try {
+            DatagramSocket serverSocket = new DatagramSocket(RGPIO.devicePort);
+            serverSocket.setBroadcast(true);
+            byte[] receiveData = new byte[1024];
+            byte[] sendData;
+            while (true) {
+                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                serverSocket.receive(receivePacket);
+                InetAddress serverInetAddress = receivePacket.getAddress();
+                PiDevice.serverIPAddress = serverInetAddress.toString().substring(1);
+                int devicePort = receivePacket.getPort();
+                String message = new String(receivePacket.getData());
+                message = message.substring(0, receivePacket.getLength());
+                System.out.println("DEVICE RECEIVED: " + message);
+
+                String reply = PiDevice.handleServerMessage(message);
+
+                if (reply != null) {
+                    System.out.println("DEVICE REPLIED : " + reply);
+                    sendData = reply.getBytes();
+                    DatagramPacket sendPacket
+                            = new DatagramPacket(sendData, sendData.length, serverInetAddress, devicePort);
+                    serverSocket.send(sendPacket);
+                }
+
+            }
+        } catch (SocketException so) {
+            so.printStackTrace();
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
+    }
+}
+
+public class PiDevice {
+
+    static public String deviceModel;
+    static public String HWid;
+    static public ArrayList<DeviceInput> digitalInputs = new ArrayList<>();
+    static public ArrayList<DeviceOutput> digitalOutputs = new ArrayList<>();
+    static HashMap<String, String> inputTypeMap = new HashMap<>();
+
+    static String serverIPAddress = null;
+
+    static TimeStamp windowsBootTime = null;
+
+    static public DeviceInput addDigitalInput(String name) {
+        DeviceInput dip = new DeviceInput(name, "Digital", "Low");
+        digitalInputs.add(dip);
+        inputTypeMap.put(name, "Dip");
+        return dip;
+    }
+
+    static public DeviceOutput addDigitalOutput(String name) {
+        DeviceOutput dop = new DeviceOutput(name, "Digital", "Low");
+        digitalOutputs.add(dop);
+        inputTypeMap.put(name, "Dop");
+        return dop;
+    }
+
+    static void sendReport() {
+        String report = "Report/HWid:" + getHWid() + "/Model:" + deviceModel;
+        report = report + "/Uptime:" + getUpTime();
+        for (DeviceInput dip : digitalInputs) {
+            report = report + "/Dip:" + dip.name;
+        }
+        for (DeviceOutput dop : digitalOutputs) {
+            report = report + "/Dop:" + dop.name;
+        }
+
+        //       System.out.println("SENDING "+report);
+        if (serverIPAddress != null) {
+            UDPSender.send(report, serverIPAddress, null, RGPIO.serverPort, 0, 1);
+        } else {
+            UDPSender.send(report, "255.255.255.255", null, RGPIO.serverPort, 0, 1);
+        }
+    }
+
+    static public void sendEvent(String inputName, String value) {
+        boolean validArgs = false;
+        String inputType;
+
+        inputType = inputTypeMap.get(inputName);
+        if (inputType == null) {
+            System.out.println("sendEvent() : unknown input " + inputName);
+        } else {
+            if (inputType.equals("Dip")) {
+                if ((value.equals("High")) || (value.equals("Low"))) {
+                    validArgs = true;
+                } else {
+                    System.out.println("sendEvent() : Digital input " + inputName
+                            + " can only be set to High or Low");
+                }
+            }
+
+            if (validArgs) {
+                String event = "Event"
+                        + "/HWid:" + HWid
+                        + "/Model:" + deviceModel
+                        + "/" + inputType + ":" + inputName
+                        + "/Value:" + value;
+
+                if (serverIPAddress != null) {
+                    UDPSender.send(event, serverIPAddress, null, RGPIO.serverPort, 0, 1);
+                } else {
+                    System.out.println("sendEvent() : server IP address is not known");
+                }
+            } else {
+                System.out.println("sendEvent() : invalid arguments");
+            }
+        }
+    }
+
+    static public void runDevice() {
+
+        MessagePrinter m = new MessagePrinter();
+        RGPIO.addMessageListener(m);
+
+        HWid = getHWid();
+
+        Integer upTime = getUpTime();
+        if (upTime == null) {
+            System.out.println("System uptime could not be determined");
+        } else {
+            int upTimeDays = upTime / (60 * 60 * 24);
+            upTime = upTime % (60 * 60 * 24);
+            int upTimeHours = upTime / (60 * 60);
+            upTime = upTime % (60 * 60);
+            int upTimeMinutes = upTime / 60;
+            upTime = upTime % 60;
+            System.out.println("System up since " + upTimeDays + " days, "
+                    + upTimeHours + " hours, "
+                    + +upTimeMinutes + " minutes, "
+                    + +upTime + " seconds");
+        }
+
+        (new InitialReportThread()).start();
+
+        // device opens a socket and starts listening to commands
+        (new CommandListener()).start();
+    }
+
+    public static String handleServerMessage(String message) {
+
+        /*      
+         This method executes an incoming command and 
+         returns the reply string to be returned to the server socket port
+       
+         Report    : Report is sent to the RGPIO.serverPort, no reply to the server socket port
+         Set/Pin:%s/Value:%p    OK is sent to the server socket port
+         Get/Pin:%s    %p
+         System/Command:%s/arg1:%s/arg2:%s…    ACK
+         */
+        if (message.equals("Report")) {
+            sendReport();
+            return null;
+
+        } else {
+
+            try {
+                String[] s = message.split("/");
+                String command = s[0];
+                String name;
+                String value;
+                if (command.equals("OK")) {
+                    // OK is sent by the server when it receives a Report
+                    // only to let the device know the server IP address 
+                    return null;
+                } else if (command.equals("Get")) {
+                    String dipName = null;
+
+                    for (int i = 1; i < s.length; i++) {
+                        String nameValue = s[i];
+                        String[] nv = nameValue.split(":");
+                        name = nv[0];
+                        value = nv[1];
+                        if (name.equals("Dip")) {
+                            dipName = value;
+                        }
+                    }
+                    if ((dipName != null)) {
+                        System.out.println("device received command to get digital input " + dipName);
+                        DeviceInput dip = null;
+                        for (DeviceInput d : digitalInputs) {
+                            if (d.name.equals(dipName)) {
+                                dip = d;
+                            }
+                        }
+                        if (dip == null) {
+                            System.out.println("device received GET command for unknown digital output " + dipName);
+                        } else {
+                            return dip.getValue();
+                        }
+                    } else {
+                        System.out.println("device received SET command with invalid syntax");
+                    }
+
+                    return "X";
+
+                } else if (command.equals("Set")) {
+                    String dopName = null;
+                    String dopValue = null;
+
+                    for (int i = 1; i < s.length; i++) {
+                        String nameValue = s[i];
+                        String[] nv = nameValue.split(":");
+                        name = nv[0];
+                        value = nv[1];
+                        if (name.equals("Dop")) {
+                            dopName = value;
+                        }
+                        if (name.equals("Value")) {
+                            dopValue = value;
+                        }
+                    }
+                    if ((dopName != null) && (dopValue != null)) {
+                        System.out.println("device received command to set digital output " + dopName
+                                + " to " + dopValue);
+                        DeviceOutput dop = null;
+                        for (DeviceOutput d : digitalOutputs) {
+                            if (d.name.equals(dopName)) {
+                                dop = d;
+                            }
+                        }
+                        if (dop == null) {
+                            System.out.println("device received SET command for unknown digital output " + dopName);
+                        } else {
+                            dop.setValue(dopValue);
+                        }
+                    } else {
+                        System.out.println("device received SET command with invalid syntax");
+                    }
+
+                    return "OK";
+
+                } else {
+                    System.out.println("Device received unknown command : " + command);
+                    return null;
+                }
+
+            } catch (Exception e) {
+                return "Device received invalid command : " + message;
+            }
+        }
+
+    }
+
+    static public String getHWid() {
+        // returns the host name as HWid
+        // The 'hostname' command happens to be the same on windows and linux
+        Process p;
+        try {
+            p = Runtime.getRuntime().exec("hostname");
+            p.waitFor();
+            BufferedReader reader
+                    = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+            return reader.readLine();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    static public Integer getUpTime() {
+
+        // Linux  read uptime from /proc
+        try {
+            Scanner sc = new Scanner(new FileInputStream("/proc/uptime"));
+            sc.useDelimiter("[.]");
+            return sc.nextInt();
+        } catch (Exception e) {
+        }
+
+        // windows : find boot time from 'systeminfo'
+        if (windowsBootTime == null) {  // first time it is stored because exec systeminfo is slow
+            Process p;
+            try {
+                p = Runtime.getRuntime().exec("systeminfo");
+                p.waitFor();
+                BufferedReader reader
+                        = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("System Boot Time:")) {
+                        System.out.println(line);
+
+                        Scanner sc = new Scanner(line);
+                        sc.useDelimiter("[^0-9]+");
+                        int day = sc.nextInt();
+                        int month = sc.nextInt();
+                        int year = sc.nextInt();
+                        int hour = sc.nextInt();
+                        int minute = sc.nextInt();
+                        int second = sc.nextInt();
+
+                        windowsBootTime = new TimeStamp(0);
+                        windowsBootTime.set(Calendar.YEAR, year);
+                        windowsBootTime.set(Calendar.MONTH, month - 1); // Calendar uses months 0-11                   
+                        windowsBootTime.set(Calendar.DAY_OF_MONTH, day);
+                        windowsBootTime.set(Calendar.HOUR_OF_DAY, hour);
+                        windowsBootTime.set(Calendar.MINUTE, minute);
+                        windowsBootTime.set(Calendar.SECOND, second);
+                        System.out.println("windows system boot " + windowsBootTime.asLongString());
+
+                    }
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        if (windowsBootTime != null) {
+            return (int) ((new TimeStamp()).getTimeInMillis()
+                    - windowsBootTime.getTimeInMillis()) / 1000;
+        }
+
+        // both attempts failed
+        return null;
+    }
+
+}
