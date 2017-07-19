@@ -15,7 +15,7 @@ public class RGPIOOutputMap extends HashMap<String, RGPIOOutput> {
         if (digitalOutput == null) {
             digitalOutput = new RGPIOOutput(name);
             RGPIO.digitalOutputMap.put(name, digitalOutput);
-            digitalOutput.type=RGPIOIOType.Digital;
+            digitalOutput.type=RGPIOIOType.DigitalOutput;
         };
         return digitalOutput;
     }

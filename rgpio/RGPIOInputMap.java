@@ -15,7 +15,7 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
         if (digitalInput == null) {
             digitalInput = new RGPIOInput(name);
             RGPIO.digitalInputMap.put(name, digitalInput);
-            digitalInput.type=RGPIOIOType.Digital;
+            digitalInput.type=RGPIOIOType.DigitalInput;
         };
         return digitalInput;
     }

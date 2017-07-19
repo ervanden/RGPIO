@@ -11,8 +11,8 @@ public class RGPIOInput extends RGPIOSelector {
     public RGPIOIOType type;
 
 //    public String value;
-    public Integer nrHigh = -1;
-    public Integer nrLow = -1;
+    public Integer nrHigh = 0;
+    public Integer nrLow = 0;
 
     private String value;
 

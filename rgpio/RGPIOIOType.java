@@ -5,9 +5,12 @@ package rgpio;
 
 public enum RGPIOIOType {
 
-    Digital, 
-    Analog,
-    String
+    DigitalInput,
+    DigitalOutput,
+    AnalogInput,
+    AnalogOutput,
+    StringInput,
+    StringOutput
 
 }
 
