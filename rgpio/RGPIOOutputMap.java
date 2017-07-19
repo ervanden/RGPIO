@@ -93,6 +93,7 @@ public class RGPIOOutputMap extends HashMap<String, RGPIOOutput> {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
+                              RGPIO.updateFeed.writeToClients(p.toJSON());
         }
     }
 

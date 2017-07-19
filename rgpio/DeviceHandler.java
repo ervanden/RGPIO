@@ -1,10 +1,6 @@
 
 package rgpio;
 
-import static rgpio.RGPIO.deviceMap;
-import static rgpio.RGPIO.digitalInputMap;
-import static rgpio.RGPIO.digitalOutputMap;
-
 
 public class DeviceHandler {
  
@@ -49,15 +45,15 @@ public class DeviceHandler {
                 }
                 if (name.equals("Uptime")) {
                     upTime = Integer.parseInt(value);
-                    deviceMap.deviceReported(HWid, model, deviceIPAddress, upTime);
+                    RGPIO.deviceMap.deviceReported(HWid, model, deviceIPAddress, upTime);
                 }
                 if (name.equals("Dip")) {
                     pinName = value;
-                    digitalInputMap.digitalInputReported(pinName, HWid, model);
+                    RGPIO.digitalInputMap.digitalInputReported(pinName, HWid, model);
                 }
                 if (name.equals("Dop")) {
                     pinName = value;
-                    digitalOutputMap.digitalOutputReported(pinName, HWid, model);
+                    RGPIO.digitalOutputMap.digitalOutputReported(pinName, HWid, model);
                 }
             }
 
@@ -86,7 +82,7 @@ public class DeviceHandler {
                     pinValue = value;
                 }
             }
-            deviceMap.deviceReportedPinEvent(HWid, pinLabel, pinValue);
+            RGPIO.deviceMap.deviceReportedPinEvent(HWid, pinLabel, pinValue);
 
         } else {
             e = new RGPIOMessageEvent(RGPIOMessageType.InvalidMessage);
