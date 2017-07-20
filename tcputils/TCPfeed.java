@@ -28,10 +28,12 @@ class FeedThread extends Thread {
     String clientID;
     DataOutputStream outToClient;
     BufferedReader inFromServer;
+            private TCPserverListener listener = null;
 
-    public FeedThread(Socket socket) {
+    public FeedThread(Socket socket,TCPserverListener listener) {
         super("Server Thread");
         this.socket = socket;
+        this.listener=listener;
 
     }
 
@@ -65,7 +67,17 @@ class FeedThread extends Thread {
             inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             try {
-                String s;
+
+                if (listener!=null) {
+                    ArrayList<String> reply;
+                    reply = listener.onClientRequest(clientID, "status");
+                    for (String r : reply) {
+                        System.out.println("----feed init = "+r);
+                        writeToClient(r);
+                    }
+                }
+                    
+                                    String s;
                 while ((s = inFromServer.readLine()) != null) {
                     Console.println("MSG FROM CLIENT " + clientID + " : " + s);
                 }
@@ -95,6 +107,15 @@ public class TCPfeed extends Thread {
         this.portNumber = portNumber;
     }
 
+        private TCPserverListener listener = null;
+
+    public void addListener(TCPserverListener l) {
+        if (listener != null) {
+            System.out.println("TCPfeed can only have 1 listener");
+        } else {
+            listener = l;
+        }
+    }
 
     public void writeToClients(String s) {
         Console.println("TCPfeed received msg to be forwarded: " + s);
@@ -129,7 +150,7 @@ public class TCPfeed extends Thread {
         Console.println("TCP Server starts listening on port " + portNumber);
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (true) {
-                FeedThread t = new FeedThread(serverSocket.accept());
+                FeedThread t = new FeedThread(serverSocket.accept(),listener);
                 t.start();
                 serverThreads.add(t);
             }

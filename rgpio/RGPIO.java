@@ -155,15 +155,16 @@ public class RGPIO {
         messageFeed = new TCPfeed(messageFeedPort);
         messageFeed.start();
 
-        updateFeed = new TCPfeed(updateFeedPort);
-        updateFeed.start();
-
         clientRequests = new TCPserver(clientRequestPort);
 
         // the clientHandler object interprets the client request and generates a reply
         ClientHandler clientHandler = new ClientHandler();
         clientRequests.addListener(clientHandler);
         clientRequests.start();
+        
+        updateFeed = new TCPfeed(updateFeedPort);
+        updateFeed.addListener(clientHandler);
+        updateFeed.start();
     }
 
     public static void receiveFromDevice(String ipAddress, String message) {
