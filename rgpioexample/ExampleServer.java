@@ -8,14 +8,14 @@ public class ExampleServer implements RGPIOInputEventListener, RGPIOMessageListe
      Pressing any button switches the lights off if they were on, and off if they were on.
      PIRDevices is only used to get a message if there are less than 2 PIR's.
      */
-    RGPIODeviceGroup PIRDevices;
+    RGPIODeviceGroup allDevices;
     RGPIOInput buttons;
     RGPIOOutput lights;
 
     public void onInputEvent(RGPIOInputEvent event) {
 
         if (event.rgpioInput == buttons) {
-            if (event.rgpioInput.nrHigh>0) {
+            if (event.rgpioInput.nrHigh > 0) {
                 if (lights.get().equals("High")) {
                     lights.set("Low");
                 } else {
@@ -47,8 +47,8 @@ public class ExampleServer implements RGPIOInputEventListener, RGPIOMessageListe
 
         //      RGPIO.receiveFromDevice("192.168.0.34", "Report/HWid:PIR1/Model:PIR/Uptime:600/Dop:00/Dip:02");
         //       RGPIO.printMaps("after report");
-        PIRDevices = RGPIO.deviceGroupMap.get("PIR");
-        PIRDevices.minMembers = 2;
+        allDevices = RGPIO.deviceGroupMap.get("allDevice");
+        allDevices.minMembers = 2;
         buttons = RGPIO.digitalInputMap.get("button");
         lights = RGPIO.digitalOutputMap.get("light");
         buttons.minMembers = 2;
@@ -64,6 +64,9 @@ public class ExampleServer implements RGPIOInputEventListener, RGPIOMessageListe
         while (true) {
             try {
                 Thread.sleep(3000);
+                RGPIO.receiveFromDevice("192.168.0.99", "Report/HWid:1625496/Model:RELAY/Uptime:10/Dop:0/Dip:2");
+                Thread.sleep(3000);
+                RGPIO.receiveFromDevice("192.168.0.99", "Event/HWid:1625496/Model:RELAY/Pin:2/State:Low");
             } catch (InterruptedException ie) {
             }
 //            System.out.println("GET button value = "+buttons.);
