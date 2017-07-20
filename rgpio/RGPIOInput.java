@@ -78,26 +78,26 @@ public class RGPIOInput extends RGPIOSelector {
     //  pass change of state to all the listeners
     public void stateChange(RGPIOInputEvent event) {
 
-
         nrHigh = 0;
         nrLow = 0;
-
+//        System.out.println("---state change for digital input " + name);
         for (Device device : RGPIO.deviceMap.values()) {
             for (PInput dip : device.digitalInputs.values()) {
                 if (dip.vinput == this) {
-                    if (dip.value.equals("High")) {
-                        nrHigh++;
-                    }
-                    if (dip.value.equals("Low")) {
-                        nrLow++;
+//                    System.out.println("---physical pin " + device.HWid + "." + dip.name);
+//                    System.out.println("---physical pin value=" + dip.value);
+                    if (dip.value != null) { // is null before first GET or EVENT
+                        if (dip.value.equals("High")) {
+                            nrHigh++;
+                        }
+                        if (dip.value.equals("Low")) {
+                            nrLow++;
+                        }
                     }
                 }
             }
         }
         RGPIO.updateFeed.writeToClients(toJSON());
-
-
-
 
         for (RGPIOInputEventListener l : digitalListeners) {
             try {
