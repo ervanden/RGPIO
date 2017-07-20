@@ -34,7 +34,7 @@ class FeedThread extends Thread {
         super("Server Thread");
         this.socket = socket;
         this.listener=listener;
-        Console.verbose(true);
+        Console.verbose(false);
     }
 
     public void writeToClient(String s) {
@@ -68,11 +68,13 @@ class FeedThread extends Thread {
 
             try {
 
+                /* TO DO  client should send the status command  */
+                
                 if (listener!=null) {
                     ArrayList<String> reply;
                     reply = listener.onClientRequest(clientID, "status");
                     for (String r : reply) {
-                        System.out.println("----feed init = "+r);
+//                        System.out.println("----feed init = "+r);
                         writeToClient(r);
                     }
                 }
@@ -105,7 +107,7 @@ public class TCPfeed extends Thread {
     public TCPfeed(int portNumber) {
         super();
         this.portNumber = portNumber;
-        Console.verbose(true);
+        Console.verbose(false);
     }
 
         private TCPserverListener listener = null;
