@@ -14,19 +14,18 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
         if (digitalInput == null) {
             digitalInput = new RGPIOInput(name);
             RGPIO.digitalInputMap.put(name, digitalInput);
-            digitalInput.type=RGPIOIOType.digitalInput;
+            digitalInput.type = RGPIOIOType.digitalInput;
         };
         return digitalInput;
     }
 
     public void print() {
         String formatString = "%12s %1s\n";
-        System.out.printf(formatString, "DigitalInput",  "device.pin");
+        System.out.printf(formatString, "DigitalInput", "device.pin");
         for (RGPIOInput d : this.values()) {
             String name = d.name;
 
             String state = d.get_value();
-
 
             String separator = "";
             String devicePins = "<";
@@ -39,7 +38,7 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
                 }
             }
             devicePins = devicePins + ">";
-            System.out.printf(formatString, name,  devicePins);
+            System.out.printf(formatString, name, devicePins);
         }
     }
 
@@ -54,6 +53,7 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
         PInput p = d.digitalInputs.get(pinName);
         if (p == null) {
             p = new PInput();
+            p.type = RGPIOIOType.digitalInput;
             p.name = pinName;
             p.value = null;
             p.device = d;
@@ -66,7 +66,7 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
             for (RGPIOInput digitalInput : RGPIO.digitalInputMap.values()) {
                 if (digitalInput.matchesDevicePin(pinName, modelName, HWid)) {
                     theOnlyDigitalInput = digitalInput;
-  
+
                     nrInstances++;
 //                    System.out.println(" pin match : " + pinName + " " + modelName + " " + nrInstances);
                 }
@@ -95,7 +95,7 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-                    RGPIO.updateFeed.writeToClients(p.toJSON());
+            RGPIO.updateFeed.writeToClients(p.toJSON());
         }
     }
 

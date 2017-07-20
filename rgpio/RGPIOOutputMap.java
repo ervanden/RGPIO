@@ -54,6 +54,7 @@ public class RGPIOOutputMap extends HashMap<String, RGPIOOutput> {
         if (p == null) {
             p = new POutput();
             p.name = pinName;
+            p.type=RGPIOIOType.digitalOutput;
             p.value = null;
             p.device = d;
             p.voutput = null;
