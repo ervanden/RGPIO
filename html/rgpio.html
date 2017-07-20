@@ -20,18 +20,18 @@
 
         <br>
         <table>
-         <tr>
-          <td id="VDEVhtml">Virtual Devices</td>
-          <td id="PDEVhtml">Physical Devices</td>
-         </tr>
-         <tr>
-          <td id="VDIPhtml">Virtual Inputs</td>
-          <td id="PDIPhtml">Physical Inputs</td>
-         </tr>
-         <tr>
-          <td id="VDOPhtml">Virtual Outputs</td>
-          <td id="PDOPhtml">Physical Outputs</td>
-         </tr>
+            <tr>
+                <td id="VDEVhtml">Virtual Devices</td>
+                <td id="PDEVhtml">Physical Devices</td>
+            </tr>
+            <tr>
+                <td id="VDIPhtml">Virtual Inputs</td>
+                <td id="PDIPhtml">Physical Inputs</td>
+            </tr>
+            <tr>
+                <td id="VDOPhtml">Virtual Outputs</td>
+                <td id="PDOPhtml">Physical Outputs</td>
+            </tr>
         </table>
 
         <p>physical device updates</p>
@@ -177,7 +177,7 @@
             PDEVTable.setColumns(["HWid", "model", "ipAddress", "status"]);
             PDEVTable.setKeys(["HWid"]);
             PDEVTable.setCellColors(cellColors);
-            var PDEVhtml= PDEVTable.createTable("PDEVTable", "PDEV");
+            var PDEVhtml = PDEVTable.createTable("PDEVTable", "PDEV");
 
             var VDEVTable = new TableGenerator();
             VDEVTable.setDocument(document);
@@ -237,7 +237,7 @@
                             var lines = data.split("\n");
                             for (var i = 0; i < lines.length; i++) {
                                 if (lines[i].length > 0) {  // php sends empty string from time to time
-                                    document.getElementById("messageDiv").innerHTML += "status " + lines[i] + "<br>";
+                                    // document.getElementById("messageDiv").innerHTML += "status " + lines[i] + "<br>";
                                     try {
                                         var obj = JSON.parse(lines[i]);
                                     } catch (e) {
@@ -249,16 +249,16 @@
                                     if (obj.object == "VDEV") {
                                         VDEVTable.fillRow(obj);
                                     }
-                                    if ((obj.object == "VIO")&&(obj.type == "digitalInput")) {
+                                    if ((obj.object == "VIO") && (obj.type == "digitalInput")) {
                                         VDIPTable.fillRow(obj);
                                     }
-                                    if ((obj.object == "VIO")&&(obj.type == "digitalOutput")) {
+                                    if ((obj.object == "VIO") && (obj.type == "digitalOutput")) {
                                         VDOPTable.fillRow(obj);
                                     }
-                                    if ((obj.object == "PIO")&&(obj.type == "digitalInput")) {
+                                    if ((obj.object == "PIO") && (obj.type == "digitalInput")) {
                                         PDIPTable.fillRow(obj);
                                     }
-                                    if ((obj.object == "PIO")&&(obj.type == "digitalOutput")) {
+                                    if ((obj.object == "PIO") && (obj.type == "digitalOutput")) {
                                         PDOPTable.fillRow(obj);
                                     }
                                 }
@@ -272,36 +272,43 @@
                     var updateFeed = new EventSource("updateFeed.php");
                     updateFeed.onmessage = function (event) {
                         if (event.data.length > 0) {  // php sends empty string from time to time
-                            document.getElementById("messageDiv").innerHTML += "update " + event.data + "<br>";
+  //                          document.getElementById("messageDiv").innerHTML += "update " + event.data + "<br>";
                             try {
                                 var obj = JSON.parse(event.data);
                             } catch (e) {
                                 console.log("updateFeed: JSON syntax error");
                             }
+
                             if (obj.object == "PDEV") {
                                 PDEVTable.fillRow(obj);
                             }
                             if (obj.object == "VDEV") {
                                 VDEVTable.fillRow(obj);
                             }
-                                    if (obj.object == "VDEV") {
-                                        VDEVTable.fillRow(obj);
-                                    }
-                                    if ((obj.object == "VIO")&&(obj.type == "digitalInput")) {
-                                        VDIPTable.fillRow(obj);
-                                    }
-                                    if ((obj.object == "VIO")&&(obj.type == "digitalOutput")) {
-                                        VDOPTable.fillRow(obj);
-                                    }
-                                    if ((obj.object == "PIO")&&(obj.type == "digitalInput")) {
-                                        PDIPTable.fillRow(obj);
-                                    }
-                                    if ((obj.object == "PIO")&&(obj.type == "digitalOutput")) {
-                                        PDOPTable.fillRow(obj);
-                                    }
+                            if ((obj.object == "VIO") && (obj.type == "digitalInput")) {
+                                VDIPTable.fillRow(obj);
+                            }
+                            if ((obj.object == "VIO") && (obj.type == "digitalOutput")) {
+                                VDOPTable.fillRow(obj);
+                            }
+                            if ((obj.object == "PIO") && (obj.type == "digitalInput")) {
+                                PDIPTable.fillRow(obj);
+                            }
+                            if ((obj.object == "PIO") && (obj.type == "digitalOutput")) {
+                                PDOPTable.fillRow(obj);
+                            }
+                        }
+                    };
+                } else {
+                    document.getElementById("messageDiv").innerHTML = "This browser does not support server-sent events...";
+                }
 
 
-
+                if (typeof (EventSource) !== "undefined") {
+                    var messageFeed = new EventSource("messageFeed.php");
+                    messageFeed.onmessage = function (event) {
+                        if (event.data.length > 0) {  // php sends empty string from time to time
+                            document.getElementById("messageDiv").innerHTML += event.data + "<br>";
                         }
                     };
                 } else {
