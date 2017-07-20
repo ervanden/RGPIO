@@ -47,7 +47,7 @@ public class ExampleServer implements RGPIOInputEventListener, RGPIOMessageListe
 
         //      RGPIO.receiveFromDevice("192.168.0.34", "Report/HWid:PIR1/Model:PIR/Uptime:600/Dop:00/Dip:02");
         //       RGPIO.printMaps("after report");
-        allDevices = RGPIO.deviceGroupMap.get("allDevice");
+        allDevices = RGPIO.deviceGroupMap.get("allDevices");
         allDevices.minMembers = 2;
         buttons = RGPIO.digitalInputMap.get("button");
         lights = RGPIO.digitalOutputMap.get("light");
