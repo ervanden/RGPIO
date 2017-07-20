@@ -2,13 +2,14 @@ package devices;
 
 import rgpio.*;
 
-public class DeviceDigitalInput {
+public class PInput {
 
     public String name;
     public String value;
 
     public Device device;
-    public RGPIOInput digitalInput;
+    public RGPIOIOType type;
+    public RGPIOInput vinput;
 
     public void set_value(String newValue) {
         value = newValue;
@@ -23,7 +24,7 @@ public class DeviceDigitalInput {
         JSONString json = new JSONString();
         json.addString("object", "PIO");
         json.addString("name", name);
-        json.addString("type", "digitalInput");
+        json.addString("type", type.name());
         json.addString("device", device.HWid);
         json.addString("value", value);
         return json.close();

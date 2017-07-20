@@ -1,8 +1,6 @@
 package rgpio;
 
-import devices.Device;
-import devices.DeviceDigitalInput;
-import devices.DeviceDigitalOutput;
+import devices.*;
 import java.util.ArrayList;
 import tcputils.*;
 
@@ -14,10 +12,10 @@ public class ClientHandler implements TCPserverListener {
         if (request.equals("status")) {
             for (Device d : RGPIO.deviceMap.values()) {
                 reply.add(d.toJSON());
-                for (DeviceDigitalInput dip : d.digitalInputs.values()) {
+                for (PInput dip : d.digitalInputs.values()) {
                     reply.add(dip.toJSON());
                 }
-                for (DeviceDigitalOutput dop : d.digitalOutputs.values()) {
+                for (POutput dop : d.digitalOutputs.values()) {
                     reply.add(dop.toJSON());
                 }
             }

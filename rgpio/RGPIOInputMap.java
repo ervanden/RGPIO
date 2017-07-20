@@ -1,7 +1,6 @@
 package rgpio;
 
-import devices.Device;
-import devices.DeviceDigitalInput;
+import devices.*;
 import java.util.HashMap;
 
 public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
@@ -15,7 +14,7 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
         if (digitalInput == null) {
             digitalInput = new RGPIOInput(name);
             RGPIO.digitalInputMap.put(name, digitalInput);
-            digitalInput.type=RGPIOIOType.DigitalInput;
+            digitalInput.type=RGPIOIOType.digitalInput;
         };
         return digitalInput;
     }
@@ -32,8 +31,8 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
             String separator = "";
             String devicePins = "<";
             for (Device device : RGPIO.deviceMap.values()) {
-                for (DeviceDigitalInput pin : device.digitalInputs.values()) {
-                    if (pin.digitalInput == d) {
+                for (PInput pin : device.digitalInputs.values()) {
+                    if (pin.vinput == d) {
                         devicePins = devicePins + separator + device.HWid + "." + pin.name;
                         separator = ",";
                     }
@@ -52,13 +51,13 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
         Device d = RGPIO.deviceMap.get(HWid);
 
         // add the pin to the device
-        DeviceDigitalInput p = d.digitalInputs.get(pinName);
+        PInput p = d.digitalInputs.get(pinName);
         if (p == null) {
-            p = new DeviceDigitalInput();
+            p = new PInput();
             p.name = pinName;
             p.value = null;
             p.device = d;
-            p.digitalInput = null;
+            p.vinput = null;
             d.digitalInputs.put(pinName, p);
 
             // match to a digitalInput
@@ -73,13 +72,13 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
                 }
             }
             if (nrInstances == 1) {
-                p.digitalInput = theOnlyDigitalInput;
+                p.vinput = theOnlyDigitalInput;
 
                 RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.Info);
                 e.description = "device pin assigned to digital input";
                 e.HWid = HWid;
                 e.pinLabel = pinName;
-                e.digitalInput = p.digitalInput.name;
+                e.digitalInput = p.vinput.name;
                 RGPIO.message(e);
             }
             if (nrInstances == 0) {

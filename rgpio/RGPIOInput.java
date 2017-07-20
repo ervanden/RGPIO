@@ -50,8 +50,8 @@ public class RGPIOInput extends RGPIOSelector {
         ArrayList<SendGetCommandThread> threads = new ArrayList<>();
 
         for (Device device : RGPIO.deviceMap.values()) {
-            for (DeviceDigitalInput dip : device.digitalInputs.values()) {
-                if (dip.digitalInput == this) {
+            for (PInput dip : device.digitalInputs.values()) {
+                if (dip.vinput == this) {
                     SendGetCommandThread t = new SendGetCommandThread(device, dip);
                     threads.add(t);
                     t.start();
@@ -83,8 +83,8 @@ public class RGPIOInput extends RGPIOSelector {
         nrLow = 0;
 
         for (Device device : RGPIO.deviceMap.values()) {
-            for (DeviceDigitalInput dip : device.digitalInputs.values()) {
-                if (dip.digitalInput == this) {
+            for (PInput dip : device.digitalInputs.values()) {
+                if (dip.vinput == this) {
                     if (dip.value.equals("High")) {
                         nrHigh++;
                     }

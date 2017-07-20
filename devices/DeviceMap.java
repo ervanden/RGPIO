@@ -87,7 +87,7 @@ public class DeviceMap extends ConcurrentHashMap<String, Device> {
         }
 
         d.setActive();
-        DeviceDigitalInput deviceDigitalInput = d.digitalInputs.get(pinLabel);
+        PInput deviceDigitalInput = d.digitalInputs.get(pinLabel);
         if (deviceDigitalInput == null) {
             RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.InvalidPinName);
             e.description = "received event from unknown digital input pin";
@@ -110,7 +110,7 @@ public class DeviceMap extends ConcurrentHashMap<String, Device> {
         
         deviceDigitalInput.set_value(value);
 
-        if (deviceDigitalInput.digitalInput == null) {
+        if (deviceDigitalInput.vinput == null) {
             RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.InvalidPinName);
             e.description = "received event from unassigned digital input pin";
             e.HWid = d.HWid;
@@ -128,7 +128,7 @@ public class DeviceMap extends ConcurrentHashMap<String, Device> {
 
         RGPIOInputEvent ev = new RGPIOInputEvent();
         ev.device = d;
-        ev.rgpioInput = deviceDigitalInput.digitalInput;
+        ev.rgpioInput = deviceDigitalInput.vinput;
         ev.rgpioInput.stateChange(ev);
     }
 

@@ -17,8 +17,8 @@ public class Device {
     public TimeStamp lastContact = new TimeStamp(0); // timestamp
     public TimeStamp powerOn = new TimeStamp(0);     // timestamp of device power-on
 
-    public HashMap<String, DeviceDigitalInput> digitalInputs = new HashMap<>(); // key is pin label
-    public HashMap<String, DeviceDigitalOutput> digitalOutputs = new HashMap<>(); // key is pin label
+    public HashMap<String, PInput> digitalInputs = new HashMap<>(); // key is pin label
+    public HashMap<String, POutput> digitalOutputs = new HashMap<>(); // key is pin label
 
     public String toJSON() {
         JSONString json = new JSONString();

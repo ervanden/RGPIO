@@ -5,9 +5,9 @@ import devices.*;
 public class SendGetCommandThread extends Thread {
 
     Device device;
-    DeviceDigitalInput dip;
+    PInput dip;
 
-    public SendGetCommandThread(Device device,DeviceDigitalInput dip) {
+    public SendGetCommandThread(Device device,PInput dip) {
         super();
         this.device=device;
         this.dip=dip;

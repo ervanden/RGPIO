@@ -30,8 +30,8 @@ public class RGPIOOutput extends RGPIOSelector {
         RGPIO.updateFeed.writeToClients(toJSON());
 
         for (Device device : RGPIO.deviceMap.values()) {
-            for (DeviceDigitalOutput dop : device.digitalOutputs.values()) {
-                if (dop.digitalOutput == this) {
+            for (POutput dop : device.digitalOutputs.values()) {
+                if (dop.voutput == this) {
                     dop.value = newValue;   // store the state also with the physical dop. (why?)
                     RGPIO.updateFeed.writeToClients(dop.toJSON());
                     new SendSetCommandThread(device, "Set/Dop:" + dop.name + "/Value:" + dop.value).start();
