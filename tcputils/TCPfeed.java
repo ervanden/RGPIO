@@ -34,7 +34,7 @@ class FeedThread extends Thread {
         super("Server Thread");
         this.socket = socket;
         this.listener=listener;
-
+        Console.verbose(true);
     }
 
     public void writeToClient(String s) {
@@ -105,6 +105,7 @@ public class TCPfeed extends Thread {
     public TCPfeed(int portNumber) {
         super();
         this.portNumber = portNumber;
+        Console.verbose(true);
     }
 
         private TCPserverListener listener = null;

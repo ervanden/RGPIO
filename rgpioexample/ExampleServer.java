@@ -45,6 +45,11 @@ public class ExampleServer implements RGPIOInputEventListener, RGPIOMessageListe
         RGPIO.addMessageListener(this);
         RGPIO.initialize(deviceFile);
 
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException ie) {
+        }
+
         //      RGPIO.receiveFromDevice("192.168.0.34", "Report/HWid:PIR1/Model:PIR/Uptime:600/Dop:00/Dip:02");
         //       RGPIO.printMaps("after report");
         allDevices = RGPIO.deviceGroupMap.get("allDevices");
@@ -64,13 +69,13 @@ public class ExampleServer implements RGPIOInputEventListener, RGPIOMessageListe
         while (true) {
             try {
                 Thread.sleep(3000);
-/*
-                RGPIO.receiveFromDevice("192.168.0.99", "Report/HWid:1625496/Model:RELAY/Uptime:10/Dop:0/Dip:2");
-                Thread.sleep(3000);
-                RGPIO.receiveFromDevice("192.168.0.99", "Event/HWid:1625496/Model:RELAY/Dip:2/Value:Low");
-                Thread.sleep(3000);
-                RGPIO.receiveFromDevice("192.168.0.99", "Event/HWid:1625496/Model:RELAY/Dip:2/Value:High");
-*/
+                /*
+                 RGPIO.receiveFromDevice("192.168.0.99", "Report/HWid:1625496/Model:RELAY/Uptime:10/Dop:0/Dip:2");
+                 Thread.sleep(3000);
+                 RGPIO.receiveFromDevice("192.168.0.99", "Event/HWid:1625496/Model:RELAY/Dip:2/Value:Low");
+                 Thread.sleep(3000);
+                 RGPIO.receiveFromDevice("192.168.0.99", "Event/HWid:1625496/Model:RELAY/Dip:2/Value:High");
+                 */
             } catch (InterruptedException ie) {
             }
 //            System.out.println("GET button value = "+buttons.);
