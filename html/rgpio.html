@@ -19,6 +19,20 @@
         <div id="tableDiv" ></div>
 
         <br>
+        <table>
+         <tr>
+          <td id="VDEVhtml">Virtual Devices</td>
+          <td id="PDEVhtml">Physical Devices</td>
+         </tr>
+         <tr>
+          <td id="VDIPhtml">Virtual Inputs</td>
+          <td id="PDIPhtml">Physical Inputs</td>
+         </tr>
+         <tr>
+          <td id="VDOPhtml">Virtual Outputs</td>
+          <td id="PDOPhtml">Physical Outputs</td>
+         </tr>
+        </table>
 
         <p>physical device updates</p>
 
@@ -152,49 +166,68 @@
             }
 
             var cellColors = {
-                "ACTIVE": "cellNotresponding",
-                "NOTRESPONDING": "cellActive",
+                "ACTIVE": "cellActive",
+                "NOTRESPONDING": "cellNotresponding",
                 "High": "cellHigh",
                 "Low": "cellLow"
             };
 
-            var table;
             var PDEVTable = new TableGenerator();
             PDEVTable.setDocument(document);
             PDEVTable.setColumns(["HWid", "model", "ipAddress", "status"]);
             PDEVTable.setKeys(["HWid"]);
             PDEVTable.setCellColors(cellColors);
-            table = PDEVTable.createTable("PDEVTable", "PDEV");
-            document.getElementById("tableDiv").appendChild(table);
+            var PDEVhtml= PDEVTable.createTable("PDEVTable", "PDEV");
 
             var VDEVTable = new TableGenerator();
             VDEVTable.setDocument(document);
             VDEVTable.setColumns(["name", "active devices"]);
             VDEVTable.setKeys(["name"]);
             VDEVTable.setCellColors(cellColors);
-            table = VDEVTable.createTable("VDEVTable", "VDEV");
-            document.getElementById("tableDiv").appendChild(table);
+            var VDEVhtml = VDEVTable.createTable("VDEVTable", "VDEV");
 
-            var PIOTable = new TableGenerator();
-            PIOTable.setDocument(document);
-            PIOTable.setColumns(["device", "name", "type", "value"]);
-            PIOTable.setKeys(["device", "name"]);
-            PIOTable.setCellColors(cellColors);
-            table = PIOTable.createTable("PIOTable", "PIO");
-            document.getElementById("tableDiv").appendChild(table);
+            var PDIPTable = new TableGenerator();
+            PDIPTable.setDocument(document);
+            PDIPTable.setColumns(["device", "name", "value"]);
+            PDIPTable.setKeys(["device", "name"]);
+            PDIPTable.setCellColors(cellColors);
+            var PDIPhtml = PDIPTable.createTable("PDIPTable", "PDIP");
+
+            var PDOPTable = new TableGenerator();
+            PDOPTable.setDocument(document);
+            PDOPTable.setColumns(["device", "name", "value"]);
+            PDOPTable.setKeys(["device", "name"]);
+            PDOPTable.setCellColors(cellColors);
+            var PDOPhtml = PDOPTable.createTable("PDOPTable", "PDOP");
             /*            
              PIOTable.fillRow({"device": "a1", "type": "b", "name": "c1", "value": "d"});
              PIOTable.fillRow({"device": "a2", "type": "b", "name": "c1", "value": "d2"});
              PIOTable.fillRow({"device": "a2", "type": "AA", "name": "c1", "value": "d2"});
              PIOTable.fillRow({"device": "a1", "type": "TT", "name": "c1", "value": "d2"});/*
              */
-            var VIOTable = new TableGenerator();
-            VIOTable.setDocument(document);
-            VIOTable.setCellColors(cellColors);
-            VIOTable.setColumns(["name", "type", "value", "nrHigh", "nrLow"]);
-            VIOTable.setKeys(["name"]);
-            table = VIOTable.createTable("VIOTable", "VIO");
-            document.getElementById("tableDiv").appendChild(table);
+            var VDIPTable = new TableGenerator();
+            VDIPTable.setDocument(document);
+            VDIPTable.setColumns(["name", "nrHigh", "nrLow"]);
+            VDIPTable.setKeys(["name"]);
+            VDIPTable.setCellColors(cellColors);
+            var VDIPhtml = VDIPTable.createTable("VDIPTable", "VDIP");
+
+            var VDOPTable = new TableGenerator();
+            VDOPTable.setDocument(document);
+            VDOPTable.setColumns(["name", "value"]);
+            VDOPTable.setKeys(["name"]);
+            VDOPTable.setCellColors(cellColors);
+            var VDOPhtml = VDOPTable.createTable("VDOPTable", "VDOP");
+
+            document.getElementById("VDEVhtml").appendChild(VDEVhtml);
+            document.getElementById("PDEVhtml").appendChild(PDEVhtml);
+            document.getElementById("VDIPhtml").appendChild(VDIPhtml);
+            document.getElementById("PDIPhtml").appendChild(PDIPhtml);
+            document.getElementById("VDOPhtml").appendChild(VDOPhtml);
+            document.getElementById("PDOPhtml").appendChild(PDOPhtml);
+
+
+
 
             $(document).ready(function () {
 
@@ -216,11 +249,17 @@
                                     if (obj.object == "VDEV") {
                                         VDEVTable.fillRow(obj);
                                     }
-                                    if (obj.object == "VIO") {
-                                        VIOTable.fillRow(obj);
+                                    if ((obj.object == "VIO")&&(obj.type == "digitalInput")) {
+                                        VDIPTable.fillRow(obj);
                                     }
-                                    if (obj.object == "PIO") {
-                                        PIOTable.fillRow(obj);
+                                    if ((obj.object == "VIO")&&(obj.type == "digitalOutput")) {
+                                        VDOPTable.fillRow(obj);
+                                    }
+                                    if ((obj.object == "PIO")&&(obj.type == "digitalInput")) {
+                                        PDIPTable.fillRow(obj);
+                                    }
+                                    if ((obj.object == "PIO")&&(obj.type == "digitalOutput")) {
+                                        PDOPTable.fillRow(obj);
                                     }
                                 }
                             }
@@ -245,12 +284,24 @@
                             if (obj.object == "VDEV") {
                                 VDEVTable.fillRow(obj);
                             }
-                            if (obj.object == "VIO") {
-                                VIOTable.fillRow(obj);
-                            }
-                            if (obj.object == "PIO") {
-                                PIOTable.fillRow(obj);
-                            }
+                                    if (obj.object == "VDEV") {
+                                        VDEVTable.fillRow(obj);
+                                    }
+                                    if ((obj.object == "VIO")&&(obj.type == "digitalInput")) {
+                                        VDIPTable.fillRow(obj);
+                                    }
+                                    if ((obj.object == "VIO")&&(obj.type == "digitalOutput")) {
+                                        VDOPTable.fillRow(obj);
+                                    }
+                                    if ((obj.object == "PIO")&&(obj.type == "digitalInput")) {
+                                        PDIPTable.fillRow(obj);
+                                    }
+                                    if ((obj.object == "PIO")&&(obj.type == "digitalOutput")) {
+                                        PDOPTable.fillRow(obj);
+                                    }
+
+
+
                         }
                     };
                 } else {
