@@ -1,6 +1,6 @@
 package rgpio;
 
-public class VDevice extends Selector{
+public class VDevice extends VSelector{
 
     public String name = null;
     public Integer minMembers = null;
@@ -8,7 +8,7 @@ public class VDevice extends Selector{
 
     public VDevice(String name) {
         this.name = name;
-        RGPIO.deviceGroupMap.put(name, this);
+        RGPIO.VDeviceMap.put(name, this);
     }
 
 }

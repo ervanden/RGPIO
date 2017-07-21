@@ -48,15 +48,15 @@ public class DeviceHandler {
                 }
                 if (name.equals("Uptime")) {
                     upTime = Integer.parseInt(value);
-                    RGPIO.deviceMap.deviceReported(HWid, model, deviceIPAddress, upTime);
+                    RGPIO.PDeviceMap.deviceReported(HWid, model, deviceIPAddress, upTime);
                 }
                 if (name.equals("Dip")) {
                     pinName = value;
-                    RGPIO.digitalInputMap.digitalInputReported(pinName, HWid, model);
+                    RGPIO.VDigitalInputMap.digitalInputReported(pinName, HWid, model);
                 }
                 if (name.equals("Dop")) {
                     pinName = value;
-                    RGPIO.digitalOutputMap.digitalOutputReported(pinName, HWid, model);
+                    RGPIO.VDigitalOutputMap.digitalOutputReported(pinName, HWid, model);
                 }
             }
 
@@ -85,7 +85,7 @@ public class DeviceHandler {
                     pinValue = value;
                 }
             }
-            RGPIO.deviceMap.deviceReportedPinEvent(HWid, pinLabel, pinValue);
+            RGPIO.PDeviceMap.deviceReportedPinEvent(HWid, pinLabel, pinValue);
 
         } else {
             e = new MessageEvent(MessageType.InvalidMessage);

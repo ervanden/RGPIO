@@ -12,7 +12,7 @@ public class MessageEvent {
     // device information
     public String state = null;
     public String model = null;
-    public String group = null;
+    public String vdevice = null;
     public String HWid = null;
     public String ipAddress = null;
 
@@ -20,8 +20,8 @@ public class MessageEvent {
     public String pinType = null;
     public String pinLabel = null;
 
-    public String digitalInput = null;
-    public String digitalOutput = null;
+    public String vinput = null;
+    public String voutput = null;
 
     public MessageEvent(MessageType type) {
         time = new TimeStamp().getTimeInMillis();
@@ -44,8 +44,8 @@ public class MessageEvent {
         if (model != null) {
             msg = msg + " model=" + model;
         }
-        if (group != null) {
-            msg = msg + " group=" + group;
+        if (vdevice != null) {
+            msg = msg + " group=" + vdevice;
         }
         if (ipAddress != null) {
             msg = msg + " ipAddress=" + ipAddress;
@@ -59,11 +59,11 @@ public class MessageEvent {
         if (state != null) {
             msg = msg + " state=" + state;
         }
-        if (digitalInput != null) {
-            msg = msg + " digitalInput=" + digitalInput;
+        if (vinput != null) {
+            msg = msg + " digitalInput=" + vinput;
         }
-        if (digitalOutput != null) {
-            msg = msg + " digitalOutput=" + digitalOutput;
+        if (voutput != null) {
+            msg = msg + " digitalOutput=" + voutput;
         }
         return msg;
     }
@@ -84,8 +84,8 @@ public class MessageEvent {
         if (model != null) {
             json.addProperty("model=", model);
         }
-        if (group != null) {
-            json.addProperty("group=", group);
+        if (vdevice != null) {
+            json.addProperty("group=", vdevice);
         }
         if (ipAddress != null) {
             json.addProperty("ipAddress", ipAddress);
@@ -99,11 +99,11 @@ public class MessageEvent {
         if (state != null) {
             json.addProperty("state", state);
         }
-        if (digitalInput != null) {
-            json.addProperty("digitalInput", digitalInput);
+        if (vinput != null) {
+            json.addProperty("digitalInput", vinput);
         }
-        if (digitalOutput != null) {
-            json.addProperty("digitalOutput", digitalOutput);
+        if (voutput != null) {
+            json.addProperty("digitalOutput", voutput);
         }
         return json.asString();
     }

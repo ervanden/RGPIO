@@ -92,7 +92,7 @@ class DeviceProbeThread extends Thread {
                 Thread.sleep(send_interval);
                 // Check if a device has not responded within the last send_interval.
                 long now = new TimeStamp().getTimeInMillis();
-                for (PDevice device : RGPIO.deviceMap.values()) {
+                for (PDevice device : RGPIO.PDeviceMap.values()) {
                     if ((now - device.lastContact.getTimeInMillis()) > send_interval) {
                         device.setNotResponding("device did not respond in last " + send_interval + " msec");
                     }
@@ -101,9 +101,9 @@ class DeviceProbeThread extends Thread {
                 e.printStackTrace();
             }
 
-            for (VDevice deviceGroup : RGPIO.deviceGroupMap.values()) {
+            for (VDevice deviceGroup : RGPIO.VDeviceMap.values()) {
                 int n = 0;
-                for (PDevice device : RGPIO.deviceMap.values()) {
+                for (PDevice device : RGPIO.PDeviceMap.values()) {
                     if ((device.deviceGroup == deviceGroup) && (device.get_status() == PDeviceStatus.ACTIVE)) {
                         n++;
                     }
@@ -112,7 +112,7 @@ class DeviceProbeThread extends Thread {
                     if (n < deviceGroup.minMembers) {
                         MessageEvent e = new MessageEvent(MessageType.DeviceGroupMinimum);
                         e.description = "device group has too few members : " + n;
-                        e.group = deviceGroup.name;
+                        e.vdevice = deviceGroup.name;
                         RGPIO.message(e);
                     }
                 }
@@ -124,10 +124,10 @@ class DeviceProbeThread extends Thread {
 
 public class RGPIO {
 
-    public static PDeviceMap deviceMap;
-    public static VDeviceMap deviceGroupMap;
-    public static VInputMap digitalInputMap;
-    public static VOutputMap digitalOutputMap;
+    public static PDeviceMap PDeviceMap;
+    public static VDeviceMap VDeviceMap;
+    public static VInputMap VDigitalInputMap;
+    public static VOutputMap VDigitalOutputMap;
 
     public static TCPfeed messageFeed;
     public static TCPfeed updateFeed;
@@ -141,10 +141,10 @@ public class RGPIO {
 
     public static void initialize(String configurationDir) {
 
-        deviceGroupMap = new VDeviceMap();
-        deviceMap = new PDeviceMap();
-        digitalInputMap = new VInputMap();
-        digitalOutputMap = new VOutputMap();
+        VDeviceMap = new VDeviceMap();
+        PDeviceMap = new PDeviceMap();
+        VDigitalInputMap = new VInputMap();
+        VDigitalOutputMap = new VOutputMap();
 
         readDevicesFile(configurationDir);
 
@@ -159,16 +159,48 @@ public class RGPIO {
         messageFeed = new TCPfeed(messageFeedPort);
         messageFeed.start();
 
-        clientRequests = new TCPserver(clientRequestPort);
-
-        // the clientHandler object interprets the client request and generates a reply
+//       clientRequests = new TCPserver(clientRequestPort);
+//       no client requests implemented at this time
         ClientHandler clientHandler = new ClientHandler();
-        clientRequests.addListener(clientHandler);
-        clientRequests.start();
-        
+//        clientRequests.addListener(clientHandler);
+//        clientRequests.start();
+
         updateFeed = new TCPfeed(updateFeedPort);
         updateFeed.addListener(clientHandler);
         updateFeed.start();
+    }
+
+    public static VDevice VDevice(String name) {
+        VDevice vdev = VDeviceMap.get(name);
+        if (vdev == null) {
+            MessageEvent e = new MessageEvent(MessageType.Info);
+            e.description = "PDevice is not defined in devices.txt ";
+            e.vdevice = name;
+            RGPIO.message(e);
+        }
+        return vdev;
+    }
+
+    public static VInput VDigitalInput(String name) {
+        VInput vin = VDigitalInputMap.get(name);
+        if (vin == null) {
+            MessageEvent e = new MessageEvent(MessageType.Info);
+            e.description = "VDigitalInput is not defined in devices.txt ";
+            e.vinput = name;
+            RGPIO.message(e);
+        }
+        return vin;
+    }
+
+    public static VOutput VDigitalOutput(String name) {
+        VOutput vout = VDigitalOutputMap.get(name);
+        if (vout == null) {
+            MessageEvent e = new MessageEvent(MessageType.Info);
+            e.description = "VDigitalOutput is not defined in devices.txt ";
+            e.voutput = name;
+            RGPIO.message(e);
+        }
+        return vout;
     }
 
     public static void receiveFromDevice(String ipAddress, String message) {
@@ -202,15 +234,15 @@ public class RGPIO {
 
     public static void printMaps(String title) {
 //        System.out.println("===== maps after " + title + " =======");
-//        System.out.println("\nDevice group map\n");
-        RGPIO.deviceGroupMap.print();
+//        System.out.println("\nDevice vdevice map\n");
+        RGPIO.VDeviceMap.print();
 //        System.out.println("\nDigital input map\n");
-        RGPIO.digitalInputMap.print();
+        RGPIO.VDigitalInputMap.print();
 //        System.out.println("\nDigital output map\n");
-        RGPIO.digitalOutputMap.print();
+        RGPIO.VDigitalOutputMap.print();
 //        System.out.println();
 //        System.out.println("\nPhysical devices\n");
-        RGPIO.deviceMap.print();
+        RGPIO.PDeviceMap.print();
     }
 
     public static void readDevicesFile(String fileName) {
@@ -248,13 +280,13 @@ public class RGPIO {
                     name = nv[0];
                     value = nv[1];
                     if (name.equals("Device")) {
-                        device = RGPIO.deviceGroupMap.add(value);
+                        device = RGPIO.VDeviceMap.add(value);
                     }
                     if (name.equals("DigitalInput")) {
-                        digitalInput = RGPIO.digitalInputMap.add(value);
+                        digitalInput = RGPIO.VDigitalInputMap.add(value);
                     }
                     if (name.equals("DigitalOutput")) {
-                        digitalOutput = RGPIO.digitalOutputMap.add(value);
+                        digitalOutput = RGPIO.VDigitalOutputMap.add(value);
                     }
                     if (name.equals("Model")) {
                         model = value;

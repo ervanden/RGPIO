@@ -13,7 +13,6 @@ public class TCPserver extends Thread {
     public TCPserver(int portNumber) {
         super();
         this.portNumber = portNumber;
-        System.out.println("listener="+listener+" "+(listener != null));
     }
 
     public void addListener(TCPserverListener l) {

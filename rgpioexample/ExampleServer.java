@@ -47,17 +47,17 @@ public class ExampleServer implements VInputEventListener, MessageListener {
         RGPIO.addMessageListener(this);
         RGPIO.initialize(deviceFile);
 
+        // wait until TCPfeed and TCPclient listeners are ready
         try {
             Thread.sleep(2000);
         } catch (InterruptedException ie) {
         }
 
-        //      RGPIO.receiveFromDevice("192.168.0.34", "Report/HWid:PIR1/Model:PIR/Uptime:600/Dop:00/Dip:02");
-        //       RGPIO.printMaps("after report");
-        allDevices = RGPIO.deviceGroupMap.get("allDevices");
+        allDevices = RGPIO.VDevice("allDevices");
+        buttons = RGPIO.VDigitalInput("button");
+        lights = RGPIO.VDigitalOutput("light");
+
         allDevices.minMembers = 2;
-        buttons = RGPIO.digitalInputMap.get("button");
-        lights = RGPIO.digitalOutputMap.get("light");
         buttons.minMembers = 2;
         lights.minMembers = 1;
 
@@ -65,8 +65,6 @@ public class ExampleServer implements VInputEventListener, MessageListener {
 
         // switch all lights off to be in a known state
         lights.set("Low");
-
-        RGPIO.printMaps("");
 
         while (true) {
             try {

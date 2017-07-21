@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import udputils.SendGetCommandThread;
 
-public class VInput extends Selector {
+public class VInput extends VSelector {
 
     public String name;
     public IOType type;
@@ -20,7 +20,7 @@ public class VInput extends Selector {
 
     public VInput(String name) {
         this.name = name;
-        RGPIO.digitalInputMap.put(name, this);
+        RGPIO.VDigitalInputMap.put(name, this);
     }
 
     public void set_value(String newValue) {
@@ -49,7 +49,7 @@ public class VInput extends Selector {
 
         ArrayList<SendGetCommandThread> threads = new ArrayList<>();
 
-        for (PDevice device : RGPIO.deviceMap.values()) {
+        for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput dip : device.digitalInputs.values()) {
                 if (dip.vinput == this) {
                     SendGetCommandThread t = new SendGetCommandThread(device, dip);
@@ -81,7 +81,7 @@ public class VInput extends Selector {
         nrHigh = 0;
         nrLow = 0;
 //        System.out.println("---state change for digital input " + name);
-        for (PDevice device : RGPIO.deviceMap.values()) {
+        for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput dip : device.digitalInputs.values()) {
                 if (dip.vinput == this) {
 //                    System.out.println("---physical pin " + device.HWid + "." + dip.name);

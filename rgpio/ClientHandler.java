@@ -11,7 +11,7 @@ public class ClientHandler implements TCPserverListener {
         ArrayList<String> reply = new ArrayList<>();
 
         if (request.equals("status")) {
-            for (PDevice d : RGPIO.deviceMap.values()) {
+            for (PDevice d : RGPIO.PDeviceMap.values()) {
                 reply.add(d.toJSON());
                 for (PInput dip : d.digitalInputs.values()) {
                     reply.add(dip.toJSON());
@@ -20,10 +20,10 @@ public class ClientHandler implements TCPserverListener {
                     reply.add(dop.toJSON());
                 }
             }
-            for (VInput dip : RGPIO.digitalInputMap.values()) {
+            for (VInput dip : RGPIO.VDigitalInputMap.values()) {
                 reply.add(dip.toJSON());
             }
-            for (VOutput dop : RGPIO.digitalOutputMap.values()) {
+            for (VOutput dop : RGPIO.VDigitalOutputMap.values()) {
                 reply.add(dop.toJSON());
             }
         } else {

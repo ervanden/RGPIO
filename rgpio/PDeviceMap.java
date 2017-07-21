@@ -49,9 +49,9 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
 
         PDevice d = get(HWid);
         if (d == null) {
-            // device does not yet exist. Create it and match to an device group
+            // device does not yet exist. Create it and match to an device vdevice
             d = new PDevice();
-            RGPIO.deviceMap.put(HWid, d);
+            RGPIO.PDeviceMap.put(HWid, d);
             d.HWid = HWid;
             d.groupName = null;
             d.modelName = modelName;
@@ -132,7 +132,7 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
 
         int nrInstances = 0;
         VDevice theOnlyDeviceGroup = null;
-        for (Map.Entry<String, VDevice> e : RGPIO.deviceGroupMap.entrySet()) {
+        for (Map.Entry<String, VDevice> e : RGPIO.VDeviceMap.entrySet()) {
             VDevice deviceGroup = e.getValue();
             if (deviceGroup.matchesDevice(device.modelName, device.HWid)) {
                 theOnlyDeviceGroup = deviceGroup;
@@ -146,7 +146,7 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
             MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "device assigned to group";
             e.HWid = device.HWid;
-            e.group = device.groupName;
+            e.vdevice = device.groupName;
             RGPIO.message(e);
         }
         if (nrInstances == 0) {

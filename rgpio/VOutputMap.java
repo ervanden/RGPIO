@@ -11,10 +11,10 @@ public class VOutputMap extends HashMap<String, VOutput> {
     }
     
         public VOutput add(String name) {
-        VOutput digitalOutput = RGPIO.digitalOutputMap.get(name);
+        VOutput digitalOutput = RGPIO.VDigitalOutputMap.get(name);
         if (digitalOutput == null) {
             digitalOutput = new VOutput(name);
-            RGPIO.digitalOutputMap.put(name, digitalOutput);
+            RGPIO.VDigitalOutputMap.put(name, digitalOutput);
             digitalOutput.type=IOType.digitalOutput;
         };
         return digitalOutput;
@@ -29,7 +29,7 @@ public class VOutputMap extends HashMap<String, VOutput> {
 
             String separator = "";
             String devicePins = "<";
-            for (PDevice device : RGPIO.deviceMap.values()) {
+            for (PDevice device : RGPIO.PDeviceMap.values()) {
                 for (POutput pin : device.digitalOutputs.values()) {
                     if (pin.voutput == d) {
                         devicePins = devicePins + separator + device.HWid + "." + pin.name;
@@ -47,7 +47,7 @@ public class VOutputMap extends HashMap<String, VOutput> {
             String HWid,
             String modelName) {
 
-        PDevice d = RGPIO.deviceMap.get(HWid);
+        PDevice d = RGPIO.PDeviceMap.get(HWid);
 
         // add the Dop to the device
         // test if already exists in case we process REPORT more than once
@@ -61,10 +61,10 @@ public class VOutputMap extends HashMap<String, VOutput> {
             p.voutput = null;
             d.digitalOutputs.put(pinName, p);
 
-            // match to a digitalOutput
+            // match to a voutput
             int nrInstances = 0;
             VOutput theOnlyDigitalOutput = null;
-            for (VOutput digitalOutput : RGPIO.digitalOutputMap.values()) {
+            for (VOutput digitalOutput : RGPIO.VDigitalOutputMap.values()) {
                 if (digitalOutput.matchesDevicePin(pinName, modelName, HWid)) {
                     theOnlyDigitalOutput = digitalOutput;
                     nrInstances++;
@@ -77,7 +77,7 @@ public class VOutputMap extends HashMap<String, VOutput> {
                 e.description = "device pin assigned to digital output";
                 e.HWid = HWid;
                 e.pinLabel = pinName;
-                e.digitalOutput = p.voutput.name;
+                e.voutput = p.voutput.name;
                 RGPIO.message(e);
             }
             if (nrInstances == 0) {

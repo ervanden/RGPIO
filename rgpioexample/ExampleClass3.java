@@ -178,10 +178,10 @@ public class ExampleClass3 implements VInputEventListener, MessageListener, Mous
         RGPIO.addMessageListener(this);
         RGPIO.initialize(configurationDirectory);
 
-        PIRDevices = RGPIO.deviceGroupMap.get("PIR");
+        PIRDevices = RGPIO.VDeviceMap.get("PIR");
         PIRDevices.minMembers = 2;
-        buttons = RGPIO.digitalInputMap.get("button");
-        lights = RGPIO.digitalOutputMap.get("light");
+        buttons = RGPIO.VDigitalInputMap.get("button");
+        lights = RGPIO.VDigitalOutputMap.get("light");
         buttons.minMembers = 2;
         lights.minMembers = 1;
 

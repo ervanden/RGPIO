@@ -3,7 +3,7 @@ package rgpio;
 import utils.JSONObject;
 import udputils.SendSetCommandThread;
 
-public class VOutput extends Selector {
+public class VOutput extends VSelector {
 
     public String name;
     public String value;
@@ -12,7 +12,7 @@ public class VOutput extends Selector {
 
     public VOutput(String name) {
         this.name = name;
-        RGPIO.digitalOutputMap.put(name, this);
+        RGPIO.VDigitalOutputMap.put(name, this);
     }
 
     public String toJSON() {
@@ -29,7 +29,7 @@ public class VOutput extends Selector {
         value = newValue;
         RGPIO.updateFeed.writeToClients(toJSON());
 
-        for (PDevice device : RGPIO.deviceMap.values()) {
+        for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (POutput dop : device.digitalOutputs.values()) {
                 if (dop.voutput == this) {
                     dop.value = newValue;   // store the state also with the physical dop. (why?)
