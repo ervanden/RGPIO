@@ -1,8 +1,12 @@
 package rgpio;
 
+import rgpioutils.MessageType;
+import rgpioutils.MessageListener;
+import rgpioutils.MessageEvent;
+import utils.TimeStamp;
+import utils.ByteOrderMark;
 import utils.Console;
 import udputils.UDPSender;
-import devices.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,7 +58,7 @@ class DeviceMonitorThread extends Thread {
                             = new DatagramPacket(sendData, sendData.length, deviceIPAddress, RGPIO.devicePort);
                     serverSocket.send(sendPacket);
 
-                    RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.SendMessage);
+                    MessageEvent e = new MessageEvent(MessageType.SendMessage);
                     e.description = "OK to <" + message + ">";
                     e.ipAddress = deviceIPAddress.toString().substring(1);
                     RGPIO.message(e);
@@ -88,7 +92,7 @@ class DeviceProbeThread extends Thread {
                 Thread.sleep(send_interval);
                 // Check if a device has not responded within the last send_interval.
                 long now = new TimeStamp().getTimeInMillis();
-                for (Device device : RGPIO.deviceMap.values()) {
+                for (PDevice device : RGPIO.deviceMap.values()) {
                     if ((now - device.lastContact.getTimeInMillis()) > send_interval) {
                         device.setNotResponding("device did not respond in last " + send_interval + " msec");
                     }
@@ -97,16 +101,16 @@ class DeviceProbeThread extends Thread {
                 e.printStackTrace();
             }
 
-            for (RGPIODeviceGroup deviceGroup : RGPIO.deviceGroupMap.values()) {
+            for (VDevice deviceGroup : RGPIO.deviceGroupMap.values()) {
                 int n = 0;
-                for (Device device : RGPIO.deviceMap.values()) {
-                    if ((device.deviceGroup == deviceGroup) && (device.get_status() == DeviceStatus.ACTIVE)) {
+                for (PDevice device : RGPIO.deviceMap.values()) {
+                    if ((device.deviceGroup == deviceGroup) && (device.get_status() == PDeviceStatus.ACTIVE)) {
                         n++;
                     }
                 }
                 if (deviceGroup.minMembers != null) {
                     if (n < deviceGroup.minMembers) {
-                        RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.DeviceGroupMinimum);
+                        MessageEvent e = new MessageEvent(MessageType.DeviceGroupMinimum);
                         e.description = "device group has too few members : " + n;
                         e.group = deviceGroup.name;
                         RGPIO.message(e);
@@ -120,10 +124,10 @@ class DeviceProbeThread extends Thread {
 
 public class RGPIO {
 
-    public static DeviceMap deviceMap;
-    public static RGPIODeviceGroupMap deviceGroupMap;
-    public static RGPIOInputMap digitalInputMap;
-    public static RGPIOOutputMap digitalOutputMap;
+    public static PDeviceMap deviceMap;
+    public static VDeviceMap deviceGroupMap;
+    public static VInputMap digitalInputMap;
+    public static VOutputMap digitalOutputMap;
 
     public static TCPfeed messageFeed;
     public static TCPfeed updateFeed;
@@ -137,10 +141,10 @@ public class RGPIO {
 
     public static void initialize(String configurationDir) {
 
-        deviceGroupMap = new RGPIODeviceGroupMap();
-        deviceMap = new DeviceMap();
-        digitalInputMap = new RGPIOInputMap();
-        digitalOutputMap = new RGPIOOutputMap();
+        deviceGroupMap = new VDeviceMap();
+        deviceMap = new PDeviceMap();
+        digitalInputMap = new VInputMap();
+        digitalOutputMap = new VOutputMap();
 
         readDevicesFile(configurationDir);
 
@@ -173,13 +177,13 @@ public class RGPIO {
 
     }
 
-    private static List<RGPIOMessageListener> listeners = new ArrayList<>();
+    private static List<MessageListener> listeners = new ArrayList<>();
 
-    public static void addMessageListener(RGPIOMessageListener toAdd) {
+    public static void addMessageListener(MessageListener toAdd) {
         listeners.add(toAdd);
     }
 
-    public static void message(RGPIOMessageEvent e) {
+    public static void message(MessageEvent e) {
 
         // a message is generated from within RGPIO.
         // Send it out to clients connected to the message feed
@@ -188,7 +192,7 @@ public class RGPIO {
             messageFeed.writeToClients(e.toJSON());
         }
 
-        for (RGPIOMessageListener l : listeners) {
+        for (MessageListener l : listeners) {
             try {
                 l.onMessage(e);
             } catch (Exception ex) {
@@ -228,9 +232,9 @@ public class RGPIO {
                 }
 
                 lineCount++;
-                RGPIODeviceGroup device = null;
-                RGPIOInput digitalInput = null;
-                RGPIOOutput digitalOutput = null;
+                VDevice device = null;
+                VInput digitalInput = null;
+                VOutput digitalOutput = null;
                 String model = null;
                 String HWid = null;
                 String pin = null;
@@ -266,38 +270,38 @@ public class RGPIO {
                 int selectors = 0;
                 if (device != null) {
                     if (model != null) {
-                        device.addSelector(null, "Model", model);
+                        device.addSelectSpec(null, "Model", model);
                         selectors++;
                     }
                     if (HWid != null) {
-                        device.addSelector(null, "HWid", HWid);
+                        device.addSelectSpec(null, "HWid", HWid);
                         selectors++;
                     }
                 }
                 if ((digitalOutput != null) && (pin != null)) {
                     if (model != null) {
-                        digitalOutput.addSelector(pin, "Model", model);
+                        digitalOutput.addSelectSpec(pin, "Model", model);
                         selectors++;
                     }
                     if (HWid != null) {
-                        digitalOutput.addSelector(pin, "HWid", HWid);
+                        digitalOutput.addSelectSpec(pin, "HWid", HWid);
                         selectors++;
                     }
                 }
 
                 if ((digitalInput != null) && (pin != null)) {
                     if (model != null) {
-                        digitalInput.addSelector(pin, "Model", model);
+                        digitalInput.addSelectSpec(pin, "Model", model);
                         selectors++;
                     }
                     if (HWid != null) {
-                        digitalInput.addSelector(pin, "HWid", HWid);
+                        digitalInput.addSelectSpec(pin, "HWid", HWid);
                         selectors++;
                     }
                 }
 
                 if (selectors != 1) {
-                    RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.Info);
+                    MessageEvent e = new MessageEvent(MessageType.Info);
                     e.description = "invalid line : " + inputLine + " selectors " + selectors;
                     RGPIO.message(e);
                 }
@@ -306,11 +310,11 @@ public class RGPIO {
             System.out.println("read from " + fileName + " : " + lineCount + " lines");
             inputStream.close();
         } catch (FileNotFoundException fnf) {
-            RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.Info);
+            MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "file not found : " + fileName;
             RGPIO.message(e);
         } catch (IOException io) {
-            RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.Info);
+            MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "io exception while reading file : " + fileName;
             RGPIO.message(e);
         }

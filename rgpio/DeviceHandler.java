@@ -1,6 +1,9 @@
 
 package rgpio;
 
+import rgpioutils.MessageType;
+import rgpioutils.MessageEvent;
+
 
 public class DeviceHandler {
  
@@ -15,7 +18,7 @@ public class DeviceHandler {
          return value = false : invalid command
  
          */
-        RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.ReceivedMessage);
+        MessageEvent e = new MessageEvent(MessageType.ReceivedMessage);
         e.description = "<" + message + ">";
         e.ipAddress = deviceIPAddress;
         RGPIO.message(e);
@@ -85,7 +88,7 @@ public class DeviceHandler {
             RGPIO.deviceMap.deviceReportedPinEvent(HWid, pinLabel, pinValue);
 
         } else {
-            e = new RGPIOMessageEvent(RGPIOMessageType.InvalidMessage);
+            e = new MessageEvent(MessageType.InvalidMessage);
             e.description = "invalid command from device <" + message + ">";
             e.ipAddress = deviceIPAddress;
             RGPIO.message(e);

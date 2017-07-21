@@ -1,21 +1,21 @@
-package rgpio;
+package utils;
 
-public class JSONString {
+public class JSONObject {
 
     String s;
 
-    public JSONString() {
+    public JSONObject() {
         s = "{";
     }
 
-    public void addString(String name, String value) {
+    public void addProperty(String name, String value) {
         if (!s.equals("{")) {
             s = s + ",";
         };
         s = s + " \"" + name + "\":\"" + value + "\"";
     }
 
-    public String close() {
+    public String asString() {
         return s + "}";
     }
 

@@ -1,18 +1,20 @@
 package rgpioexample;
 
+import rgpioutils.MessageListener;
+import rgpioutils.MessageEvent;
 import rgpio.*;
 
-public class ExampleServer implements RGPIOInputEventListener, RGPIOMessageListener {
+public class ExampleServer implements VInputEventListener, MessageListener {
 
     /*
      Pressing any button switches the lights off if they were on, and off if they were on.
      PIRDevices is only used to get a message if there are less than 2 PIR's.
      */
-    RGPIODeviceGroup allDevices;
-    RGPIOInput buttons;
-    RGPIOOutput lights;
+    VDevice allDevices;
+    VInput buttons;
+    VOutput lights;
 
-    public void onInputEvent(RGPIOInputEvent event) {
+    public void onInputEvent(VInputEvent event) {
 
         if (event.rgpioInput == buttons) {
             if (event.rgpioInput.nrHigh > 0) {
@@ -28,7 +30,7 @@ public class ExampleServer implements RGPIOInputEventListener, RGPIOMessageListe
         }
     }
 
-    public void onMessage(RGPIOMessageEvent e) throws Exception {
+    public void onMessage(MessageEvent e) throws Exception {
         System.out.println(e.toString());
 
     }

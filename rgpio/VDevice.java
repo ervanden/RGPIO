@@ -1,12 +1,12 @@
 package rgpio;
 
-public class RGPIODeviceGroup extends RGPIOSelector{
+public class VDevice extends Selector{
 
     public String name = null;
     public Integer minMembers = null;
 
 
-    public RGPIODeviceGroup(String name) {
+    public VDevice(String name) {
         this.name = name;
         RGPIO.deviceGroupMap.put(name, this);
     }

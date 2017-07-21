@@ -1,17 +1,21 @@
-package devices;
+package rgpio;
 
+import rgpioutils.MessageType;
+import rgpioutils.MessageEvent;
+import utils.TimeStamp;
+import utils.JSONObject;
 import java.util.HashMap;
 import udputils.UDPSender;
 import rgpio.*;
 
-public class Device {
+public class PDevice {
 
     // status changes are forwarded to updateFeed. All access must be via methods. status field is private
-    private DeviceStatus status = DeviceStatus.NULL;
+    private PDeviceStatus status = PDeviceStatus.NULL;
 
     public String groupName = null;
     public String modelName = null;
-    public RGPIODeviceGroup deviceGroup = null;
+    public VDevice deviceGroup = null;
     public String HWid = null;        // unique hardware identifier
     public String ipAddress = null;
     public TimeStamp lastContact = new TimeStamp(0); // timestamp
@@ -21,35 +25,35 @@ public class Device {
     public HashMap<String, POutput> digitalOutputs = new HashMap<>(); // key is pin label
 
     public String toJSON() {
-        JSONString json = new JSONString();
-        json.addString("object", "PDEV");
-        json.addString("model", modelName);
-        json.addString("HWid", HWid);
-        json.addString("ipAddress", ipAddress);
-        json.addString("status", status.name());
-        return json.close();
+        JSONObject json = new JSONObject();
+        json.addProperty("object", "PDEV");
+        json.addProperty("model", modelName);
+        json.addProperty("HWid", HWid);
+        json.addProperty("ipAddress", ipAddress);
+        json.addProperty("status", status.name());
+        return json.asString();
     }
 
-    public void set_status(DeviceStatus status) {
+    public void set_status(PDeviceStatus status) {
         if (status != this.status) {
             this.status = status;
             RGPIO.updateFeed.writeToClients(toJSON());
         }
     }
 
-    public DeviceStatus get_status() {
+    public PDeviceStatus get_status() {
         return this.status;
     }
 
     public void setActive() {
-        set_status(DeviceStatus.ACTIVE);
+        set_status(PDeviceStatus.ACTIVE);
         this.lastContact = new TimeStamp();
     }
 
     public void setNotResponding(String msg) {
-        set_status(DeviceStatus.NOTRESPONDING);
+        set_status(PDeviceStatus.NOTRESPONDING);
 
-        RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.DeviceNotResponding);
+        MessageEvent e = new MessageEvent(MessageType.DeviceNotResponding);
         e.description = msg;
         e.ipAddress = ipAddress;
         e.HWid = HWid;
@@ -68,15 +72,15 @@ public class Device {
 
         String reply = null;
         if (ipAddress == null) {
-            RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.SendWarning);
+            MessageEvent e = new MessageEvent(MessageType.SendWarning);
             e.description = "cannot send message to unreported device";
             e.HWid = HWid;
             RGPIO.message(e);
-        } else if (status == DeviceStatus.ACTIVE) {
+        } else if (status == PDeviceStatus.ACTIVE) {
             reply = UDPSender.send(message, ipAddress, this, RGPIO.devicePort, 2000, 3);
             if (reply == null) {
-                set_status(DeviceStatus.NOTRESPONDING);
-                RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.DeviceNotResponding);
+                set_status(PDeviceStatus.NOTRESPONDING);
+                MessageEvent e = new MessageEvent(MessageType.DeviceNotResponding);
                 e.description = "device did not reply to <" + message + ">";
                 e.HWid = HWid;
                 RGPIO.message(e);

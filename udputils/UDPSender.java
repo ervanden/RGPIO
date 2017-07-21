@@ -1,15 +1,17 @@
 package udputils;
 
+import rgpioutils.MessageType;
+import rgpioutils.MessageEvent;
+import rgpio.PDevice;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import rgpio.*;
-import devices.*;
 
 public class UDPSender {
 
-    public static String send(String message, String ipAddress, Device device, int port, int timeout, int retries) {
+    public static String send(String message, String ipAddress, PDevice device, int port, int timeout, int retries) {
 
         // returns the reply if it arrives within the timeout, otherwise null
         // timeout of 0 means we skip waiting for the reply
@@ -17,7 +19,7 @@ public class UDPSender {
             //           byte[] sendData = new byte[1024];
             byte[] receiveData = new byte[1024];
 
-            RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.SendMessage);
+            MessageEvent e = new MessageEvent(MessageType.SendMessage);
             e.description = "<" + message + ">";
             e.ipAddress = ipAddress;
             if (device != null) {
@@ -42,7 +44,7 @@ public class UDPSender {
                         String reply = new String(receivePacket.getData());
                         reply = reply.substring(0, receivePacket.getLength());
 
-                        RGPIOMessageEvent e1 = new RGPIOMessageEvent(RGPIOMessageType.SendMessage);
+                        MessageEvent e1 = new MessageEvent(MessageType.SendMessage);
                         e1.description = ">REPLY(" + r + ") : " + reply;
                         e1.ipAddress = ipAddress;
                         if (device != null) {

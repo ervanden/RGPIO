@@ -3,7 +3,7 @@
 package rgpio;
 
 
-public enum RGPIOIOType {
+public enum IOType {
 
     digitalInput,
     digitalOutput,

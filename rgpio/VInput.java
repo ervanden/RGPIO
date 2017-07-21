@@ -1,14 +1,14 @@
 package rgpio;
 
-import devices.*;
+import utils.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 import udputils.SendGetCommandThread;
 
-public class RGPIOInput extends RGPIOSelector {
+public class VInput extends Selector {
 
     public String name;
-    public RGPIOIOType type;
+    public IOType type;
 
 //    public String value;
     public Integer nrHigh = 0;
@@ -18,7 +18,7 @@ public class RGPIOInput extends RGPIOSelector {
 
     public Integer minMembers = null;
 
-    public RGPIOInput(String name) {
+    public VInput(String name) {
         this.name = name;
         RGPIO.digitalInputMap.put(name, this);
     }
@@ -33,13 +33,13 @@ public class RGPIOInput extends RGPIOSelector {
     }
 
     public String toJSON() {
-        JSONString json = new JSONString();
-        json.addString("object", "VIO");
-        json.addString("name", name);
-        json.addString("nrHigh", nrHigh.toString());
-        json.addString("nrLow", nrLow.toString());
-        json.addString("type", type.name());
-        return json.close();
+        JSONObject json = new JSONObject();
+        json.addProperty("object", "VIO");
+        json.addProperty("name", name);
+        json.addProperty("nrHigh", nrHigh.toString());
+        json.addProperty("nrLow", nrLow.toString());
+        json.addProperty("type", type.name());
+        return json.asString();
     }
 
     public void get() {
@@ -49,7 +49,7 @@ public class RGPIOInput extends RGPIOSelector {
 
         ArrayList<SendGetCommandThread> threads = new ArrayList<>();
 
-        for (Device device : RGPIO.deviceMap.values()) {
+        for (PDevice device : RGPIO.deviceMap.values()) {
             for (PInput dip : device.digitalInputs.values()) {
                 if (dip.vinput == this) {
                     SendGetCommandThread t = new SendGetCommandThread(device, dip);
@@ -69,19 +69,19 @@ public class RGPIOInput extends RGPIOSelector {
         System.out.println("... all GET threads finished");
     }
 
-    private List<RGPIOInputEventListener> digitalListeners = new ArrayList<>();
+    private List<VInputEventListener> digitalListeners = new ArrayList<>();
 
-    public void addDigitalPinListener(RGPIOInputEventListener toAdd) {
+    public void addDigitalPinListener(VInputEventListener toAdd) {
         digitalListeners.add(toAdd);
     }
 
     //  pass change of state to all the listeners
-    public void stateChange(RGPIOInputEvent event) {
+    public void stateChange(VInputEvent event) {
 
         nrHigh = 0;
         nrLow = 0;
 //        System.out.println("---state change for digital input " + name);
-        for (Device device : RGPIO.deviceMap.values()) {
+        for (PDevice device : RGPIO.deviceMap.values()) {
             for (PInput dip : device.digitalInputs.values()) {
                 if (dip.vinput == this) {
 //                    System.out.println("---physical pin " + device.HWid + "." + dip.name);
@@ -99,7 +99,7 @@ public class RGPIOInput extends RGPIOSelector {
         }
         RGPIO.updateFeed.writeToClients(toJSON());
 
-        for (RGPIOInputEventListener l : digitalListeners) {
+        for (VInputEventListener l : digitalListeners) {
             try {
                 l.onInputEvent(event);
             } catch (Exception e) {

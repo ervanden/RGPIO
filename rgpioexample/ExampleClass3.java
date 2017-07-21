@@ -1,5 +1,7 @@
 package rgpioexample;
 
+import rgpioutils.MessageListener;
+import rgpioutils.MessageEvent;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,15 +14,15 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import rgpio.*;
 
-public class ExampleClass3 implements RGPIOInputEventListener, RGPIOMessageListener, MouseListener, ActionListener {
+public class ExampleClass3 implements VInputEventListener, MessageListener, MouseListener, ActionListener {
 
     /*
      there are a number of buttons and a number of lights.
      Pressing any button switches the lights off if they were on, and off if they were on.
      */
-    RGPIODeviceGroup PIRDevices;
-    RGPIOInput buttons;
-    RGPIOOutput lights;
+    VDevice PIRDevices;
+    VInput buttons;
+    VOutput lights;
 
     boolean lightsOnWhenPressed;
 
@@ -87,7 +89,7 @@ public class ExampleClass3 implements RGPIOInputEventListener, RGPIOMessageListe
         }
     }
 
-    public void onInputEvent(RGPIOInputEvent event) {
+    public void onInputEvent(VInputEvent event) {
 
         if (event.rgpioInput.name.equals("button")) {
 
@@ -107,7 +109,7 @@ public class ExampleClass3 implements RGPIOInputEventListener, RGPIOMessageListe
         }
     }
 
-    public void onMessage(RGPIOMessageEvent e) throws Exception {
+    public void onMessage(MessageEvent e) throws Exception {
         System.out.println(e.toString());
     }
 

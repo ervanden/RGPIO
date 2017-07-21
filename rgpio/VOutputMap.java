@@ -1,20 +1,21 @@
 package rgpio;
 
-import devices.*;
+import rgpioutils.MessageType;
+import rgpioutils.MessageEvent;
 import java.util.HashMap;
 
-public class RGPIOOutputMap extends HashMap<String, RGPIOOutput> {
+public class VOutputMap extends HashMap<String, VOutput> {
 
-    public RGPIOOutputMap() {
+    public VOutputMap() {
         super();
     }
     
-        public RGPIOOutput add(String name) {
-        RGPIOOutput digitalOutput = RGPIO.digitalOutputMap.get(name);
+        public VOutput add(String name) {
+        VOutput digitalOutput = RGPIO.digitalOutputMap.get(name);
         if (digitalOutput == null) {
-            digitalOutput = new RGPIOOutput(name);
+            digitalOutput = new VOutput(name);
             RGPIO.digitalOutputMap.put(name, digitalOutput);
-            digitalOutput.type=RGPIOIOType.digitalOutput;
+            digitalOutput.type=IOType.digitalOutput;
         };
         return digitalOutput;
     }
@@ -22,13 +23,13 @@ public class RGPIOOutputMap extends HashMap<String, RGPIOOutput> {
     public void print() {
         String formatString = "%12s %5s %1s\n";
         System.out.printf(formatString, "DigitalOutput", "state", "device.pin");
-        for (RGPIOOutput d : this.values()) {
+        for (VOutput d : this.values()) {
             String name = d.name;
             String state = d.value;
 
             String separator = "";
             String devicePins = "<";
-            for (Device device : RGPIO.deviceMap.values()) {
+            for (PDevice device : RGPIO.deviceMap.values()) {
                 for (POutput pin : device.digitalOutputs.values()) {
                     if (pin.voutput == d) {
                         devicePins = devicePins + separator + device.HWid + "." + pin.name;
@@ -46,7 +47,7 @@ public class RGPIOOutputMap extends HashMap<String, RGPIOOutput> {
             String HWid,
             String modelName) {
 
-        Device d = RGPIO.deviceMap.get(HWid);
+        PDevice d = RGPIO.deviceMap.get(HWid);
 
         // add the Dop to the device
         // test if already exists in case we process REPORT more than once
@@ -54,7 +55,7 @@ public class RGPIOOutputMap extends HashMap<String, RGPIOOutput> {
         if (p == null) {
             p = new POutput();
             p.name = pinName;
-            p.type=RGPIOIOType.digitalOutput;
+            p.type=IOType.digitalOutput;
             p.value = null;
             p.device = d;
             p.voutput = null;
@@ -62,8 +63,8 @@ public class RGPIOOutputMap extends HashMap<String, RGPIOOutput> {
 
             // match to a digitalOutput
             int nrInstances = 0;
-            RGPIOOutput theOnlyDigitalOutput = null;
-            for (RGPIOOutput digitalOutput : RGPIO.digitalOutputMap.values()) {
+            VOutput theOnlyDigitalOutput = null;
+            for (VOutput digitalOutput : RGPIO.digitalOutputMap.values()) {
                 if (digitalOutput.matchesDevicePin(pinName, modelName, HWid)) {
                     theOnlyDigitalOutput = digitalOutput;
                     nrInstances++;
@@ -72,7 +73,7 @@ public class RGPIOOutputMap extends HashMap<String, RGPIOOutput> {
             if (nrInstances == 1) {
                 p.voutput = theOnlyDigitalOutput;
 
-                RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.Info);
+                MessageEvent e = new MessageEvent(MessageType.Info);
                 e.description = "device pin assigned to digital output";
                 e.HWid = HWid;
                 e.pinLabel = pinName;
@@ -80,14 +81,14 @@ public class RGPIOOutputMap extends HashMap<String, RGPIOOutput> {
                 RGPIO.message(e);
             }
             if (nrInstances == 0) {
-                RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.UnassignedPin);
+                MessageEvent e = new MessageEvent(MessageType.UnassignedPin);
                 e.description = "device pin can not be assigned to digital output";
                 e.HWid = HWid;
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
             if (nrInstances > 1) {
-                RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.UnassignedPin);
+                MessageEvent e = new MessageEvent(MessageType.UnassignedPin);
                 e.description = "device pin matches more than one digital output";
                 e.HWid = HWid;
                 e.pinLabel = pinName;

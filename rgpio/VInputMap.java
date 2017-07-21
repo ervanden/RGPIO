@@ -1,20 +1,21 @@
 package rgpio;
 
-import devices.*;
+import rgpioutils.MessageType;
+import rgpioutils.MessageEvent;
 import java.util.HashMap;
 
-public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
+public class VInputMap extends HashMap<String, VInput> {
 
-    public RGPIOInputMap() {
+    public VInputMap() {
         super();
     }
 
-    public RGPIOInput add(String name) {
-        RGPIOInput digitalInput = RGPIO.digitalInputMap.get(name);
+    public VInput add(String name) {
+        VInput digitalInput = RGPIO.digitalInputMap.get(name);
         if (digitalInput == null) {
-            digitalInput = new RGPIOInput(name);
+            digitalInput = new VInput(name);
             RGPIO.digitalInputMap.put(name, digitalInput);
-            digitalInput.type = RGPIOIOType.digitalInput;
+            digitalInput.type = IOType.digitalInput;
         };
         return digitalInput;
     }
@@ -22,14 +23,14 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
     public void print() {
         String formatString = "%12s %1s\n";
         System.out.printf(formatString, "DigitalInput", "device.pin");
-        for (RGPIOInput d : this.values()) {
+        for (VInput d : this.values()) {
             String name = d.name;
 
             String state = d.get_value();
 
             String separator = "";
             String devicePins = "<";
-            for (Device device : RGPIO.deviceMap.values()) {
+            for (PDevice device : RGPIO.deviceMap.values()) {
                 for (PInput pin : device.digitalInputs.values()) {
                     if (pin.vinput == d) {
                         devicePins = devicePins + separator + device.HWid + "." + pin.name;
@@ -47,13 +48,13 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
             String HWid,
             String modelName) {
 
-        Device d = RGPIO.deviceMap.get(HWid);
+        PDevice d = RGPIO.deviceMap.get(HWid);
 
         // add the pin to the device
         PInput p = d.digitalInputs.get(pinName);
         if (p == null) {
             p = new PInput();
-            p.type = RGPIOIOType.digitalInput;
+            p.type = IOType.digitalInput;
             p.name = pinName;
             p.value = null;
             p.device = d;
@@ -62,8 +63,8 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
 
             // match to a digitalInput
             int nrInstances = 0;
-            RGPIOInput theOnlyDigitalInput = null;
-            for (RGPIOInput digitalInput : RGPIO.digitalInputMap.values()) {
+            VInput theOnlyDigitalInput = null;
+            for (VInput digitalInput : RGPIO.digitalInputMap.values()) {
                 if (digitalInput.matchesDevicePin(pinName, modelName, HWid)) {
                     theOnlyDigitalInput = digitalInput;
 
@@ -74,7 +75,7 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
             if (nrInstances == 1) {
                 p.vinput = theOnlyDigitalInput;
 
-                RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.Info);
+                MessageEvent e = new MessageEvent(MessageType.Info);
                 e.description = "device pin assigned to digital input";
                 e.HWid = HWid;
                 e.pinLabel = pinName;
@@ -82,14 +83,14 @@ public class RGPIOInputMap extends HashMap<String, RGPIOInput> {
                 RGPIO.message(e);
             }
             if (nrInstances == 0) {
-                RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.UnassignedPin);
+                MessageEvent e = new MessageEvent(MessageType.UnassignedPin);
                 e.description = "device pin can not be assigned to digital input";
                 e.HWid = HWid;
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
             if (nrInstances > 1) {
-                RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.UnassignedPin);
+                MessageEvent e = new MessageEvent(MessageType.UnassignedPin);
                 e.description = "device pin matches more than one digital input";
                 e.HWid = HWid;
                 e.pinLabel = pinName;

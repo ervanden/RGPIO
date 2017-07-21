@@ -1,13 +1,13 @@
 package udputils;
 
-import devices.*;
+import rgpio.PDevice;
 
 public class SendSetCommandThread extends Thread {
 
-    Device device;
+    PDevice device;
     String message;
 
-    public SendSetCommandThread(Device device, String message) {
+    public SendSetCommandThread(PDevice device, String message) {
         super();
         this.device=device;
                 this.message = message;

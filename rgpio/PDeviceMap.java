@@ -1,5 +1,9 @@
-package devices;
+package rgpio;
 
+import rgpioutils.MessageType;
+import rgpioutils.MessageEvent;
+import rgpio.PDevice;
+import utils.TimeStamp;
 import rgpio.*;
 import utils.*;
 
@@ -8,22 +12,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-/*
- deviceMap entry syntax
-
- HWid:deviceModelName:groupName
-
- 'deviceGroup' is the modelName by which this device is referred to in the application
-
- */
-public class DeviceMap extends ConcurrentHashMap<String, Device> {
+public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
 
     // key is HWid
     // concurrent because devices can report and be added to the map at any time
     String deviceMapFileName;
     int unknownDeviceCounter = 0;
 
-    public DeviceMap() {
+    public PDeviceMap() {
         super();
         Console.verbose(true);
     }
@@ -33,7 +29,7 @@ public class DeviceMap extends ConcurrentHashMap<String, Device> {
         String formatString = "%12s %12s  %13s  %12s  %12s  %12s\n";
         System.out.printf(formatString,
                 "HWid", "deviceGroup", "status", "ipAddress", "lastContact", "powerOn");
-        for (Device d : this.values()) {
+        for (PDevice d : this.values()) {
             String HWid = d.HWid;
             String status = d.get_status().name();
             String deviceGroupName = d.groupName;
@@ -51,15 +47,15 @@ public class DeviceMap extends ConcurrentHashMap<String, Device> {
             String ipAddress,
             int upTime) {
 
-        Device d = get(HWid);
+        PDevice d = get(HWid);
         if (d == null) {
             // device does not yet exist. Create it and match to an device group
-            d = new Device();
+            d = new PDevice();
             RGPIO.deviceMap.put(HWid, d);
             d.HWid = HWid;
             d.groupName = null;
             d.modelName = modelName;
-            d.set_status(DeviceStatus.UNASSIGNED);
+            d.set_status(PDeviceStatus.UNASSIGNED);
             this.put(HWid, d);
             matchToGroup(d);
         }
@@ -75,9 +71,9 @@ public class DeviceMap extends ConcurrentHashMap<String, Device> {
             String pinLabel,
             String value) {
 
-        Device d = this.get(HWid);
+        PDevice d = this.get(HWid);
         if (d == null) {
-            RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.UnreportedDevice);
+            MessageEvent e = new MessageEvent(MessageType.UnreportedDevice);
             e.description = "received event from an unreported device";
             e.HWid = HWid;
             e.pinLabel = pinLabel;
@@ -89,7 +85,7 @@ public class DeviceMap extends ConcurrentHashMap<String, Device> {
         d.setActive();
         PInput deviceDigitalInput = d.digitalInputs.get(pinLabel);
         if (deviceDigitalInput == null) {
-            RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.InvalidPinName);
+            MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
             e.description = "received event from unknown digital input pin";
             e.HWid = d.HWid;
             e.pinLabel = pinLabel;
@@ -98,7 +94,7 @@ public class DeviceMap extends ConcurrentHashMap<String, Device> {
         }
 
         if (!(value.equals("High")) && !(value.equals("Low"))) {
-            RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.InvalidPinValue);
+            MessageEvent e = new MessageEvent(MessageType.InvalidPinValue);
             e.description = "received event with invalid digital input value";
             e.HWid = d.HWid;
             e.pinLabel = pinLabel;
@@ -111,7 +107,7 @@ public class DeviceMap extends ConcurrentHashMap<String, Device> {
         deviceDigitalInput.set_value(value);
 
         if (deviceDigitalInput.vinput == null) {
-            RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.InvalidPinName);
+            MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
             e.description = "received event from unassigned digital input pin";
             e.HWid = d.HWid;
             e.pinLabel = pinLabel;
@@ -119,25 +115,25 @@ public class DeviceMap extends ConcurrentHashMap<String, Device> {
             return;
         }
 
-        RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.Info);
+        MessageEvent e = new MessageEvent(MessageType.Info);
         e.description = "state change";
         e.HWid = d.HWid;
         e.pinLabel = pinLabel;
         e.state = value;
         RGPIO.message(e);
 
-        RGPIOInputEvent ev = new RGPIOInputEvent();
+        VInputEvent ev = new VInputEvent();
         ev.device = d;
         ev.rgpioInput = deviceDigitalInput.vinput;
         ev.rgpioInput.stateChange(ev);
     }
 
-    public static void matchToGroup(Device device) {
+    public static void matchToGroup(PDevice device) {
 
         int nrInstances = 0;
-        RGPIODeviceGroup theOnlyDeviceGroup = null;
-        for (Map.Entry<String, RGPIODeviceGroup> e : RGPIO.deviceGroupMap.entrySet()) {
-            RGPIODeviceGroup deviceGroup = e.getValue();
+        VDevice theOnlyDeviceGroup = null;
+        for (Map.Entry<String, VDevice> e : RGPIO.deviceGroupMap.entrySet()) {
+            VDevice deviceGroup = e.getValue();
             if (deviceGroup.matchesDevice(device.modelName, device.HWid)) {
                 theOnlyDeviceGroup = deviceGroup;
                 nrInstances++;
@@ -147,21 +143,21 @@ public class DeviceMap extends ConcurrentHashMap<String, Device> {
             device.groupName = theOnlyDeviceGroup.name;
             device.deviceGroup = theOnlyDeviceGroup;
 
-            RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.Info);
+            MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "device assigned to group";
             e.HWid = device.HWid;
             e.group = device.groupName;
             RGPIO.message(e);
         }
         if (nrInstances == 0) {
-            RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.UnassignedDevice);
+            MessageEvent e = new MessageEvent(MessageType.UnassignedDevice);
             e.description = "device can not be assigned to a group";
             e.HWid = device.HWid;
             e.model = device.modelName;
             RGPIO.message(e);
         }
         if (nrInstances > 1) {
-            RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.UnassignedDevice);
+            MessageEvent e = new MessageEvent(MessageType.UnassignedDevice);
             e.description = "device matches more than one group";
             e.HWid = device.HWid;
             RGPIO.message(e);

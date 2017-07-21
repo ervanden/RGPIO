@@ -1,5 +1,7 @@
 package pidevice;
 
+import rgpioutils.MessageListener;
+import rgpioutils.MessageEvent;
 import udputils.UDPSender;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,16 +11,16 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import rgpio.*;
-import devices.TimeStamp;
+import utils.TimeStamp;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Scanner;
 
-class MessagePrinter implements RGPIOMessageListener {
+class MessagePrinter implements MessageListener {
 
-    public void onMessage(RGPIOMessageEvent e) throws Exception {
+    public void onMessage(MessageEvent e) throws Exception {
         System.out.println(e.toString());
     }
 }

@@ -1,13 +1,14 @@
 package udputils;
 
-import devices.*;
+import rgpio.PInput;
+import rgpio.PDevice;
 
 public class SendGetCommandThread extends Thread {
 
-    Device device;
+    PDevice device;
     PInput dip;
 
-    public SendGetCommandThread(Device device,PInput dip) {
+    public SendGetCommandThread(PDevice device,PInput dip) {
         super();
         this.device=device;
         this.dip=dip;

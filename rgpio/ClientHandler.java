@@ -1,6 +1,7 @@
 package rgpio;
 
-import devices.*;
+import rgpioutils.MessageType;
+import rgpioutils.MessageEvent;
 import java.util.ArrayList;
 import tcputils.*;
 
@@ -10,7 +11,7 @@ public class ClientHandler implements TCPserverListener {
         ArrayList<String> reply = new ArrayList<>();
 
         if (request.equals("status")) {
-            for (Device d : RGPIO.deviceMap.values()) {
+            for (PDevice d : RGPIO.deviceMap.values()) {
                 reply.add(d.toJSON());
                 for (PInput dip : d.digitalInputs.values()) {
                     reply.add(dip.toJSON());
@@ -19,14 +20,14 @@ public class ClientHandler implements TCPserverListener {
                     reply.add(dop.toJSON());
                 }
             }
-            for (RGPIOInput dip : RGPIO.digitalInputMap.values()) {
+            for (VInput dip : RGPIO.digitalInputMap.values()) {
                 reply.add(dip.toJSON());
             }
-            for (RGPIOOutput dop : RGPIO.digitalOutputMap.values()) {
+            for (VOutput dop : RGPIO.digitalOutputMap.values()) {
                 reply.add(dop.toJSON());
             }
         } else {
-            RGPIOMessageEvent e = new RGPIOMessageEvent(RGPIOMessageType.Info);
+            MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "unrecognized request from client : <" + request + ">";
             e.ipAddress = clientID;
             RGPIO.message(e);

@@ -1,9 +1,9 @@
 
 
-package rgpio;
+package rgpioutils;
 
 
-public enum RGPIOMessageType {
+public enum MessageType {
 
     Error, 
     Info,
