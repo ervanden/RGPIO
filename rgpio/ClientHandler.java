@@ -11,7 +11,6 @@ public class ClientHandler implements TCPserverListener {
         ArrayList<String> reply = new ArrayList<>();
 
         if (request.equals("status")) {
-            RGPIO.printMaps("status");
             for (PDevice d : RGPIO.PDeviceMap.values()) {
                 reply.add(d.toJSON());
                 for (PInput dip : d.digitalInputs.values()) {
