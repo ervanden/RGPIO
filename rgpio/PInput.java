@@ -1,8 +1,6 @@
 package rgpio;
 
-import rgpio.PDevice;
 import utils.JSONObject;
-import rgpio.*;
 
 public class PInput {
 
@@ -31,5 +29,26 @@ public class PInput {
         json.addProperty("value", value);
         return json.asString();
     }
+    
+    
+        
+    public void setDebounced(String value){
+
+        if (type == IOType.digitalInput) {
+       if (value.equals("High")){ } 
+              if (value.equals("Low")){ } 
+        } else if (type == IOType.analogInput) {
+         
+        } else if (type == IOType.stringInput) {
+
+        }
+             
+        set_value(value);
+        VInputEvent ev = new VInputEvent();
+        ev.rgpioInput = vinput;
+        ev.rgpioInput.stateChange(ev);
+
+    }
+    
 
 }

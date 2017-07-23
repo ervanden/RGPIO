@@ -10,7 +10,7 @@ public class MessageEvent {
     public String description = null;
 
     // device information
-    public String state = null;
+    public String value = null;
     public String model = null;
     public String vdevice = null;
     public String HWid = null;
@@ -45,7 +45,7 @@ public class MessageEvent {
             msg = msg + " model=" + model;
         }
         if (vdevice != null) {
-            msg = msg + " group=" + vdevice;
+            msg = msg + " vdevice=" + vdevice;
         }
         if (ipAddress != null) {
             msg = msg + " ipAddress=" + ipAddress;
@@ -56,14 +56,14 @@ public class MessageEvent {
         if (pinLabel != null) {
             msg = msg + " pinLabel=" + pinLabel;
         }
-        if (state != null) {
-            msg = msg + " state=" + state;
+        if (value != null) {
+            msg = msg + " value=" + value;
         }
         if (vinput != null) {
-            msg = msg + " digitalInput=" + vinput;
+            msg = msg + " vinput=" + vinput;
         }
         if (voutput != null) {
-            msg = msg + " digitalOutput=" + voutput;
+            msg = msg + " voutput=" + voutput;
         }
         return msg;
     }
@@ -82,10 +82,10 @@ public class MessageEvent {
             json.addProperty("HWid", HWid);
         }
         if (model != null) {
-            json.addProperty("model=", model);
+            json.addProperty("model", model);
         }
         if (vdevice != null) {
-            json.addProperty("group=", vdevice);
+            json.addProperty("vdevice", vdevice);
         }
         if (ipAddress != null) {
             json.addProperty("ipAddress", ipAddress);
@@ -96,14 +96,14 @@ public class MessageEvent {
         if (pinLabel != null) {
             json.addProperty("pinLabel", pinLabel);
         }
-        if (state != null) {
-            json.addProperty("state", state);
+        if (value != null) {
+            json.addProperty("value", value);
         }
         if (vinput != null) {
-            json.addProperty("digitalInput", vinput);
+            json.addProperty("vinput", vinput);
         }
         if (voutput != null) {
-            json.addProperty("digitalOutput", voutput);
+            json.addProperty("voutput", voutput);
         }
         return json.asString();
     }

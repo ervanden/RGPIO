@@ -6,7 +6,6 @@ import utils.TimeStamp;
 import utils.JSONObject;
 import java.util.HashMap;
 import udputils.UDPSender;
-import rgpio.*;
 
 public class PDevice {
 
@@ -22,7 +21,11 @@ public class PDevice {
     public TimeStamp powerOn = new TimeStamp(0);     // timestamp of device power-on
 
     public HashMap<String, PInput> digitalInputs = new HashMap<>(); // key is pin label
+    public HashMap<String, PInput> analogInputs = new HashMap<>(); // key is pin label
+    public HashMap<String, PInput> stringInputs = new HashMap<>(); // key is pin label
     public HashMap<String, POutput> digitalOutputs = new HashMap<>(); // key is pin label
+    public HashMap<String, POutput> analogOutputs = new HashMap<>(); // key is pin label
+    public HashMap<String, POutput> stringOutputs = new HashMap<>(); // key is pin label
 
     public String toJSON() {
         JSONObject json = new JSONObject();
@@ -91,5 +94,4 @@ public class PDevice {
         return reply;
     }
 
-   
 }
