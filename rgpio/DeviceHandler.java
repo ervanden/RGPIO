@@ -9,21 +9,11 @@ public class DeviceHandler {
  
         public static boolean handleDeviceMessage(String deviceIPAddress, String message) {
 
-        /*  Messages :
-        
-         Report/HWid:xxx/Model:xxx/Uptime:xxx
-         Event/HWid:%s/Model:%s/Pin:%s/%p       (event = HIGH or LOW or number)
-        
-         return value = true : valid command
-         return value = false : invalid command
- 
-         */
         MessageEvent e = new MessageEvent(MessageType.ReceivedMessage);
         e.description = "<" + message + ">";
         e.ipAddress = deviceIPAddress;
         RGPIO.message(e);
 
-        //       try {
         String[] s = message.split("/");
         String command = s[0];
         String name;
@@ -52,12 +42,13 @@ public class DeviceHandler {
                 }
                 if (name.equals("Dip")) {
                     pinName = value;
-                    RGPIO.VDigitalInputMap.digitalInputReported(pinName, HWid, model);
+                    RGPIO.VDigitalInputMap.deviceInputReported(pinName, HWid, model);
                 }
                 if (name.equals("Dop")) {
                     pinName = value;
-                    RGPIO.VDigitalOutputMap.digitalOutputReported(pinName, HWid, model);
+                    RGPIO.VDigitalOutputMap.deviceOutputReported(pinName, HWid, model);
                 }
+ 
             }
 
         } else if (command.equals("Event")) {

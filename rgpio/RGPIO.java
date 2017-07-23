@@ -127,7 +127,11 @@ public class RGPIO {
     public static PDeviceMap PDeviceMap;
     public static VDeviceMap VDeviceMap;
     public static VInputMap VDigitalInputMap;
+    public static VInputMap VAnalogInputMap;
+    public static VInputMap VStringInputMap;
     public static VOutputMap VDigitalOutputMap;
+    public static VOutputMap VAnalogOutputMap;
+    public static VOutputMap VStringOutputMap;
 
     public static TCPfeed messageFeed;
     public static TCPfeed updateFeed;
@@ -143,8 +147,12 @@ public class RGPIO {
 
         VDeviceMap = new VDeviceMap();
         PDeviceMap = new PDeviceMap();
-        VDigitalInputMap = new VInputMap();
-        VDigitalOutputMap = new VOutputMap();
+        VDigitalInputMap = new VInputMap(IOType.digitalInput);
+        VAnalogInputMap = new VInputMap(IOType.analogInput);
+        VStringInputMap = new VInputMap(IOType.stringInput);
+        VDigitalOutputMap = new VOutputMap(IOType.digitalOutput);
+        VAnalogOutputMap = new VOutputMap(IOType.analogOutput);
+        VStringOutputMap = new VOutputMap(IOType.stringOutput);
 
         readDevicesFile(configurationDir);
 
@@ -265,8 +273,8 @@ public class RGPIO {
 
                 lineCount++;
                 VDevice device = null;
-                VInput digitalInput = null;
-                VOutput digitalOutput = null;
+                VInput vinput = null;
+                VOutput voutput = null;
                 String model = null;
                 String HWid = null;
                 String pin = null;
@@ -283,10 +291,22 @@ public class RGPIO {
                         device = RGPIO.VDeviceMap.add(value);
                     }
                     if (name.equals("DigitalInput")) {
-                        digitalInput = RGPIO.VDigitalInputMap.add(value);
+                        vinput = RGPIO.VDigitalInputMap.add(value);
                     }
                     if (name.equals("DigitalOutput")) {
-                        digitalOutput = RGPIO.VDigitalOutputMap.add(value);
+                        voutput = RGPIO.VDigitalOutputMap.add(value);
+                    }
+                    if (name.equals("AnalogInput")) {
+                        vinput = RGPIO.VAnalogInputMap.add(value);
+                    }
+                    if (name.equals("AnalogOutput")) {
+                        voutput = RGPIO.VAnalogOutputMap.add(value);
+                    }
+                    if (name.equals("StringInput")) {
+                        vinput = RGPIO.VStringInputMap.add(value);
+                    }
+                    if (name.equals("StringOutput")) {
+                        voutput = RGPIO.VStringOutputMap.add(value);
                     }
                     if (name.equals("Model")) {
                         model = value;
@@ -310,24 +330,24 @@ public class RGPIO {
                         selectors++;
                     }
                 }
-                if ((digitalOutput != null) && (pin != null)) {
+                if ((voutput != null) && (pin != null)) {
                     if (model != null) {
-                        digitalOutput.addSelectSpec(pin, "Model", model);
+                        voutput.addSelectSpec(pin, "Model", model);
                         selectors++;
                     }
                     if (HWid != null) {
-                        digitalOutput.addSelectSpec(pin, "HWid", HWid);
+                        voutput.addSelectSpec(pin, "HWid", HWid);
                         selectors++;
                     }
                 }
 
-                if ((digitalInput != null) && (pin != null)) {
+                if ((vinput != null) && (pin != null)) {
                     if (model != null) {
-                        digitalInput.addSelectSpec(pin, "Model", model);
+                        vinput.addSelectSpec(pin, "Model", model);
                         selectors++;
                     }
                     if (HWid != null) {
-                        digitalInput.addSelectSpec(pin, "HWid", HWid);
+                        vinput.addSelectSpec(pin, "HWid", HWid);
                         selectors++;
                     }
                 }
