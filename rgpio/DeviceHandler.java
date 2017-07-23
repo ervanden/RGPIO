@@ -1,13 +1,11 @@
-
 package rgpio;
 
 import rgpioutils.MessageType;
 import rgpioutils.MessageEvent;
 
-
 public class DeviceHandler {
- 
-        public static boolean handleDeviceMessage(String deviceIPAddress, String message) {
+
+    public static boolean handleDeviceMessage(String deviceIPAddress, String message) {
 
         MessageEvent e = new MessageEvent(MessageType.ReceivedMessage);
         e.description = "<" + message + ">";
@@ -48,7 +46,22 @@ public class DeviceHandler {
                     pinName = value;
                     RGPIO.VDigitalOutputMap.deviceOutputReported(pinName, HWid, model);
                 }
- 
+                if (name.equals("Aip")) {
+                    pinName = value;
+                    RGPIO.VAnalogInputMap.deviceInputReported(pinName, HWid, model);
+                }
+                if (name.equals("Aop")) {
+                    pinName = value;
+                    RGPIO.VAnalogOutputMap.deviceOutputReported(pinName, HWid, model);
+                }
+                if (name.equals("Sip")) {
+                    pinName = value;
+                    RGPIO.VStringInputMap.deviceInputReported(pinName, HWid, model);
+                }
+                if (name.equals("Sop")) {
+                    pinName = value;
+                    RGPIO.VStringOutputMap.deviceOutputReported(pinName, HWid, model);
+                }
             }
 
         } else if (command.equals("Event")) {
@@ -69,7 +82,7 @@ public class DeviceHandler {
                 if (name.equals("Model")) {
                     model = value;
                 }
-                if (name.equals("Dip")) {
+                if ((name.equals("Dip"))||(name.equals("Aip"))||(name.equals("Sip"))) {
                     pinLabel = value;
                 }
                 if (name.equals("Value")) {

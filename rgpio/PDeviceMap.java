@@ -29,7 +29,8 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
         for (PDevice d : this.values()) {
             String HWid = d.HWid;
             String status = d.get_status().name();
-            String deviceGroupName = d.groupName;
+            String deviceGroupName=null;
+            if (d.vdevice!=null) deviceGroupName = d.vdevice.name;
             String ipAddress = d.ipAddress;
             String lastContact = "" + d.lastContact.asString();
             String powerOn = "" + d.powerOn.asString();
@@ -46,11 +47,11 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
 
         PDevice d = get(HWid);
         if (d == null) {
-            // device does not yet exist. Create it and match to an device vdevice
+            // pdevice does not yet exist. Create it and match to a vdevice
             d = new PDevice();
             RGPIO.PDeviceMap.put(HWid, d);
             d.HWid = HWid;
-            d.groupName = null;
+            d.vdevice = null;
             d.modelName = modelName;
             d.set_status(PDeviceStatus.UNASSIGNED);
             this.put(HWid, d);
@@ -80,6 +81,7 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
         }
 
         d.setActive();
+        
         PInput pinput = null;
         if (pinput == null) {
             pinput = d.digitalInputs.get(pinLabel);
@@ -101,7 +103,7 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
 
         if (pinput.vinput == null) {
             MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
-            e.description = "received event from unassigned digital input pin";
+            e.description = "received event from unassigned device pin of type "+pinput.type.name();
             e.HWid = d.HWid;
             e.pinLabel = pinLabel;
             RGPIO.message(e);
@@ -147,34 +149,33 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
     public static void matchToGroup(PDevice device) {
 
         int nrInstances = 0;
-        VDevice theOnlyDeviceGroup = null;
+        VDevice theOnlyVDevice = null;
         for (Map.Entry<String, VDevice> e : RGPIO.VDeviceMap.entrySet()) {
-            VDevice deviceGroup = e.getValue();
-            if (deviceGroup.matchesDevice(device.modelName, device.HWid)) {
-                theOnlyDeviceGroup = deviceGroup;
+            VDevice vdevice = e.getValue();
+            if (vdevice.matchesDevice(device.modelName, device.HWid)) {
+                theOnlyVDevice = vdevice;
                 nrInstances++;
             }
         }
         if (nrInstances == 1) {
-            device.groupName = theOnlyDeviceGroup.name;
-            device.deviceGroup = theOnlyDeviceGroup;
+            device.vdevice = theOnlyVDevice;
 
             MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "device assigned to group";
+            e.description = "PDevice assigned to VDevice";
             e.HWid = device.HWid;
-            e.vdevice = device.groupName;
+            e.vdevice = device.vdevice.name;
             RGPIO.message(e);
         }
         if (nrInstances == 0) {
             MessageEvent e = new MessageEvent(MessageType.UnassignedDevice);
-            e.description = "device can not be assigned to a group";
+            e.description = "PDevice can not be matched to a VDevice";
             e.HWid = device.HWid;
             e.model = device.modelName;
             RGPIO.message(e);
         }
         if (nrInstances > 1) {
             MessageEvent e = new MessageEvent(MessageType.UnassignedDevice);
-            e.description = "device matches more than one group";
+            e.description = "PDevice matches more than one VDevice";
             e.HWid = device.HWid;
             RGPIO.message(e);
         }

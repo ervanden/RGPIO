@@ -14,10 +14,10 @@ public class ExampleServer implements VInputEventListener, MessageListener {
     VInput buttons;
     VOutput lights;
 
-    public void onInputEvent(VInputEvent event) {
+    public void onInputEvent(VInput vinput) {
 
-        if (event.rgpioInput == buttons) {
-            if (event.rgpioInput.nrHigh > 0) {
+        if (vinput == buttons) {
+            if (buttons.nrHigh() > 0) {
                 if (lights.get().equals("High")) {
                     lights.set("Low");
                 } else {

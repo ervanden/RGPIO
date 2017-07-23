@@ -12,9 +12,9 @@ public class PDevice {
     // status changes are forwarded to updateFeed. All access must be via methods. status field is private
     private PDeviceStatus status = PDeviceStatus.NULL;
 
-    public String groupName = null;
+ //   public String groupName = null;
     public String modelName = null;
-    public VDevice deviceGroup = null;
+    public VDevice vdevice = null;
     public String HWid = null;        // unique hardware identifier
     public String ipAddress = null;
     public TimeStamp lastContact = new TimeStamp(0); // timestamp

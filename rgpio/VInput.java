@@ -9,11 +9,6 @@ public class VInput extends VSelector {
 
     public String name;
     public IOType type;
-
-//    public String value;
-    public Integer nrHigh = 0;
-    public Integer nrLow = 0;
-
     private String value;
 
     public Integer minMembers = null;
@@ -36,8 +31,8 @@ public class VInput extends VSelector {
         JSONObject json = new JSONObject();
         json.addProperty("object", "VIO");
         json.addProperty("name", name);
-        json.addProperty("nrHigh", nrHigh.toString());
-        json.addProperty("nrLow", nrLow.toString());
+        json.addProperty("nrHigh", nrHigh().toString());
+        json.addProperty("nrLow", nrLow().toString());
         json.addProperty("type", type.name());
         return json.asString();
     }
@@ -76,10 +71,21 @@ public class VInput extends VSelector {
     }
 
     //  pass change of state to all the listeners
-    public void stateChange(VInputEvent event) {
+    public void stateChange() {
 
-        nrHigh = 0;
-        nrLow = 0;
+        RGPIO.updateFeed.writeToClients(toJSON());
+
+        for (VInputEventListener l : digitalListeners) {
+            try {
+                l.onInputEvent(this);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    public Integer nrHigh() {
+        int nrHigh = 0;
+        int nrLow = 0;
 //        System.out.println("---state change for digital input " + name);
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput dip : device.digitalInputs.values()) {
@@ -97,14 +103,29 @@ public class VInput extends VSelector {
                 }
             }
         }
-        RGPIO.updateFeed.writeToClients(toJSON());
-
-        for (VInputEventListener l : digitalListeners) {
-            try {
-                l.onInputEvent(event);
-            } catch (Exception e) {
-            }
-        }
+        return nrHigh;
     }
 
+    public Integer nrLow() {
+        int nrHigh = 0;
+        int nrLow = 0;
+//        System.out.println("---state change for digital input " + name);
+        for (PDevice device : RGPIO.PDeviceMap.values()) {
+            for (PInput dip : device.digitalInputs.values()) {
+                if (dip.vinput == this) {
+//                    System.out.println("---physical pin " + device.HWid + "." + dip.name);
+//                    System.out.println("---physical pin value=" + dip.value);
+                    if (dip.value != null) { // is null before first GET or EVENT
+                        if (dip.value.equals("High")) {
+                            nrHigh++;
+                        }
+                        if (dip.value.equals("Low")) {
+                            nrLow++;
+                        }
+                    }
+                }
+            }
+        }
+        return nrHigh;
+    }
 }

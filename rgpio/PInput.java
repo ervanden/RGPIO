@@ -44,9 +44,8 @@ public class PInput {
         }
              
         set_value(value);
-        VInputEvent ev = new VInputEvent();
-        ev.rgpioInput = vinput;
-        ev.rgpioInput.stateChange(ev);
+
+        vinput.stateChange();
 
     }
     

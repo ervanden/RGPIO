@@ -14,7 +14,7 @@ public class VDeviceMap extends HashMap<String, VDevice> {
         if (device == null) {
             device = new VDevice(name);
             RGPIO.VDeviceMap.put(name, device);
-        };
+        }
         return device;
     }
 
@@ -30,8 +30,8 @@ public class VDeviceMap extends HashMap<String, VDevice> {
             String deviceString = "<";
             String separator = "";
             for (PDevice device : RGPIO.PDeviceMap.values()) {
-                if (device.groupName != null) {  // device assigned to group
-                    if (device.groupName.equals(deviceGroupName)) {
+                if (device.vdevice != null) {  // device assigned to group
+                    if (device.vdevice.name.equals(deviceGroupName)) {
                         String HWid = device.HWid;
                         if (HWid != null) {
                             deviceString = deviceString + separator + HWid;

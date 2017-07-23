@@ -104,7 +104,7 @@ class DeviceProbeThread extends Thread {
             for (VDevice deviceGroup : RGPIO.VDeviceMap.values()) {
                 int n = 0;
                 for (PDevice device : RGPIO.PDeviceMap.values()) {
-                    if ((device.deviceGroup == deviceGroup) && (device.get_status() == PDeviceStatus.ACTIVE)) {
+                    if ((device.vdevice == deviceGroup) && (device.get_status() == PDeviceStatus.ACTIVE)) {
                         n++;
                     }
                 }
