@@ -79,7 +79,7 @@ public void deviceOutputReported(
             p.device = d;
             p.voutput = null;
             deviceOutputs.put(pinName, p);
-
+System.out.println("device output reported "+HWid+" "+pinName+" type="+type+" len="+deviceOutputs.size());
             // match to a voutput
             int nrInstances = 0;
             VOutput theOnlyVOutput = null;

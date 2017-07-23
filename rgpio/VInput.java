@@ -126,6 +126,6 @@ public class VInput extends VSelector {
                 }
             }
         }
-        return nrHigh;
+        return nrLow;
     }
 }
