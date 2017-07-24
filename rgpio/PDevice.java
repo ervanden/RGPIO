@@ -44,6 +44,7 @@ public class PDevice {
         if (status != PDeviceStatus.ACTIVE) {
             status = PDeviceStatus.ACTIVE;
             RGPIO.updateFeed.writeToClients(toJSON());
+            setAllPins("UNKNOWN");
         }
         this.lastContact = new TimeStamp();
     }
@@ -60,24 +61,28 @@ public class PDevice {
         e.HWid = HWid;
         RGPIO.message(e);
 
-        // set value of all device pins to unknown
+        setAllPins("NOTRESPONDING");
+
+    }
+
+    private void setAllPins(String value) {
         for (PInput ip : digitalInputs.values()) {
-            ip.set_value("NOTRESPONDING");
+            ip.set_value(value);
         }
         for (PInput ip : analogInputs.values()) {
-            ip.set_value("NOTRESPONDING");
+            ip.set_value(value);
         }
         for (PInput ip : stringInputs.values()) {
-            ip.set_value("NOTRESPONDING");
+            ip.set_value(value);
         }
         for (POutput op : digitalOutputs.values()) {
-            op.set_value("NOTRESPONDING");
+            op.set_value(value);
         }
         for (POutput op : analogOutputs.values()) {
-            op.set_value("NOTRESPONDING");
+            op.set_value(value);
         }
         for (POutput op : stringOutputs.values()) {
-            op.set_value("NOTRESPONDING");
+            op.set_value(value);
         }
     }
 
