@@ -39,7 +39,7 @@ class FeedThread extends Thread {
                 outToClient.writeBytes(s + "\n");
 
                 // delay of 10ms to avoid flooding of the client.
-                // If messages come in too fast, they are dropped at the browser
+                // If events come in too fast, they are dropped at the browser
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException ie) {
