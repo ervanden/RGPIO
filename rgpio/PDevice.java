@@ -12,7 +12,6 @@ public class PDevice {
     // status changes are forwarded to updateFeed. All access must be via methods. status field is private
     private PDeviceStatus status = PDeviceStatus.NULL;
 
-    //   public String groupName = null;
     public String modelName = null;
     public VDevice vdevice = null;
     public String HWid = null;        // unique hardware identifier
@@ -37,24 +36,23 @@ public class PDevice {
         return json.asString();
     }
 
-    public void set_status(PDeviceStatus status) {
-        if (status != this.status) {
-            this.status = status;
-            RGPIO.updateFeed.writeToClients(toJSON());
-        }
-    }
-
     public PDeviceStatus get_status() {
         return this.status;
     }
 
     public void setActive() {
-        set_status(PDeviceStatus.ACTIVE);
+        if (status != PDeviceStatus.ACTIVE) {
+            status = PDeviceStatus.ACTIVE;
+            RGPIO.updateFeed.writeToClients(toJSON());
+        }
         this.lastContact = new TimeStamp();
     }
 
     public void setNotResponding(String msg) {
-        set_status(PDeviceStatus.NOTRESPONDING);
+        if (status != PDeviceStatus.NOTRESPONDING) {
+            status = PDeviceStatus.NOTRESPONDING;
+            RGPIO.updateFeed.writeToClients(toJSON());
+        }
 
         MessageEvent e = new MessageEvent(MessageType.DeviceNotResponding);
         e.description = msg;
@@ -63,14 +61,27 @@ public class PDevice {
         RGPIO.message(e);
 
         // set value of all device pins to unknown
-        for (PInput ip : digitalInputs.values()) {ip.set_value("NOTRESPONDING");}
-        for (PInput ip : analogInputs.values()) {ip.set_value("NOTRESPONDING");}
-        for (PInput ip : stringInputs.values()) {ip.set_value("NOTRESPONDING");}
-        for (POutput op : digitalOutputs.values()) {op.set_value("NOTRESPONDING");}
-        for (POutput op : analogOutputs.values()) {op.set_value("NOTRESPONDING");}
-        for (POutput op : stringOutputs.values()) {op.set_value("NOTRESPONDING");}
+        for (PInput ip : digitalInputs.values()) {
+            ip.set_value("NOTRESPONDING");
+        }
+        for (PInput ip : analogInputs.values()) {
+            ip.set_value("NOTRESPONDING");
+        }
+        for (PInput ip : stringInputs.values()) {
+            ip.set_value("NOTRESPONDING");
+        }
+        for (POutput op : digitalOutputs.values()) {
+            op.set_value("NOTRESPONDING");
+        }
+        for (POutput op : analogOutputs.values()) {
+            op.set_value("NOTRESPONDING");
+        }
+        for (POutput op : stringOutputs.values()) {
+            op.set_value("NOTRESPONDING");
+        }
     }
-public String sendToDevice(String message) {
+
+    public String sendToDevice(String message) {
 
         // delay because ESP misses packet if it receives SET  too fast after sending EVENT
         // (UDP is stopped and started on ESP after sending = blackout of a few msec)
@@ -88,11 +99,7 @@ public String sendToDevice(String message) {
         } else if (status == PDeviceStatus.ACTIVE) {
             reply = UDPSender.send(message, ipAddress, this, RGPIO.devicePort, 2000, 3);
             if (reply == null) {
-                set_status(PDeviceStatus.NOTRESPONDING);
-                MessageEvent e = new MessageEvent(MessageType.DeviceNotResponding);
-                e.description = "device did not reply to <" + message + ">";
-                e.HWid = HWid;
-                RGPIO.message(e);
+                setNotResponding("device did not reply to <" + message + ">");
             } else {
                 setActive();
             }

@@ -53,7 +53,6 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
             d.HWid = HWid;
             d.vdevice = null;
             d.modelName = modelName;
-            d.set_status(PDeviceStatus.UNASSIGNED);
             this.put(HWid, d);
             matchToGroup(d);
         }
