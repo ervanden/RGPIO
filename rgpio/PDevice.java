@@ -12,7 +12,7 @@ public class PDevice {
     // status changes are forwarded to updateFeed. All access must be via methods. status field is private
     private PDeviceStatus status = PDeviceStatus.NULL;
 
- //   public String groupName = null;
+    //   public String groupName = null;
     public String modelName = null;
     public VDevice vdevice = null;
     public String HWid = null;        // unique hardware identifier
@@ -62,9 +62,15 @@ public class PDevice {
         e.HWid = HWid;
         RGPIO.message(e);
 
+        // set value of all device pins to unknown
+        for (PInput ip : digitalInputs.values()) {ip.set_value("NOTRESPONDING");}
+        for (PInput ip : analogInputs.values()) {ip.set_value("NOTRESPONDING");}
+        for (PInput ip : stringInputs.values()) {ip.set_value("NOTRESPONDING");}
+        for (POutput op : digitalOutputs.values()) {op.set_value("NOTRESPONDING");}
+        for (POutput op : analogOutputs.values()) {op.set_value("NOTRESPONDING");}
+        for (POutput op : stringOutputs.values()) {op.set_value("NOTRESPONDING");}
     }
-
-    public String sendToDevice(String message) {
+public String sendToDevice(String message) {
 
         // delay because ESP misses packet if it receives SET  too fast after sending EVENT
         // (UDP is stopped and started on ESP after sending = blackout of a few msec)

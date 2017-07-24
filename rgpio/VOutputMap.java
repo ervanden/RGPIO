@@ -75,11 +75,10 @@ public void deviceOutputReported(
             p = new POutput();
             p.type = type;
             p.name = pinName;
-            p.value = null;
             p.device = d;
             p.voutput = null;
             deviceOutputs.put(pinName, p);
-System.out.println("device output reported "+HWid+" "+pinName+" type="+type+" len="+deviceOutputs.size());
+
             // match to a voutput
             int nrInstances = 0;
             VOutput theOnlyVOutput = null;
@@ -114,7 +113,9 @@ System.out.println("device output reported "+HWid+" "+pinName+" type="+type+" le
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-            RGPIO.updateFeed.writeToClients(p.toJSON());
+                        p.set_value("UNKNOWN");
+                        
+// already done by set_value            RGPIO.updateFeed.writeToClients(p.toJSON());
         }
     }
 

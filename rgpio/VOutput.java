@@ -33,9 +33,9 @@ public class VOutput extends VSelector {
             if (type == IOType.digitalOutput) {
                 for (POutput dop : device.digitalOutputs.values()) {
                     if (dop.voutput == this) {
-                        dop.value = newValue;   // store the output value also with the physical dop. (why?)
+                        dop.set_value(newValue);
                         RGPIO.updateFeed.writeToClients(dop.toJSON());
-                        new SendSetCommandThread(device, "Set/Dop:" + dop.name + "/Value:" + dop.value).start();
+                        new SendSetCommandThread(device, "Set/Dop:" + dop.name + "/Value:" + dop.get_value()).start();
 
                     }
                 }
@@ -43,9 +43,9 @@ public class VOutput extends VSelector {
             if (type == IOType.analogOutput) {
                 for (POutput aop : device.analogOutputs.values()) {
                     if (aop.voutput == this) {
-                        aop.value = newValue;   // store the output value also with the physical dop. (why?)
+                        aop.set_value(newValue);
                         RGPIO.updateFeed.writeToClients(aop.toJSON());
-                        new SendSetCommandThread(device, "Set/Aop:" + aop.name + "/Value:" + aop.value).start();
+                        new SendSetCommandThread(device, "Set/Aop:" + aop.name + "/Value:" + aop.get_value()).start();
 
                     }
                 }
@@ -53,9 +53,9 @@ public class VOutput extends VSelector {
             if (type == IOType.analogOutput) {
                 for (POutput sop : device.stringOutputs.values()) {
                     if (sop.voutput == this) {
-                        sop.value = newValue;   // store the output value also with the physical dop. (why?)
+                        sop.set_value(newValue);
                         RGPIO.updateFeed.writeToClients(sop.toJSON());
-                        new SendSetCommandThread(device, "Set/Sop:" + sop.name + "/Value:" + sop.value).start();
+                        new SendSetCommandThread(device, "Set/Sop:" + sop.name + "/Value:" + sop.get_value()).start();
 
                     }
                 }

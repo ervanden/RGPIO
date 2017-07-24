@@ -16,10 +16,6 @@ public class PInput {
         RGPIO.updateFeed.writeToClients(toJSON());
     }
 
-    public String get_value() {
-        return value;
-    }
-
     public String toJSON() {
         JSONObject json = new JSONObject();
         json.addProperty("object", "PIO");
