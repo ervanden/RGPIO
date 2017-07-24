@@ -1,4 +1,3 @@
-
 package tcputils;
 
 import utils.Console;
@@ -6,8 +5,6 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
-
-
 
 /* 
  A TCPfeed object listens to the given port and starts a thread for every client that connects.
@@ -17,23 +14,19 @@ import java.util.List;
 
  Intended usage: clients can be started from PHP and can continuously update a web site with
  output from an application that runs as a daemon
-*/
-
-
-
-
+ */
 class FeedThread extends Thread {
 
     private Socket socket = null;
     String clientID;
     DataOutputStream outToClient;
     BufferedReader inFromServer;
-            private TCPserverListener listener = null;
+    private TCPserverListener listener = null;
 
-    public FeedThread(Socket socket,TCPserverListener listener) {
+    public FeedThread(Socket socket, TCPserverListener listener) {
         super("Server Thread");
         this.socket = socket;
-        this.listener=listener;
+        this.listener = listener;
         Console.verbose(false);
     }
 
@@ -44,6 +37,13 @@ class FeedThread extends Thread {
 
             try {
                 outToClient.writeBytes(s + "\n");
+
+                // delay of 10ms to avoid flooding of the client.
+                // If messages come in too fast, they are dropped at the browser
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ie) {
+                };
             } catch (SocketException se) {
                 Console.println("socket exception while writing to client");
                 socket.close();
@@ -69,8 +69,7 @@ class FeedThread extends Thread {
             try {
 
                 /* TO DO  client should send the status command  */
-                
-                if (listener!=null) {
+                if (listener != null) {
                     ArrayList<String> reply;
                     reply = listener.onClientRequest(clientID, "status");
                     for (String r : reply) {
@@ -78,8 +77,8 @@ class FeedThread extends Thread {
                         writeToClient(r);
                     }
                 }
-                    
-                                    String s;
+
+                String s;
                 while ((s = inFromServer.readLine()) != null) {
                     Console.println("MSG FROM CLIENT " + clientID + " : " + s);
                 }
@@ -110,7 +109,7 @@ public class TCPfeed extends Thread {
         Console.verbose(false);
     }
 
-        private TCPserverListener listener = null;
+    private TCPserverListener listener = null;
 
     public void addListener(TCPserverListener l) {
         if (listener != null) {
@@ -153,7 +152,7 @@ public class TCPfeed extends Thread {
         Console.println("TCP Server starts listening on port " + portNumber);
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (true) {
-                FeedThread t = new FeedThread(serverSocket.accept(),listener);
+                FeedThread t = new FeedThread(serverSocket.accept(), listener);
                 t.start();
                 serverThreads.add(t);
             }
