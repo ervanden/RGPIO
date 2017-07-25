@@ -48,6 +48,8 @@ public class PDevice {
             System.out.println("pdev "+HWid+" changed from "+status+" to ACTIVE ");
             status = PDeviceStatus.ACTIVE;
             RGPIO.updateFeed.writeToClients(toJSON());
+            // if the device was not responding and becomes active again, the state of input pins
+            // should be re-read and output pins should be re-set
             setAllPins("UNKNOWN");
         }
         this.lastContact = new TimeStamp();
