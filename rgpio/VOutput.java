@@ -12,7 +12,6 @@ public class VOutput extends VSelector {
 
     public VOutput(String name) {
         this.name = name;
-//        RGPIO.VDigitalOutputMap.put(name, this);
     }
 
     public String toJSON() {

@@ -31,9 +31,14 @@ public class VInput extends VSelector {
         JSONObject json = new JSONObject();
         json.addProperty("object", "VIO");
         json.addProperty("name", name);
-        json.addProperty("nrHigh", nrHigh().toString());
-        json.addProperty("nrLow", nrLow().toString());
         json.addProperty("type", type.name());
+        if (type == IOType.digitalInput) {
+            json.addProperty("nrHigh", nrHigh().toString());
+            json.addProperty("nrLow", nrLow().toString());
+        }
+        if (type == IOType.analogInput) {
+            json.addProperty("avg", avg().toString());
+        }
         return json.asString();
     }
 
@@ -45,9 +50,9 @@ public class VInput extends VSelector {
         ArrayList<SendGetCommandThread> threads = new ArrayList<>();
 
         for (PDevice device : RGPIO.PDeviceMap.values()) {
-            for (PInput dip : device.inputs.values()) {
-                if (dip.vinput == this) {
-                    SendGetCommandThread t = new SendGetCommandThread(device, dip);
+            for (PInput ip : device.inputs.values()) {
+                if (ip.vinput == this) {
+                    SendGetCommandThread t = new SendGetCommandThread(device, ip);
                     threads.add(t);
                     t.start();
                 }
@@ -62,6 +67,16 @@ public class VInput extends VSelector {
             };
         }
         System.out.println("... all GET threads finished");
+
+        // send change of value to updateFeed
+        for (PDevice device : RGPIO.PDeviceMap.values()) {
+            for (PInput ip : device.inputs.values()) {
+                if (ip.vinput == this) {
+                    RGPIO.updateFeed.writeToClients(ip.toJSON());
+                }
+            }
+        }
+        RGPIO.updateFeed.writeToClients(toJSON());
     }
 
     private List<VInputEventListener> digitalListeners = new ArrayList<>();
@@ -132,11 +147,11 @@ public class VInput extends VSelector {
     public Float avg() {
         float sum = 0;
         int n = 0;
-                    System.out.println("---AVG calculation for " + name);
+        System.out.println("---AVG calculation for " + name);
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
-                   System.out.println("---physical pin " + device.HWid + "." + dip.name);
+                    System.out.println("---physical pin " + device.HWid + "." + dip.name);
                     System.out.println("---physical pin value=" + dip.value);
                     if (dip.value != null) { // is null before first GET or EVENT
                         float f = Float.parseFloat(dip.value);
