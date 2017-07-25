@@ -337,7 +337,7 @@
                     var updateFeed = new EventSource("updateFeed.php");
                     updateFeed.onmessage = function (event) {
                         if (event.data.length > 0) {  // php sends empty string from time to time
-                            //                          document.getElementById("messageDiv").innerHTML += "update " + event.data + "<br>";
+                                     document.getElementById("messageDiv").innerHTML += "update " + event.data + "<br>";
                             try {
                                 var obj = JSON.parse(event.data);
                             } catch (e) {
@@ -394,7 +394,7 @@
                     var messageFeed = new EventSource("messageFeed.php");
                     messageFeed.onmessage = function (event) {
                         if (event.data.length > 0) {  // php sends empty string from time to time
-                            document.getElementById("messageDiv").innerHTML += event.data + "<br>";
+     //                       document.getElementById("messageDiv").innerHTML += event.data + "<br>";
                         }
                     };
                 } else {
