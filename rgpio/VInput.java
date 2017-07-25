@@ -166,7 +166,7 @@ public class VInput extends VSelector {
         if (n > 0) {
             return sum / n;
         } else {
-            return null;
-        }
+            return 0f;
+         }
     }
 }
