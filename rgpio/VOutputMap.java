@@ -78,7 +78,8 @@ public void deviceOutputReported(
             p.device = d;
             p.voutput = null;
             deviceOutputs.put(pinName, p);
-
+            d.outputs.put(pinName, p);
+            
             // match to a voutput
             int nrInstances = 0;
             VOutput theOnlyVOutput = null;

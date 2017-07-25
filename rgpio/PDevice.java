@@ -19,6 +19,9 @@ public class PDevice {
     public TimeStamp lastContact = new TimeStamp(0); // timestamp
     public TimeStamp powerOn = new TimeStamp(0);     // timestamp of device power-on
 
+       public HashMap<String, PInput> inputs = new HashMap<>();
+    public HashMap<String, POutput> outputs = new HashMap<>();
+    
     public HashMap<String, PInput> digitalInputs = new HashMap<>(); // key is pin label
     public HashMap<String, PInput> analogInputs = new HashMap<>(); // key is pin label
     public HashMap<String, PInput> stringInputs = new HashMap<>(); // key is pin label
@@ -66,24 +69,13 @@ public class PDevice {
     }
 
     private void setAllPins(String value) {
-        for (PInput ip : digitalInputs.values()) {
+        for (PInput ip : inputs.values()) {
             ip.set_value(value);
         }
-        for (PInput ip : analogInputs.values()) {
-            ip.set_value(value);
-        }
-        for (PInput ip : stringInputs.values()) {
-            ip.set_value(value);
-        }
-        for (POutput op : digitalOutputs.values()) {
+        for (POutput op : outputs.values()) {
             op.set_value(value);
         }
-        for (POutput op : analogOutputs.values()) {
-            op.set_value(value);
-        }
-        for (POutput op : stringOutputs.values()) {
-            op.set_value(value);
-        }
+
     }
 
     public String sendToDevice(String message) {

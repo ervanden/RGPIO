@@ -80,6 +80,7 @@ public class VInputMap extends HashMap<String, VInput> {
             p.device = d;
             p.vinput = null;
             deviceInputs.put(pinName, p);
+            d.inputs.put(pinName, p);
 
             // match to a vinput
             int nrInstances = 0;

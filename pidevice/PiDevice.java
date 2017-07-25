@@ -34,7 +34,6 @@ class InitialReportThread extends Thread {
     public void run() {
         // device broadcasts  Report every second when it powers up, until it knows the server IP address
         // (when server replies OK to Report)
-        System.out.println("Server IP address = " + PiDevice.serverIPAddress);
         while (PiDevice.serverIPAddress == null) {
             PiDevice.sendReport();
             try {

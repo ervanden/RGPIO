@@ -67,11 +67,8 @@ public class ExampleDevice implements SetCommandListener, GetCommandListener, Gp
 
         PiDevice.deviceModel = "RASPBERRY";
         button = PiDevice.addDigitalInput("button");
-        PiDevice.printDevicePins();
         buzzer = PiDevice.addDigitalOutput("buzzer");
-         PiDevice.printDevicePins();
-         sensor = PiDevice.addAnalogInput("sensor");
-        PiDevice.printDevicePins();
+        sensor = PiDevice.addAnalogInput("sensor");
         timer = PiDevice.addAnalogOutput("timer");
          PiDevice.printDevicePins();
          

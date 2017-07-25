@@ -45,7 +45,7 @@ public class VInput extends VSelector {
         ArrayList<SendGetCommandThread> threads = new ArrayList<>();
 
         for (PDevice device : RGPIO.PDeviceMap.values()) {
-            for (PInput dip : device.digitalInputs.values()) {
+            for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
                     SendGetCommandThread t = new SendGetCommandThread(device, dip);
                     threads.add(t);
@@ -127,5 +127,29 @@ public class VInput extends VSelector {
             }
         }
         return nrLow;
+    }
+
+    public Float avg() {
+        float sum = 0;
+        int n = 0;
+                    System.out.println("---AVG calculation for " + name);
+        for (PDevice device : RGPIO.PDeviceMap.values()) {
+            for (PInput dip : device.inputs.values()) {
+                if (dip.vinput == this) {
+                   System.out.println("---physical pin " + device.HWid + "." + dip.name);
+                    System.out.println("---physical pin value=" + dip.value);
+                    if (dip.value != null) { // is null before first GET or EVENT
+                        float f = Float.parseFloat(dip.value);
+                        sum = sum + f;
+                        n = n + 1;
+                    }
+                }
+            }
+        }
+        if (n > 0) {
+            return sum / n;
+        } else {
+            return null;
+        }
     }
 }

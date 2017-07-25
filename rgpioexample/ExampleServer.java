@@ -24,6 +24,10 @@ public class ExampleServer implements VInputEventListener, MessageListener {
                 } else {
                     lights.set("High");
                 }
+                
+                sensor.get();
+                System.out.println("SENSOR avg = "+sensor.avg());
+                timer.set(Float.toString(sensor.avg()));
 
             } else { // button released
 
@@ -66,6 +70,7 @@ public class ExampleServer implements VInputEventListener, MessageListener {
 
         // switch all lights off to be in a known state
         lights.set("Low");
+        timer.set("7777");
 
         while (true) {
             try {
@@ -79,21 +84,6 @@ public class ExampleServer implements VInputEventListener, MessageListener {
                  */
             } catch (InterruptedException ie) {
             }
-//            System.out.println("GET button value = "+buttons.);
         }
-        /*
-         while (true) {
-         try {
-         Thread.sleep(3000);
-         lights.set("High");
-         Thread.sleep(3000);
-         lights.set("Low");
-         System.out.println();
-         RGPIO.printMaps("");
-         System.out.println();
-         } catch (InterruptedException ie) {
-         }
-         }
-         */
     }
 }
