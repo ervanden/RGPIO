@@ -18,7 +18,7 @@ public class VInputMap extends HashMap<String, VInput> {
         if (vinput == null) {
             vinput = new VInput(name);
             this.put(name, vinput);
-            vinput.type = IOType.digitalInput;
+            vinput.type = type;
         }
         return vinput;
     }
