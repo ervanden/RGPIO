@@ -61,6 +61,8 @@ public class ExampleServer implements VInputEventListener, MessageListener {
         allDevices = RGPIO.VDevice("allDevices");
         buttons = RGPIO.VDigitalInput("button");
         lights = RGPIO.VDigitalOutput("light");
+        sensor = RGPIO.VAnalogInput("sensor");
+        timer = RGPIO.VAnalogOutput("timer");
 
         allDevices.minMembers = 2;
         buttons.minMembers = 2;

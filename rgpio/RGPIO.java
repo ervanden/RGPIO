@@ -210,6 +210,50 @@ public class RGPIO {
         }
         return vout;
     }
+    
+        public static VInput VAnalogInput(String name) {
+        VInput vin = VAnalogInputMap.get(name);
+        if (vin == null) {
+            MessageEvent e = new MessageEvent(MessageType.Info);
+            e.description = "VAnalogInput is not defined in devices.txt ";
+            e.vinput = name;
+            RGPIO.message(e);
+        }
+        return vin;
+    }
+
+    public static VOutput VAnalogOutput(String name) {
+        VOutput vout = VAnalogOutputMap.get(name);
+        if (vout == null) {
+            MessageEvent e = new MessageEvent(MessageType.Info);
+            e.description = "VAnalogOutput is not defined in devices.txt ";
+            e.voutput = name;
+            RGPIO.message(e);
+        }
+        return vout;
+    }
+    
+        public static VInput VStringInput(String name) {
+        VInput vin = VStringInputMap.get(name);
+        if (vin == null) {
+            MessageEvent e = new MessageEvent(MessageType.Info);
+            e.description = "VStringInput is not defined in devices.txt ";
+            e.vinput = name;
+            RGPIO.message(e);
+        }
+        return vin;
+    }
+
+    public static VOutput VStringOutput(String name) {
+        VOutput vout = VStringOutputMap.get(name);
+        if (vout == null) {
+            MessageEvent e = new MessageEvent(MessageType.Info);
+            e.description = "VStringOutput is not defined in devices.txt ";
+            e.voutput = name;
+            RGPIO.message(e);
+        }
+        return vout;
+    }
 
     public static void receiveFromDevice(String ipAddress, String message) {
         // used for simulating devices
