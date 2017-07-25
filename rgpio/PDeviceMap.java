@@ -93,7 +93,7 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
         }
         if (pinput == null) {
             MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
-            e.description = "received event from unknown digital input pin";
+            e.description = "received event from unknown input pin";
             e.HWid = d.HWid;
             e.pinLabel = pinLabel;
             RGPIO.message(e);

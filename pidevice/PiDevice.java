@@ -145,7 +145,7 @@ public class PiDevice {
         for (DeviceInput ip : inputs) {
             System.out.println("device pin " + ip.name + " " + ip.type.name());
         }
-                for (DeviceOutput op : outputs) {
+        for (DeviceOutput op : outputs) {
             System.out.println("device pin " + op.name + " " + op.type.name());
         }
     }
@@ -202,10 +202,20 @@ public class PiDevice {
             }
 
             if (validArgs) {
+                String inputLabel = null;
+                if (inputType == IOType.digitalInput) {
+                    inputLabel = "Dip";
+                }
+                if (inputType == IOType.analogInput) {
+                    inputLabel = "Aip";
+                }
+                if (inputType == IOType.stringInput) {
+                    inputLabel = "Sip";
+                }
                 String event = "Event"
                         + "/HWid:" + HWid
                         + "/Model:" + deviceModel
-                        + "/" + inputType + ":" + inputName
+                        + "/" + inputLabel + ":" + inputName
                         + "/Value:" + value;
 
                 if (serverIPAddress != null) {
