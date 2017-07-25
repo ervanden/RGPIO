@@ -141,6 +141,15 @@ public class PiDevice {
         return sop;
     }
 
+    static public void printDevicePins() {
+        for (DeviceInput ip : inputs) {
+            System.out.println("device pin " + ip.name + " " + ip.type.name());
+        }
+                for (DeviceOutput op : outputs) {
+            System.out.println("device pin " + op.name + " " + op.type.name());
+        }
+    }
+
     static void sendReport() {
         String report = "Report/HWid:" + getHWid() + "/Model:" + deviceModel;
         report = report + "/Uptime:" + getUpTime();
