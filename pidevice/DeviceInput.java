@@ -1,17 +1,17 @@
 package pidevice;
 
+import rgpio.IOType;
+
 public class DeviceInput {
 
     String name;
-    String value;
-    String type;
+    IOType type;
     
     public GetCommandListener getCommandListener=null;
 
-    public DeviceInput(String name, String type, String value) {
+    public DeviceInput(String name, IOType type) {
         this.name = name;
         this.type = type;
-        this.value = value;
     }
 
     //  call the application to perform the GPIO action
@@ -19,7 +19,7 @@ public class DeviceInput {
     public String getValue() {
 
         if (getCommandListener==null){
-            System.out.println("Get command listener not assigned for Dip "+name);
+            System.out.println("Get command listener not defined for device input "+name);
         } else {
         return getCommandListener.onGetCommand(this);
         }

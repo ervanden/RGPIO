@@ -6,13 +6,14 @@ import rgpio.*;
 
 public class ExampleServer implements VInputEventListener, MessageListener {
 
-    /*
-     Pressing any button switches the lights off if they were on, and off if they were on.
-     PIRDevices is only used to get a message if there are less than 2 PIR's.
-     */
+
     VDevice allDevices;
+// digital test: Pressing any button toggles the lights
     VInput buttons;
     VOutput lights;
+// analog test: When the button is pressed, read the sensor and set the timer    
+    VInput sensor;
+    VOutput timer;
 
     public void onInputEvent(VInput vinput) {
 

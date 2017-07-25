@@ -13,6 +13,10 @@ public class ExampleDevice implements SetCommandListener, GetCommandListener, Gp
      */
     DeviceInput button;
     DeviceOutput buzzer;
+    
+    // analog input and analog output for test only, no effect on GPIO
+    DeviceInput sensor;
+    DeviceOutput timer;
 
     // corresponding GPIO pins
     static GpioController gpio;
@@ -23,6 +27,9 @@ public class ExampleDevice implements SetCommandListener, GetCommandListener, Gp
         // set GPIO pin corresponding to this deviceOutput to newValue
         if (deviceOutput == buzzer) {
             System.out.println("GPIO 3 set to " + newValue);
+        }
+                if (deviceOutput == timer) {
+            System.out.println("analog output <timer> set to " + newValue);
         }
     }
 
@@ -61,11 +68,15 @@ public class ExampleDevice implements SetCommandListener, GetCommandListener, Gp
         PiDevice.deviceModel = "RASPBERRY";
         button = PiDevice.addDigitalInput("button");
         buzzer = PiDevice.addDigitalOutput("buzzer");
-
+        sensor = PiDevice.addAnalogInput("sensor");
+        timer = PiDevice.addAnalogOutput("timer");
+        
         // 'this' can execute the GET and SET commands
         buzzer.setCommandListener=this;
         button.getCommandListener=this;
-
+        timer.setCommandListener=this;
+        sensor.getCommandListener=this;
+        
         PiDevice.runDevice();
 
 // convert listener thread back to in line so runDevice does not exit

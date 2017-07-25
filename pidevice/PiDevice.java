@@ -90,36 +90,81 @@ public class PiDevice {
 
     static public String deviceModel;
     static public String HWid;
-    static public ArrayList<DeviceInput> digitalInputs = new ArrayList<>();
-    static public ArrayList<DeviceOutput> digitalOutputs = new ArrayList<>();
-    static HashMap<String, String> inputTypeMap = new HashMap<>();
+    static public ArrayList<DeviceInput> inputs = new ArrayList<>();
+    static public ArrayList<DeviceOutput> outputs = new ArrayList<>();
+
+    static HashMap<String, IOType> inputTypeMap = new HashMap<>();
 
     static String serverIPAddress = null;
 
     static TimeStamp windowsBootTime = null;
 
     static public DeviceInput addDigitalInput(String name) {
-        DeviceInput dip = new DeviceInput(name, "Digital", "Low");
-        digitalInputs.add(dip);
-        inputTypeMap.put(name, "Dip");
+        DeviceInput dip = new DeviceInput(name, IOType.digitalInput);
+        inputs.add(dip);
+        inputTypeMap.put(name, IOType.digitalInput);
         return dip;
     }
 
     static public DeviceOutput addDigitalOutput(String name) {
-        DeviceOutput dop = new DeviceOutput(name, "Digital", "Low");
-        digitalOutputs.add(dop);
-        inputTypeMap.put(name, "Dop");
+        DeviceOutput dop = new DeviceOutput(name, IOType.digitalOutput);
+        outputs.add(dop);
+        inputTypeMap.put(name, IOType.digitalOutput);
         return dop;
+    }
+
+    static public DeviceInput addAnalogInput(String name) {
+        DeviceInput aip = new DeviceInput(name, IOType.analogInput);
+        inputs.add(aip);
+        inputTypeMap.put(name, IOType.analogInput);
+        return aip;
+    }
+
+    static public DeviceOutput addAnalogOutput(String name) {
+        DeviceOutput aop = new DeviceOutput(name, IOType.analogOutput);
+        outputs.add(aop);
+        inputTypeMap.put(name, IOType.analogOutput);
+        return aop;
+    }
+
+    static public DeviceInput addStringInput(String name) {
+        DeviceInput sip = new DeviceInput(name, IOType.stringInput);
+        inputs.add(sip);
+        inputTypeMap.put(name, IOType.stringInput);
+        return sip;
+    }
+
+    static public DeviceOutput addStringOutput(String name) {
+        DeviceOutput sop = new DeviceOutput(name, IOType.stringOutput);
+        outputs.add(sop);
+        inputTypeMap.put(name, IOType.stringOutput);
+        return sop;
     }
 
     static void sendReport() {
         String report = "Report/HWid:" + getHWid() + "/Model:" + deviceModel;
         report = report + "/Uptime:" + getUpTime();
-        for (DeviceInput dip : digitalInputs) {
-            report = report + "/Dip:" + dip.name;
+        for (DeviceInput ip : inputs) {
+            if (ip.type == IOType.digitalInput) {
+                report = report + "/Dip:" + ip.name;
+            }
+            if (ip.type == IOType.analogInput) {
+                report = report + "/Aip:" + ip.name;
+            }
+            if (ip.type == IOType.stringInput) {
+                report = report + "/Sip:" + ip.name;
+            }
         }
-        for (DeviceOutput dop : digitalOutputs) {
-            report = report + "/Dop:" + dop.name;
+        for (DeviceOutput op : outputs) {
+            if (op.type == IOType.digitalOutput) {
+                report = report + "/Dop:" + op.name;
+            }
+            if (op.type == IOType.analogOutput) {
+                report = report + "/Aop:" + op.name;
+            }
+            if (op.type == IOType.stringOutput) {
+                report = report + "/Sop:" + op.name;
+            }
         }
 
         //       System.out.println("SENDING "+report);
@@ -132,13 +177,13 @@ public class PiDevice {
 
     static public void sendEvent(String inputName, String value) {
         boolean validArgs = false;
-        String inputType;
+        IOType inputType;
 
         inputType = inputTypeMap.get(inputName);
         if (inputType == null) {
             System.out.println("sendEvent() : unknown input " + inputName);
         } else {
-            if (inputType.equals("Dip")) {
+            if (inputType.equals(IOType.digitalInput)) {
                 if ((value.equals("High")) || (value.equals("Low"))) {
                     validArgs = true;
                 } else {
@@ -221,7 +266,8 @@ public class PiDevice {
                     // only to let the device know the server IP address 
                     return null;
                 } else if (command.equals("Get")) {
-                    String dipName = null;
+                    String ipName = null;
+                    IOType ipType = null;
 
                     for (int i = 1; i < s.length; i++) {
                         String nameValue = s[i];
@@ -229,31 +275,44 @@ public class PiDevice {
                         name = nv[0];
                         value = nv[1];
                         if (name.equals("Dip")) {
-                            dipName = value;
+                            ipName = value;
+                            ipType = IOType.digitalInput;
+                        }
+                        if (name.equals("Aip")) {
+                            ipName = value;
+                            ipType = IOType.analogInput;
+                        }
+                        if (name.equals("Sip")) {
+                            ipName = value;
+                            ipType = IOType.stringInput;
                         }
                     }
-                    if ((dipName != null)) {
-                        System.out.println("device received command to get digital input " + dipName);
-                        DeviceInput dip = null;
-                        for (DeviceInput d : digitalInputs) {
-                            if (d.name.equals(dipName)) {
-                                dip = d;
+                    if ((ipName != null)) {
+                        System.out.println("device received GET command for input " + ipName);
+                        DeviceInput ip = null;
+                        for (DeviceInput d : inputs) {
+                            if (d.name.equals(ipName)) {
+                                ip = d;
                             }
                         }
-                        if (dip == null) {
-                            System.out.println("device received GET command for unknown digital output " + dipName);
+                        if (ip == null) {
+                            System.out.println("GET : unknown output " + ipName);
+                        } else if (ip.type != ipType) {
+                            System.out.println("GET : input of wrong iotype " + ipName + " " + ip.type);
                         } else {
-                            return dip.getValue();
+                            return ip.getValue();
                         }
+
                     } else {
-                        System.out.println("device received SET command with invalid syntax");
+                        System.out.println("GET : invalid syntax");
                     }
 
-                    return "X";
+                    return "-- get failed --";
 
                 } else if (command.equals("Set")) {
-                    String dopName = null;
-                    String dopValue = null;
+                    String opName = null;
+                    String opValue = null;
+                    IOType opType = null;
 
                     for (int i = 1; i < s.length; i++) {
                         String nameValue = s[i];
@@ -261,25 +320,36 @@ public class PiDevice {
                         name = nv[0];
                         value = nv[1];
                         if (name.equals("Dop")) {
-                            dopName = value;
+                            opName = value;
+                            opType = IOType.digitalOutput;
+                        }
+                        if (name.equals("Aop")) {
+                            opName = value;
+                            opType = IOType.analogOutput;
+                        }
+                        if (name.equals("Sop")) {
+                            opName = value;
+                            opType = IOType.stringOutput;
                         }
                         if (name.equals("Value")) {
-                            dopValue = value;
+                            opValue = value;
                         }
                     }
-                    if ((dopName != null) && (dopValue != null)) {
-                        System.out.println("device received command to set digital output " + dopName
-                                + " to " + dopValue);
-                        DeviceOutput dop = null;
-                        for (DeviceOutput d : digitalOutputs) {
-                            if (d.name.equals(dopName)) {
-                                dop = d;
+                    if ((opName != null) && (opValue != null)) {
+                        System.out.println("device received command to set  output " + opName
+                                + " to " + opValue);
+                        DeviceOutput op = null;
+                        for (DeviceOutput d : outputs) {
+                            if (d.name.equals(opName)) {
+                                op = d;
                             }
                         }
-                        if (dop == null) {
-                            System.out.println("device received SET command for unknown digital output " + dopName);
+                        if (op == null) {
+                            System.out.println("SET : unknown output " + opName);
+                        } else if (op.type != opType) {
+                            System.out.println("SET : input of wrong iotype " + opName + " " + op.type);
                         } else {
-                            dop.setValue(dopValue);
+                            op.setValue(opValue);
                         }
                     } else {
                         System.out.println("device received SET command with invalid syntax");

@@ -2,21 +2,18 @@
 
 package pidevice;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import rgpio.IOType;
 
 public class DeviceOutput {
     String name;
     String value; // stores the value the output was last SET to
-    String type;
+    IOType type;
     
     public SetCommandListener setCommandListener=null;
 
-    public DeviceOutput(String name,String type, String value) {
+    public DeviceOutput(String name,IOType type) {
         this.name = name;
         this.type=type;
-        this.value=value;
     }
     
 
