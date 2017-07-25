@@ -45,6 +45,7 @@ public class PDevice {
 
     public void setActive() {
         if (status != PDeviceStatus.ACTIVE) {
+            System.out.println("pdev "+HWid+" changed from "+status+" to ACTIVE ");
             status = PDeviceStatus.ACTIVE;
             RGPIO.updateFeed.writeToClients(toJSON());
             setAllPins("UNKNOWN");
