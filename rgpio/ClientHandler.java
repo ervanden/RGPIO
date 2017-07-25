@@ -13,18 +13,30 @@ public class ClientHandler implements TCPserverListener {
         if (request.equals("status")) {
             for (PDevice d : RGPIO.PDeviceMap.values()) {
                 reply.add(d.toJSON());
-                for (PInput dip : d.digitalInputs.values()) {
-                    reply.add(dip.toJSON());
+                for (PInput ip : d.inputs.values()) {
+                    reply.add(ip.toJSON());
                 }
-                for (POutput dop : d.digitalOutputs.values()) {
-                    reply.add(dop.toJSON());
+                for (POutput op : d.outputs.values()) {
+                    reply.add(op.toJSON());
                 }
             }
-            for (VInput dip : RGPIO.VDigitalInputMap.values()) {
-                reply.add(dip.toJSON());
+            for (VInput ip : RGPIO.VDigitalInputMap.values()) {
+                reply.add(ip.toJSON());
             }
-            for (VOutput dop : RGPIO.VDigitalOutputMap.values()) {
-                reply.add(dop.toJSON());
+            for (VOutput op : RGPIO.VDigitalOutputMap.values()) {
+                reply.add(op.toJSON());
+            }
+            for (VInput ip : RGPIO.VAnalogInputMap.values()) {
+                reply.add(ip.toJSON());
+            }
+            for (VOutput op : RGPIO.VAnalogOutputMap.values()) {
+                reply.add(op.toJSON());
+            }
+            for (VInput ip : RGPIO.VStringInputMap.values()) {
+                reply.add(ip.toJSON());
+            }
+            for (VOutput op : RGPIO.VStringOutputMap.values()) {
+                reply.add(op.toJSON());
             }
         } else {
             MessageEvent e = new MessageEvent(MessageType.Info);
