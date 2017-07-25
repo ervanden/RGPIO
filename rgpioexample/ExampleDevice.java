@@ -48,7 +48,7 @@ public class ExampleDevice implements SetCommandListener, GetCommandListener, Gp
             System.out.println("analog input <sensor> reads: 1000");
             return ("1000");
         }
-
+        return ("impossible!");
     }
 
     public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
