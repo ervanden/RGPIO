@@ -142,6 +142,7 @@ public class PiDevice {
     }
 
     static public void printDevicePins() {
+        System.out.println("---device pins ---");
         for (DeviceInput ip : inputs) {
             System.out.println("device pin " + ip.name + " " + ip.type.name());
         }
