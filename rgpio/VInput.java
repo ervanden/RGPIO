@@ -15,7 +15,7 @@ public class VInput extends VSelector {
 
     public VInput(String name) {
         this.name = name;
-        RGPIO.VDigitalInputMap.put(name, this);
+//        RGPIO.VDigitalInputMap.put(name, this);
     }
 
     public void set_value(String newValue) {
