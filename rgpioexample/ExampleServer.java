@@ -70,9 +70,13 @@ public class ExampleServer implements VInputEventListener, MessageListener {
 
         buttons.addDigitalPinListener(this);
 
-        // switch all lights off to be in a known state
+        // get and set all virtual io to be in a known state
+        
+        buttons.get();
+                                sensor.get();
         lights.set("Low");
         timer.set("7777");
+
 
         while (true) {
             try {

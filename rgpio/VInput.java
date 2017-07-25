@@ -154,9 +154,11 @@ public class VInput extends VSelector {
                     System.out.println("---physical pin " + device.HWid + "." + dip.name);
                     System.out.println("---physical pin value=" + dip.value);
                     if (dip.value != null) { // is null before first GET or EVENT
+                        if (!dip.value.equals("UNKNOWN")){
                         float f = Float.parseFloat(dip.value);
                         sum = sum + f;
                         n = n + 1;
+                        }
                     }
                 }
             }
