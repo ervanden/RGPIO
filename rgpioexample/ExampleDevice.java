@@ -13,7 +13,7 @@ public class ExampleDevice implements SetCommandListener, GetCommandListener, Gp
      */
     DeviceInput button;
     DeviceOutput buzzer;
-    
+
     // analog input and analog output for test only, no effect on GPIO
     DeviceInput sensor;
     DeviceOutput timer;
@@ -28,7 +28,7 @@ public class ExampleDevice implements SetCommandListener, GetCommandListener, Gp
         if (deviceOutput == buzzer) {
             System.out.println("GPIO 3 set to " + newValue);
         }
-                if (deviceOutput == timer) {
+        if (deviceOutput == timer) {
             System.out.println("analog output <timer> set to " + newValue);
         }
     }
@@ -42,8 +42,13 @@ public class ExampleDevice implements SetCommandListener, GetCommandListener, Gp
             if (Gpio2.isLow()) {
                 return "Low";
             }
+            return ("?");   // impossible?
         }
-        return ("X");   // impossible?
+        if (deviceInput == sensor) {
+            System.out.println("analog input <sensor> reads: 1000");
+            return ("1000");
+        }
+
     }
 
     public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
@@ -70,14 +75,14 @@ public class ExampleDevice implements SetCommandListener, GetCommandListener, Gp
         buzzer = PiDevice.addDigitalOutput("buzzer");
         sensor = PiDevice.addAnalogInput("sensor");
         timer = PiDevice.addAnalogOutput("timer");
-         PiDevice.printDevicePins();
-         
+        PiDevice.printDevicePins();
+
         // 'this' can execute the GET and SET commands
-        buzzer.setCommandListener=this;
-        button.getCommandListener=this;
-        timer.setCommandListener=this;
-        sensor.getCommandListener=this;
-        
+        buzzer.setCommandListener = this;
+        button.getCommandListener = this;
+        timer.setCommandListener = this;
+        sensor.getCommandListener = this;
+
         PiDevice.runDevice();
 
 // convert listener thread back to in line so runDevice does not exit
