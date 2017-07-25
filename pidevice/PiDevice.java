@@ -176,7 +176,6 @@ public class PiDevice {
             }
         }
 
-        //       System.out.println("SENDING "+report);
         if (serverIPAddress != null) {
             UDPSender.send(report, serverIPAddress, null, RGPIO.serverPort, 0, 1);
         } else {
@@ -202,20 +201,10 @@ public class PiDevice {
             }
 
             if (validArgs) {
-                String inputLabel = null;
-                if (inputType == IOType.digitalInput) {
-                    inputLabel = "Dip";
-                }
-                if (inputType == IOType.analogInput) {
-                    inputLabel = "Aip";
-                }
-                if (inputType == IOType.stringInput) {
-                    inputLabel = "Sip";
-                }
                 String event = "Event"
                         + "/HWid:" + HWid
                         + "/Model:" + deviceModel
-                        + "/" + inputLabel + ":" + inputName
+                        + "/" + IOType.longToShort(inputType) + ":" + inputName
                         + "/Value:" + value;
 
                 if (serverIPAddress != null) {

@@ -1,21 +1,22 @@
 package udputils;
 
+import rgpio.IOType;
 import rgpio.PInput;
 import rgpio.PDevice;
 
 public class SendGetCommandThread extends Thread {
 
     PDevice device;
-    PInput dip;
+    PInput ip;
 
-    public SendGetCommandThread(PDevice device,PInput dip) {
+    public SendGetCommandThread(PDevice device,PInput ip) {
         super();
         this.device=device;
-        this.dip=dip;
+        this.ip=ip;
     }
     
     public void run() {
-        dip.value=device.sendToDevice("Get/Dip:" + dip.name);       
+        ip.value=device.sendToDevice("Get/"+IOType.longToShort(ip.type)+":" + ip.name);       
     }
 }
 
