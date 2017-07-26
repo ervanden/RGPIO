@@ -54,7 +54,9 @@ public class PDevice {
             setAllPins("UNKNOWN");
         }
         this.lastContact = new TimeStamp();
-        if (vdevice!=null) vdevice.stateChange();
+        if (vdevice != null) {
+            vdevice.stateChange();
+        }
     }
 
     public void setNotResponding(String msg) {
@@ -70,7 +72,9 @@ public class PDevice {
         RGPIO.message(e);
 
         setAllPins("NOTRESPONDING");
-               if (vdevice!=null) vdevice.stateChange();
+        if (vdevice != null) {
+            vdevice.stateChange();
+        }
 
     }
 
@@ -110,8 +114,6 @@ public class PDevice {
         return reply;
     }
 
-    
-    
     public void addPOutput(
             String pinType,
             String pinName,
@@ -179,13 +181,11 @@ public class PDevice {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-                        poutput.set_value("UNKNOWN"); // will create an update
+            poutput.set_value("UNKNOWN"); // will create an update
 //            RGPIO.updateFeed.writeToClients(p.toJSON());
         }
     }
 
-    
-    
     public void addPInput(
             String pinType,
             String pinName,
@@ -253,8 +253,8 @@ public class PDevice {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-                        pinput.set_value("UNKNOWN"); // will trigger an update
- //          RGPIO.updateFeed.writeToClients(p.toJSON());
+            pinput.set_value("UNKNOWN"); // will trigger an update
+            //          RGPIO.updateFeed.writeToClients(p.toJSON());
         }
     }
 
