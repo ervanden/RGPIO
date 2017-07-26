@@ -47,33 +47,41 @@ public class DeviceHandler {
                     pinName = value;
                     pdevice.addPInput(pinType, pinName, HWid, model);
                 }
+                if ((name.equals("Dop"))
+                        || (name.equals("Aop"))
+                        || (name.equals("Sop"))) {
+                    pinType = name;
+                    pinName = value;
+                    pdevice.addPOutput(pinType, pinName, HWid, model);
+                }
                 /*
-                if (name.equals("Dip")) {
-                    pinName = value;
-                    RGPIO.VDigitalInputMap.deviceInputReported(pinName, HWid, model);
-                }
-                if (name.equals("Aip")) {
-                    pinName = value;
-                    RGPIO.VAnalogInputMap.deviceInputReported(pinName, HWid, model);
-                }
-                if (name.equals("Sip")) {
-                    pinName = value;
-                    RGPIO.VStringInputMap.deviceInputReported(pinName, HWid, model);
-                }
-*/
-                if (name.equals("Dop")) {
-                    pinName = value;
-                    RGPIO.VDigitalOutputMap.deviceOutputReported(pinName, HWid, model);
-                }
+                 if (name.equals("Dip")) {
+                 pinName = value;
+                 RGPIO.VDigitalInputMap.deviceInputReported(pinName, HWid, model);
+                 }
+                 if (name.equals("Aip")) {
+                 pinName = value;
+                 RGPIO.VAnalogInputMap.deviceInputReported(pinName, HWid, model);
+                 }
+                 if (name.equals("Sip")) {
+                 pinName = value;
+                 RGPIO.VStringInputMap.deviceInputReported(pinName, HWid, model);
+                 }
 
-                if (name.equals("Aop")) {
-                    pinName = value;
-                    RGPIO.VAnalogOutputMap.deviceOutputReported(pinName, HWid, model);
-                }
-                if (name.equals("Sop")) {
-                    pinName = value;
-                    RGPIO.VStringOutputMap.deviceOutputReported(pinName, HWid, model);
-                }
+                 if (name.equals("Dop")) {
+                 pinName = value;
+                 RGPIO.VDigitalOutputMap.deviceOutputReported(pinName, HWid, model);
+                 }
+
+                 if (name.equals("Aop")) {
+                 pinName = value;
+                 RGPIO.VAnalogOutputMap.deviceOutputReported(pinName, HWid, model);
+                 }
+                 if (name.equals("Sop")) {
+                 pinName = value;
+                 RGPIO.VStringOutputMap.deviceOutputReported(pinName, HWid, model);
+                 }
+                 */
             }
 
         } else if (command.equals("Event")) {
