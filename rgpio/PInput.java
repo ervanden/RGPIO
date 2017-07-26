@@ -12,8 +12,11 @@ public class PInput {
     public VInput vinput;
 
     public void set_value(String newValue) {
+        if (!value.equals(newValue)){
         value = newValue;
         RGPIO.updateFeed.writeToClients(toJSON());
+        vinput.pinValueChange();
+        }
     }
 
     public String toJSON() {
@@ -25,25 +28,20 @@ public class PInput {
         json.addProperty("value", value);
         return json.asString();
     }
-    
-    
-        
-    public void setDebounced(String value){
+
+    public void setDebounced(String value) {
 
         if (type == IOType.digitalInput) {
-       if (value.equals("High")){ } 
-              if (value.equals("Low")){ } 
+            if (value.equals("High")) {
+            }
+            if (value.equals("Low")) {
+            }
         } else if (type == IOType.analogInput) {
-         
+
         } else if (type == IOType.stringInput) {
 
         }
-             
         set_value(value);
-
-        vinput.stateChange();
-
     }
-    
 
 }

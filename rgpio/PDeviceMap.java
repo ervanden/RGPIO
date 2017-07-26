@@ -41,28 +41,29 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
         }
     }
 
-    public void deviceReported(
+    public PDevice addPDevice(
             String HWid,
             String modelName,
             String ipAddress,
             int upTime) {
 
-        PDevice d = get(HWid);
-        if (d == null) {
+        PDevice pdevice = get(HWid);
+        if (pdevice == null) {
             // pdevice does not yet exist. Create it and match to a vdevice
-            d = new PDevice();
-            RGPIO.PDeviceMap.put(HWid, d);
-            d.HWid = HWid;
-            d.vdevice = null;
-            d.modelName = modelName;
-            this.put(HWid, d);
-            matchToGroup(d);
+            pdevice = new PDevice();
+            RGPIO.PDeviceMap.put(HWid, pdevice);
+            pdevice.HWid = HWid;
+            pdevice.vdevice = null;
+            pdevice.modelName = modelName;
+            this.put(HWid, pdevice);
+            matchToGroup(pdevice);
         }
-        d.ipAddress = ipAddress;
-        d.lastContact = new TimeStamp();  //now
-        d.powerOn = new TimeStamp();
-        d.powerOn.add(Calendar.SECOND, -upTime);
-        d.setActive();
+        pdevice.ipAddress = ipAddress;
+        pdevice.lastContact = new TimeStamp();  //now
+        pdevice.powerOn = new TimeStamp();
+        pdevice.powerOn.add(Calendar.SECOND, -upTime);
+        pdevice.setActive();
+        return pdevice;
     }
 
     public void deviceReportedPinEvent(

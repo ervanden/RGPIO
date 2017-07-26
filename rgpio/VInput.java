@@ -15,14 +15,14 @@ public class VInput extends VSelector {
 
     public VInput(String name) {
         this.name = name;
-//        RGPIO.VDigitalInputMap.put(name, this);
     }
-
+/*
     public void set_value(String newValue) {
         value = newValue;
         RGPIO.updateFeed.writeToClients(toJSON());
     }
-
+*/
+    
     public String get_value() {
         return value;
     }
@@ -80,18 +80,23 @@ public class VInput extends VSelector {
         RGPIO.updateFeed.writeToClients(toJSON());
     }
 
-    private List<VInputEventListener> digitalListeners = new ArrayList<>();
+    private List<VInputEventListener> listeners = new ArrayList<>();
 
     public void addDigitalPinListener(VInputEventListener toAdd) {
-        digitalListeners.add(toAdd);
+        listeners.add(toAdd);
     }
 
-    //  pass change of state to all the listeners
-    public void stateChange() {
+
+    public void pinValueChange() {
+        
+        /* the value of one of the pins in the vinput changed (after EVENT or GET)
+           - forward the the web interface
+           - forward to the application via the listener
+        */
 
         RGPIO.updateFeed.writeToClients(toJSON());
 
-        for (VInputEventListener l : digitalListeners) {
+        for (VInputEventListener l : listeners) {
             try {
                 l.onInputEvent(this);
             } catch (Exception e) {
@@ -145,7 +150,7 @@ public class VInput extends VSelector {
                     System.out.println("---physical pin " + device.HWid + "." + dip.name);
                     System.out.println("---physical pin value=" + dip.value);
                     if (dip.value != null) { // is null before first GET or EVENT
-                        if (!dip.value.equals("UNKNOWN")){
+                        if (!dip.value.equals("UNKNOWN")){ // is UNKNOWN after device was NOTRESPONDING
                         float f = Float.parseFloat(dip.value);
                         sum = sum + f;
                         n = n + 1;

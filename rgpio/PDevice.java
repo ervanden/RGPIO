@@ -19,17 +19,17 @@ public class PDevice {
     public TimeStamp lastContact = new TimeStamp(0); // timestamp
     public TimeStamp powerOn = new TimeStamp(0);     // timestamp of device power-on
 
-       public HashMap<String, PInput> inputs = new HashMap<>();
+    public HashMap<String, PInput> inputs = new HashMap<>();
     public HashMap<String, POutput> outputs = new HashMap<>();
- 
+
     /*
-    public HashMap<String, PInput> digitalInputs = new HashMap<>(); // key is pin label
-    public HashMap<String, PInput> analogInputs = new HashMap<>(); // key is pin label
-    public HashMap<String, PInput> stringInputs = new HashMap<>(); // key is pin label
-    public HashMap<String, POutput> digitalOutputs = new HashMap<>(); // key is pin label
-    public HashMap<String, POutput> analogOutputs = new HashMap<>(); // key is pin label
-    public HashMap<String, POutput> stringOutputs = new HashMap<>(); // key is pin label
-*/
+     public HashMap<String, PInput> digitalInputs = new HashMap<>(); // key is pin label
+     public HashMap<String, PInput> analogInputs = new HashMap<>(); // key is pin label
+     public HashMap<String, PInput> stringInputs = new HashMap<>(); // key is pin label
+     public HashMap<String, POutput> digitalOutputs = new HashMap<>(); // key is pin label
+     public HashMap<String, POutput> analogOutputs = new HashMap<>(); // key is pin label
+     public HashMap<String, POutput> stringOutputs = new HashMap<>(); // key is pin label
+     */
     public String toJSON() {
         JSONObject json = new JSONObject();
         json.addProperty("object", "PDEV");
@@ -46,7 +46,7 @@ public class PDevice {
 
     public void setActive() {
         if (status != PDeviceStatus.ACTIVE) {
-            System.out.println("pdev "+HWid+" changed from "+status+" to ACTIVE ");
+            System.out.println("pdev " + HWid + " changed from " + status + " to ACTIVE ");
             status = PDeviceStatus.ACTIVE;
             RGPIO.updateFeed.writeToClients(toJSON());
             // if the device was not responding and becomes active again, the state of input pins
@@ -106,6 +106,78 @@ public class PDevice {
             }
         }
         return reply;
+    }
+
+    public void addPInput(
+            String pinType,
+            String pinName,
+            String HWid,
+            String modelName) {
+
+        IOType type = IOType.shortToLong(pinType);
+
+        PDevice pdevice = RGPIO.PDeviceMap.get(HWid);
+
+        // add the pin to the device input map
+        // and to the matching VInput map
+        HashMap<String, VInput> VInputs = null;
+
+        if (type == IOType.digitalInput) {
+            VInputs = RGPIO.VDigitalInputMap;
+        }
+        if (type == IOType.analogInput) {
+            VInputs = RGPIO.VAnalogInputMap;
+        }
+        if (type == IOType.stringInput) {
+            VInputs = RGPIO.VStringInputMap;
+        }
+
+        PInput p = pdevice.inputs.get(pinName);
+        if (p == null) {
+            p = new PInput();
+            p.type = type;
+            p.name = pinName;
+            p.value = "UNKNOWN";
+            p.device = pdevice;
+            p.vinput = null;
+            pdevice.inputs.put(pinName, p);
+
+            // match to a vinput
+            int nrInstances = 0;
+            VInput theOnlyVInput = null;
+            for (VInput vinput : VInputs.values()) {
+                if (vinput.matchesDevicePin(pinName, modelName, HWid)) {
+                    theOnlyVInput = vinput;
+                    nrInstances++;
+//                    System.out.println(" pin match : " + pinName + " " + modelName + " " + nrInstances);
+                }
+            }
+            if (nrInstances == 1) {
+                p.vinput = theOnlyVInput;
+
+                MessageEvent e = new MessageEvent(MessageType.Info);
+                e.description = "device pin assigned to " + type.name();
+                e.HWid = HWid;
+                e.pinLabel = pinName;
+                e.vinput = p.vinput.name;
+                RGPIO.message(e);
+            }
+            if (nrInstances == 0) {
+                MessageEvent e = new MessageEvent(MessageType.UnassignedPin);
+                e.description = "device pin can not be assigned to " + type.name();
+                e.HWid = HWid;
+                e.pinLabel = pinName;
+                RGPIO.message(e);
+            }
+            if (nrInstances > 1) {
+                MessageEvent e = new MessageEvent(MessageType.UnassignedPin);
+                e.description = "device pin matches more than one " + type.name();
+                e.HWid = HWid;
+                e.pinLabel = pinName;
+                RGPIO.message(e);
+            }
+            RGPIO.updateFeed.writeToClients(p.toJSON());
+        }
     }
 
 }
