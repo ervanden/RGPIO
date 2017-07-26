@@ -33,7 +33,7 @@ public class VOutputMap extends HashMap<String, VOutput> {
             String separator = "";
             String devicePins = "<";
             for (PDevice device : RGPIO.PDeviceMap.values()) {
-                for (POutput pin : device.digitalOutputs.values()) {
+                for (POutput pin : device.outputs.values()) {
                     if (pin.voutput == d) {
                         devicePins = devicePins + separator + device.HWid + "." + pin.name;
                         separator = ",";
@@ -50,35 +50,30 @@ public void deviceOutputReported(
             String HWid,
             String modelName) {
 
-        PDevice d = RGPIO.PDeviceMap.get(HWid);
+        PDevice pdevice = RGPIO.PDeviceMap.get(HWid);
 
         // add the pin to the device in the corresponding device output map
         // and to the matching VOutput map
         
-        HashMap<String, POutput> deviceOutputs = null;
         HashMap<String, VOutput> VOutputs = null;
         if (type == IOType.digitalOutput) {
-            deviceOutputs = d.digitalOutputs;
             VOutputs = RGPIO.VDigitalOutputMap;
         }
         if (type == IOType.analogOutput) {
-            deviceOutputs = d.analogOutputs;
             VOutputs = RGPIO.VAnalogOutputMap;
         }
         if (type == IOType.stringOutput) {
-            deviceOutputs = d.stringOutputs;
             VOutputs = RGPIO.VStringOutputMap;
         }
 
-        POutput p = deviceOutputs.get(pinName);
+        POutput p = pdevice.outputs.get(pinName);
         if (p == null) {
             p = new POutput();
             p.type = type;
             p.name = pinName;
-            p.device = d;
+            p.device = pdevice;
             p.voutput = null;
-            deviceOutputs.put(pinName, p);
-            d.outputs.put(pinName, p);
+            pdevice.outputs.put(pinName, p);
             
             // match to a voutput
             int nrInstances = 0;

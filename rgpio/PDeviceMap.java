@@ -29,8 +29,10 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
         for (PDevice d : this.values()) {
             String HWid = d.HWid;
             String status = d.get_status().name();
-            String deviceGroupName=null;
-            if (d.vdevice!=null) deviceGroupName = d.vdevice.name;
+            String deviceGroupName = null;
+            if (d.vdevice != null) {
+                deviceGroupName = d.vdevice.name;
+            }
             String ipAddress = d.ipAddress;
             String lastContact = "" + d.lastContact.asString();
             String powerOn = "" + d.powerOn.asString();
@@ -67,7 +69,7 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
             String HWid,
             String pinLabel,
             String value) {
-System.out.println("deviceReportedPinEvent() "+HWid+" "+pinLabel+" "+value);
+        System.out.println("deviceReportedPinEvent() " + HWid + " " + pinLabel + " " + value);
         PDevice d = this.get(HWid);
         if (d == null) {
             MessageEvent e = new MessageEvent(MessageType.UnreportedDevice);
@@ -80,17 +82,10 @@ System.out.println("deviceReportedPinEvent() "+HWid+" "+pinLabel+" "+value);
         }
 
         d.setActive();
-        
+
         PInput pinput = null;
-        if (pinput == null) {
-            pinput = d.digitalInputs.get(pinLabel);
-        }
-        if (pinput == null) {
-            pinput = d.analogInputs.get(pinLabel);
-        }
-        if (pinput == null) {
-            pinput = d.stringInputs.get(pinLabel);
-        }
+        pinput = d.inputs.get(pinLabel);
+
         if (pinput == null) {
             MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
             e.description = "received event from unknown input pin";
@@ -102,7 +97,7 @@ System.out.println("deviceReportedPinEvent() "+HWid+" "+pinLabel+" "+value);
 
         if (pinput.vinput == null) {
             MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
-            e.description = "received event from unassigned device pin of type "+pinput.type.name();
+            e.description = "received event from unassigned device pin of type " + pinput.type.name();
             e.HWid = d.HWid;
             e.pinLabel = pinLabel;
             RGPIO.message(e);

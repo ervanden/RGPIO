@@ -48,7 +48,8 @@ public class VInput extends VSelector {
         // Start all the GET commands in parallel and wait until all threads finished
 
         ArrayList<SendGetCommandThread> threads = new ArrayList<>();
-
+        
+        System.out.println("creating GET threads...");
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput ip : device.inputs.values()) {
                 if (ip.vinput == this) {
@@ -100,19 +101,14 @@ public class VInput extends VSelector {
 
     public Integer nrHigh() {
         int nrHigh = 0;
-        int nrLow = 0;
-//        System.out.println("---state change for digital input " + name);
         for (PDevice device : RGPIO.PDeviceMap.values()) {
-            for (PInput dip : device.digitalInputs.values()) {
+            for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
 //                    System.out.println("---physical pin " + device.HWid + "." + dip.name);
 //                    System.out.println("---physical pin value=" + dip.value);
                     if (dip.value != null) { // is null before first GET or EVENT
                         if (dip.value.equals("High")) {
                             nrHigh++;
-                        }
-                        if (dip.value.equals("Low")) {
-                            nrLow++;
                         }
                     }
                 }
@@ -122,18 +118,13 @@ public class VInput extends VSelector {
     }
 
     public Integer nrLow() {
-        int nrHigh = 0;
         int nrLow = 0;
-//        System.out.println("---state change for digital input " + name);
         for (PDevice device : RGPIO.PDeviceMap.values()) {
-            for (PInput dip : device.digitalInputs.values()) {
+            for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
 //                    System.out.println("---physical pin " + device.HWid + "." + dip.name);
 //                    System.out.println("---physical pin value=" + dip.value);
                     if (dip.value != null) { // is null before first GET or EVENT
-                        if (dip.value.equals("High")) {
-                            nrHigh++;
-                        }
                         if (dip.value.equals("Low")) {
                             nrLow++;
                         }

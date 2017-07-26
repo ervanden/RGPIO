@@ -29,34 +29,12 @@ public class VOutput extends VSelector {
         RGPIO.updateFeed.writeToClients(toJSON());
 
         for (PDevice device : RGPIO.PDeviceMap.values()) {
-            if (type == IOType.digitalOutput) {
-                for (POutput dop : device.digitalOutputs.values()) {
-                    if (dop.voutput == this) {
-                        dop.set_value(newValue);
-                        RGPIO.updateFeed.writeToClients(dop.toJSON());
-                        new SendSetCommandThread(device, "Set/Dop:" + dop.name + "/Value:" + dop.get_value()).start();
+            for (POutput p : device.outputs.values()) {
+                if (p.voutput == this) {
+                    p.set_value(newValue);
+                    RGPIO.updateFeed.writeToClients(p.toJSON());
+                    new SendSetCommandThread(device, "Set/" + IOType.longToShort(p.type) + ":" + p.name + "/Value:" + p.get_value()).start();
 
-                    }
-                }
-            }
-            if (type == IOType.analogOutput) {
-                for (POutput aop : device.analogOutputs.values()) {
-                    if (aop.voutput == this) {
-                        aop.set_value(newValue);
-                        RGPIO.updateFeed.writeToClients(aop.toJSON());
-                        new SendSetCommandThread(device, "Set/Aop:" + aop.name + "/Value:" + aop.get_value()).start();
-
-                    }
-                }
-            }
-            if (type == IOType.analogOutput) {
-                for (POutput sop : device.stringOutputs.values()) {
-                    if (sop.voutput == this) {
-                        sop.set_value(newValue);
-                        RGPIO.updateFeed.writeToClients(sop.toJSON());
-                        new SendSetCommandThread(device, "Set/Sop:" + sop.name + "/Value:" + sop.get_value()).start();
-
-                    }
                 }
             }
         }

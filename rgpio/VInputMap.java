@@ -34,7 +34,7 @@ public class VInputMap extends HashMap<String, VInput> {
             String separator = "";
             String devicePins = "<";
             for (PDevice device : RGPIO.PDeviceMap.values()) {
-                for (PInput pin : device.digitalInputs.values()) {
+                for (PInput pin : device.inputs.values()) {
                     if (pin.vinput == d) {
                         devicePins = devicePins + separator + device.HWid + "." + pin.name;
                         separator = ",";
@@ -51,36 +51,32 @@ public class VInputMap extends HashMap<String, VInput> {
             String HWid,
             String modelName) {
 
-        PDevice d = RGPIO.PDeviceMap.get(HWid);
+        PDevice pdevice = RGPIO.PDeviceMap.get(HWid);
 
-        // add the pin to the device in the corresponding device input map
+        // add the pin to the device input map
         // and to the matching VInput map
         
-        HashMap<String, PInput> deviceInputs = null;
         HashMap<String, VInput> VInputs = null;
         if (type == IOType.digitalInput) {
-            deviceInputs = d.digitalInputs;
             VInputs = RGPIO.VDigitalInputMap;
         }
         if (type == IOType.analogInput) {
-            deviceInputs = d.analogInputs;
             VInputs = RGPIO.VAnalogInputMap;
         }
         if (type == IOType.stringInput) {
-            deviceInputs = d.stringInputs;
             VInputs = RGPIO.VStringInputMap;
         }
 
-        PInput p = deviceInputs.get(pinName);
+        PInput p = pdevice.inputs.get(pinName);
         if (p == null) {
             p = new PInput();
             p.type = type;
             p.name = pinName;
             p.value = "UNKNOWN";
-            p.device = d;
+            p.device = pdevice;
             p.vinput = null;
-            deviceInputs.put(pinName, p);
-            d.inputs.put(pinName, p);
+//            deviceInputs.put(pinName, p);
+            pdevice.inputs.put(pinName, p);
 
             // match to a vinput
             int nrInstances = 0;
