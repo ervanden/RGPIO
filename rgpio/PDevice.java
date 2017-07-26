@@ -54,6 +54,7 @@ public class PDevice {
             setAllPins("UNKNOWN");
         }
         this.lastContact = new TimeStamp();
+        if (vdevice!=null) vdevice.stateChange();
     }
 
     public void setNotResponding(String msg) {
@@ -69,6 +70,7 @@ public class PDevice {
         RGPIO.message(e);
 
         setAllPins("NOTRESPONDING");
+               if (vdevice!=null) vdevice.stateChange();
 
     }
 
