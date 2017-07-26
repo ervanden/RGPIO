@@ -12,11 +12,9 @@ public class PInput {
     public VInput vinput;
 
     public void set_value(String newValue) {
-        if (!value.equals(newValue)){
         value = newValue;
         RGPIO.updateFeed.writeToClients(toJSON());
         vinput.pinValueChange();
-        }
     }
 
     public String toJSON() {

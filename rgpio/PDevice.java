@@ -134,15 +134,14 @@ public class PDevice {
             VOutputs = RGPIO.VStringOutputMap;
         }
 
-        POutput p = pdevice.outputs.get(pinName);
-        if (p == null) {
-            p = new POutput();
-            p.type = type;
-            p.name = pinName;
-            p.set_value("UNKNOWN");
-            p.device = pdevice;
-            p.voutput = null;
-            pdevice.outputs.put(pinName, p);
+        POutput poutput = pdevice.outputs.get(pinName);
+        if (poutput == null) {
+            poutput = new POutput();
+            poutput.type = type;
+            poutput.name = pinName;
+            poutput.device = pdevice;
+            poutput.voutput = null;
+            pdevice.outputs.put(pinName, poutput);
 
             // match to a voutput
             int nrInstances = 0;
@@ -155,13 +154,13 @@ public class PDevice {
                 }
             }
             if (nrInstances == 1) {
-                p.voutput = theOnlyVOutput;
+                poutput.voutput = theOnlyVOutput;
 
                 MessageEvent e = new MessageEvent(MessageType.Info);
                 e.description = "device pin assigned to " + type.name();
                 e.HWid = HWid;
                 e.pinLabel = pinName;
-                e.voutput = p.voutput.name;
+                e.voutput = poutput.voutput.name;
                 RGPIO.message(e);
             }
             if (nrInstances == 0) {
@@ -178,7 +177,8 @@ public class PDevice {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-            RGPIO.updateFeed.writeToClients(p.toJSON());
+                        poutput.set_value("UNKNOWN"); // will create an update
+//            RGPIO.updateFeed.writeToClients(p.toJSON());
         }
     }
 
@@ -208,15 +208,14 @@ public class PDevice {
             VInputs = RGPIO.VStringInputMap;
         }
 
-        PInput p = pdevice.inputs.get(pinName);
-        if (p == null) {
-            p = new PInput();
-            p.type = type;
-            p.name = pinName;
-            p.set_value("UNKNOWN");
-            p.device = pdevice;
-            p.vinput = null;
-            pdevice.inputs.put(pinName, p);
+        PInput pinput = pdevice.inputs.get(pinName);
+        if (pinput == null) {
+            pinput = new PInput();
+            pinput.type = type;
+            pinput.name = pinName;
+            pinput.device = pdevice;
+            pinput.vinput = null;
+            pdevice.inputs.put(pinName, pinput);
 
             // match to a vinput
             int nrInstances = 0;
@@ -229,13 +228,13 @@ public class PDevice {
                 }
             }
             if (nrInstances == 1) {
-                p.vinput = theOnlyVInput;
+                pinput.vinput = theOnlyVInput;
 
                 MessageEvent e = new MessageEvent(MessageType.Info);
                 e.description = "device pin assigned to " + type.name();
                 e.HWid = HWid;
                 e.pinLabel = pinName;
-                e.vinput = p.vinput.name;
+                e.vinput = pinput.vinput.name;
                 RGPIO.message(e);
             }
             if (nrInstances == 0) {
@@ -252,7 +251,8 @@ public class PDevice {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-            RGPIO.updateFeed.writeToClients(p.toJSON());
+                        pinput.set_value("UNKNOWN"); // will trigger an update
+ //          RGPIO.updateFeed.writeToClients(p.toJSON());
         }
     }
 
