@@ -192,7 +192,7 @@ public class PDevice {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-            poutput.set_value("UNKNOWN"); // will send an update
+            poutput.set_value(null); // will send an update
         }
     }
 
@@ -263,8 +263,7 @@ public class PDevice {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-            pinput.set_value("UNKNOWN"); // will trigger an update
-            //          RGPIO.updateFeed.writeToClients(p.toJSON());
+            pinput.set_value(null); // will trigger an update
         }
     }
 

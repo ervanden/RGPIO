@@ -16,8 +16,8 @@ public class PInput {
         RGPIO.updateFeed.writeToClients(toJSON());
         vinput.pinValueChange();
     }
-    
-    public String get_value(){
+
+    public String get_value() {
         return value;
     }
 
@@ -27,11 +27,14 @@ public class PInput {
         json.addProperty("name", name);
         json.addProperty("type", type.name());
         json.addProperty("device", device.HWid);
-        if (device.get_status() == PDeviceStatus.ACTIVE) {
-            json.addProperty("value", value);
-        } else {
-            json.addProperty("value", "NOTRESPONDING");
+        String displayValue = value;
+        if (value == null) {
+            displayValue = "null";
         }
+        if (device.get_status() == PDeviceStatus.NOTRESPONDING) {
+            displayValue = "NOTRESPONDING";
+        }
+        json.addProperty("value", displayValue);
         return json.asString();
     }
 

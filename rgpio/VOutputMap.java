@@ -109,9 +109,7 @@ public void deviceOutputReported(
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-                        p.set_value("UNKNOWN");
-                        
-// already done by set_value            RGPIO.updateFeed.writeToClients(p.toJSON());
+                        p.set_value(null);
         }
     }
 

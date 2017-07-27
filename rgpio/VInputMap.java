@@ -73,7 +73,7 @@ public class VInputMap extends HashMap<String, VInput> {
             p = new PInput();
             p.type = type;
             p.name = pinName;
-            p.value = "UNKNOWN";
+            p.value = null;
             p.device = pdevice;
             p.vinput = null;
 //            deviceInputs.put(pinName, p);
