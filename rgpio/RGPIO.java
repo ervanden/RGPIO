@@ -76,11 +76,11 @@ class DeviceMonitorThread extends Thread {
 
 class DeviceProbeThread extends Thread {
 
-    int send_interval;
+    int reportInterval;
 
-    public DeviceProbeThread(int interval) {
+    public DeviceProbeThread(int reportInterval) {
         super();
-        this.send_interval = interval;
+        this.reportInterval = reportInterval;
     }
 
     public void run() {
@@ -89,12 +89,12 @@ class DeviceProbeThread extends Thread {
                 UDPSender.send("Report", "255.255.255.255", null, RGPIO.devicePort, 0, 1);
                 //timeout==0  no use to wait for a reply here, it is sent to the listener
                 //retries==1  send only once now, the broadcast is repeated anyway
-                Thread.sleep(send_interval);
-                // Check if a device has not responded within the last send_interval.
+                Thread.sleep(reportInterval*1000);
+                // Check if a device has not responded within the last reportInterval.
                 long now = new TimeStamp().getTimeInMillis();
                 for (PDevice device : RGPIO.PDeviceMap.values()) {
-                    if ((now - device.lastContact.getTimeInMillis()) > send_interval) {
-                        device.setNotResponding("device did not respond in last " + send_interval + " msec");
+                    if ((now - device.lastContact.getTimeInMillis()) > reportInterval*1000) {
+                        device.setNotResponding("device did not respond in last " + reportInterval + " sec");
                     }
                 }
             } catch (Exception e) {
@@ -142,7 +142,7 @@ public class RGPIO {
     public static final int messageFeedPort = 2601; // server listens on this port. Clients can connect to message feed.
     public static final int clientRequestPort = 2602; // server listens on this port. Clients can send requests.
     public static final int updateFeedPort = 2603;  // server listens on this port. Client can get status updates from this feed
-public static final int reportInterval=20000; // server sends report request every reportInterval msec.
+public static final int reportInterval=20; // server sends report request every reportInterval sec.
 
     public static void initialize(String configurationDir) {
 

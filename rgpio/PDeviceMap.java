@@ -51,7 +51,7 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
         if (pdevice != null) {
             // REPORT received for an existing PDevice.
             // If upTime is less than the interval between two REPORT requests, the device has rebooted
-            if (upTime*1000<RGPIO.reportInterval) {
+            if (upTime<RGPIO.reportInterval) {
                 System.out.println("***Device uptime < "+RGPIO.reportInterval+ " : updating all pins");
                 pdevice.updateAllPins();
             }
