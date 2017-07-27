@@ -189,7 +189,19 @@ public class RGPIO {
         return vdev;
     }
 
-    public static VInput VDigitalInput(String name) {
+    public static VDigitalInput VDigitalInput(String name) {
+        VInput vin = VDigitalInputMap.get(name);
+        if (vin == null) {
+            MessageEvent e = new MessageEvent(MessageType.Info);
+            e.description = "VDigitalInput is not defined in devices.txt ";
+            e.vinput = name;
+            RGPIO.message(e);
+            return null;
+        }
+        return (VDigitalInput) vin;
+    }
+    
+        public static VInput VInput(String name) {
         VInput vin = VDigitalInputMap.get(name);
         if (vin == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);

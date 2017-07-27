@@ -16,7 +16,8 @@ public class VInputMap extends HashMap<String, VInput> {
     public VInput add(String name) {
         VInput vinput = this.get(name);
         if (vinput == null) {
-            vinput = new VInput(name);
+            vinput = new VInput();
+            vinput.name=name;
             this.put(name, vinput);
             vinput.type = type;
         }

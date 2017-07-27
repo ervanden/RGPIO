@@ -10,18 +10,7 @@ public class VInput extends VSelector {
     public String name;
     public IOType type;
     private String value;
-
     public Integer minMembers = null;
-
-    public VInput(String name) {
-        this.name = name;
-    }
-    /*
-     public void set_value(String newValue) {
-     value = newValue;
-     RGPIO.updateFeed.writeToClients(toJSON());
-     }
-     */
 
     public String get_value() {
         return value;

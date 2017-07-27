@@ -181,8 +181,7 @@ public class PDevice {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-            poutput.set_value("UNKNOWN"); // will create an update
-//            RGPIO.updateFeed.writeToClients(p.toJSON());
+            poutput.set_value("UNKNOWN"); // will send an update
         }
     }
 
