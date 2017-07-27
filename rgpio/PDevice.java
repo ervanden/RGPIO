@@ -72,7 +72,7 @@ public class PDevice {
         e.ipAddress = ipAddress;
         e.HWid = HWid;
         RGPIO.message(e);
-
+/*
         // set all pins to NOTRESPONDING
         
         for (PInput ip : inputs.values()) {
@@ -81,7 +81,7 @@ public class PDevice {
         for (POutput op : outputs.values()) {
             op.set_value("NOTRESPONDING");
         }
-
+*/
     }
     
         public void updateAllPins() {

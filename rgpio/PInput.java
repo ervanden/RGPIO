@@ -23,7 +23,11 @@ public class PInput {
         json.addProperty("name", name);
         json.addProperty("type", type.name());
         json.addProperty("device", device.HWid);
-        json.addProperty("value", value);
+        if (device.get_status() == PDeviceStatus.ACTIVE) {
+            json.addProperty("value", value);
+        } else {
+            json.addProperty("value", "NOTRESPONDING");
+        }
         return json.asString();
     }
 
