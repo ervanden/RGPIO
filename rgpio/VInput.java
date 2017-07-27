@@ -151,12 +151,12 @@ public class VInput extends VSelector {
         if (n > 0) {
             return sum / n;
         } else {
-            return 0f;
+            return Float.MAX_VALUE;
         }
     }
 
     public Float min() {
-        float result = Integer.MAX_VALUE;
+        float result = Float.MAX_VALUE;
         System.out.println("---MIN calculation for " + name);
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput dip : device.inputs.values()) {
@@ -178,7 +178,7 @@ public class VInput extends VSelector {
     }
 
     public Float max() {
-        float result = Integer.MIN_VALUE;
+        float result = Float.MIN_VALUE;
         System.out.println("---MAX calculation for " + name);
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput dip : device.inputs.values()) {

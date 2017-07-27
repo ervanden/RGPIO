@@ -72,27 +72,29 @@ public class PDevice {
         e.ipAddress = ipAddress;
         e.HWid = HWid;
         RGPIO.message(e);
-/*
-        // set all pins to NOTRESPONDING
-        
+
+        // force a web update. This will show NOTRESPONDING for the pins
         for (PInput ip : inputs.values()) {
-            ip.set_value("NOTRESPONDING");
+            ip.set_value(ip.get_value());
         }
         for (POutput op : outputs.values()) {
-            op.set_value("NOTRESPONDING");
+            op.set_value(op.get_value());
         }
-*/
     }
-    
-        public void updateAllPins() {
-            // read the input pins (get on the vinput so that this is also updated)
+
+    public void updateAllPins() {
+        // read the input pins (get on the vinput so that this is also updated)
         for (PInput ip : inputs.values()) {
-            if (ip!=null) ip.vinput.get();
+            if (ip != null) {
+                ip.vinput.get();
+            }
         }
         // set the output pins to the value they were last set to
         for (POutput op : outputs.values()) {
-   new SendSetCommandThread(this, "Set/" + IOType.longToShort(op.type) 
-           + ":" + op.name + "/Value:" + op.get_value()).start();
+            if (op.get_value()!=null) {  // null if pin was never SET
+            new SendSetCommandThread(this, "Set/" + IOType.longToShort(op.type)
+                    + ":" + op.name + "/Value:" + op.get_value()).start();
+            }
         }
 
     }

@@ -16,6 +16,10 @@ public class PInput {
         RGPIO.updateFeed.writeToClients(toJSON());
         vinput.pinValueChange();
     }
+    
+    public String get_value(){
+        return value;
+    }
 
     public String toJSON() {
         JSONObject json = new JSONObject();
