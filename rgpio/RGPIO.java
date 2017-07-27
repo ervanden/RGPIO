@@ -190,28 +190,17 @@ public static final int reportInterval=20000; // server sends report request eve
         return vdev;
     }
 
-    public static VDigitalInput VDigitalInput(String name) {
+    public static VInput VDigitalInput(String name) {
         VInput vin = VDigitalInputMap.get(name);
         if (vin == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "VDigitalInput is not defined in devices.txt ";
             e.vinput = name;
             RGPIO.message(e);
-            return null;
         }
-        return (VDigitalInput) vin;
+        return  vin;
     }
     
-        public static VInput VInput(String name) {
-        VInput vin = VDigitalInputMap.get(name);
-        if (vin == null) {
-            MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "VDigitalInput is not defined in devices.txt ";
-            e.vinput = name;
-            RGPIO.message(e);
-        }
-        return vin;
-    }
 
     public static VOutput VDigitalOutput(String name) {
         VOutput vout = VDigitalOutputMap.get(name);
