@@ -142,6 +142,7 @@ public class RGPIO {
     public static final int messageFeedPort = 2601; // server listens on this port. Clients can connect to message feed.
     public static final int clientRequestPort = 2602; // server listens on this port. Clients can send requests.
     public static final int updateFeedPort = 2603;  // server listens on this port. Client can get status updates from this feed
+public static final int reportInterval=20000; // server sends report request every reportInterval msec.
 
     public static void initialize(String configurationDir) {
 
@@ -160,7 +161,7 @@ public class RGPIO {
         new DeviceMonitorThread().start();
 
         // Start broadcasting Report requests
-        DeviceProbeThread deviceProbeThread = new DeviceProbeThread(20000);
+        DeviceProbeThread deviceProbeThread = new DeviceProbeThread(reportInterval);
         deviceProbeThread.start();
 
         Console.verbose(false); // Controls  debug output from tcputils classes

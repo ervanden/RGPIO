@@ -48,7 +48,14 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
             int upTime) {
 
         PDevice pdevice = get(HWid);
-        if (pdevice == null) {
+        if (pdevice != null) {
+            // REPORT received for an existing PDevice.
+            // If upTime is less than the interval between two REPORT requests, the device has rebooted
+            if (upTime*1000<RGPIO.reportInterval) {
+                System.out.println("***Device uptime < "+RGPIO.reportInterval+ " : updating all pins");
+                pdevice.updateAllPins();
+            }
+        } else {
             // pdevice does not yet exist. Create it and match to a vdevice
             pdevice = new PDevice();
             RGPIO.PDeviceMap.put(HWid, pdevice);

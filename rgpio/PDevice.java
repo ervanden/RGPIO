@@ -5,6 +5,7 @@ import rgpioutils.MessageEvent;
 import utils.TimeStamp;
 import utils.JSONObject;
 import java.util.HashMap;
+import udputils.SendSetCommandThread;
 import udputils.UDPSender;
 
 public class PDevice {
@@ -49,20 +50,21 @@ public class PDevice {
             System.out.println("pdev " + HWid + " changed from " + status + " to ACTIVE ");
             status = PDeviceStatus.ACTIVE;
             RGPIO.updateFeed.writeToClients(toJSON());
-            // if the device was not responding and becomes active again, the state of input pins
-            // should be re-read and output pins should be re-set
-            setAllPins("UNKNOWN");
+            if (vdevice != null) {
+                vdevice.stateChange();
+            }
+            updateAllPins();
         }
         this.lastContact = new TimeStamp();
-        if (vdevice != null) {
-            vdevice.stateChange();
-        }
     }
 
     public void setNotResponding(String msg) {
         if (status != PDeviceStatus.NOTRESPONDING) {
             status = PDeviceStatus.NOTRESPONDING;
             RGPIO.updateFeed.writeToClients(toJSON());
+            if (vdevice != null) {
+                vdevice.stateChange();
+            }
         }
 
         MessageEvent e = new MessageEvent(MessageType.DeviceNotResponding);
@@ -71,19 +73,26 @@ public class PDevice {
         e.HWid = HWid;
         RGPIO.message(e);
 
-        setAllPins("NOTRESPONDING");
-        if (vdevice != null) {
-            vdevice.stateChange();
+        // set all pins to NOTRESPONDING
+        
+        for (PInput ip : inputs.values()) {
+            ip.set_value("NOTRESPONDING");
+        }
+        for (POutput op : outputs.values()) {
+            op.set_value("NOTRESPONDING");
         }
 
     }
-
-    private void setAllPins(String value) {
+    
+        public void updateAllPins() {
+            // read the input pins (get on the vinput so that this is also updated)
         for (PInput ip : inputs.values()) {
-            ip.set_value(value);
+            if (ip!=null) ip.vinput.get();
         }
+        // set the output pins to the value they were last set to
         for (POutput op : outputs.values()) {
-            op.set_value(value);
+   new SendSetCommandThread(this, "Set/" + IOType.longToShort(op.type) 
+           + ":" + op.name + "/Value:" + op.get_value()).start();
         }
 
     }

@@ -95,7 +95,7 @@ public class PiDevice {
     static HashMap<String, IOType> inputTypeMap = new HashMap<>();
 
     static String serverIPAddress = null;
-
+    static long bootTimeInMillis = 0;
     static TimeStamp windowsBootTime = null;
 
     static public DeviceInput addDigitalInput(String name) {
@@ -224,6 +224,7 @@ public class PiDevice {
         RGPIO.addMessageListener(m);
 
         HWid = getHWid();
+        bootTimeInMillis = (new TimeStamp()).getTimeInMillis();
 
         Integer upTime = getUpTime();
         if (upTime == null) {
@@ -392,8 +393,13 @@ public class PiDevice {
             return null;
         }
     }
-
     static public Integer getUpTime() {
+        long nowInMillis = (new TimeStamp()).getTimeInMillis();
+        Long delta=(nowInMillis-bootTimeInMillis);
+        return delta.intValue()/1000;
+    
+    }
+    static public Integer getSystemUpTime() {
 
         // Linux  read uptime from /proc
         try {
