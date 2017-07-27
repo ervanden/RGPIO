@@ -54,14 +54,6 @@ public class PDevice {
                 vdevice.stateChange();
             }
             updateAllPins();
-
-            // web update all the pins
-            for (PInput ip : inputs.values()) {
-                RGPIO.updateFeed.writeToClients(ip.toJSON());
-            }
-            for (POutput op : outputs.values()) {
-                RGPIO.updateFeed.writeToClients(op.toJSON());
-            }
         }
         this.lastContact = new TimeStamp();
     }
@@ -91,18 +83,26 @@ public class PDevice {
     }
 
     public void updateAllPins() {
+        System.out.println("*** update all pins of "+HWid);
         // read the input pins (get on the vinput so that this is also updated)
         for (PInput ip : inputs.values()) {
-            if (ip != null) {
+                if (ip.vinput!=null){
                 ip.vinput.get();
-            }
+                }
         }
         // set the output pins to the value they were last set to
         for (POutput op : outputs.values()) {
-            if (op.get_value() != null) {  // null if pin was never SET
+            if (op.voutput!= null) {  
                 new SendSetCommandThread(this, "Set/" + IOType.longToShort(op.type)
-                        + ":" + op.name + "/Value:" + op.get_value()).start();
+                        + ":" + op.name + "/Value:" + op.voutput.value).start();
             }
+        }
+        // web update all the pins (in case they were displayed as NOTRESPONDING)
+        for (PInput ip : inputs.values()) {
+            RGPIO.updateFeed.writeToClients(ip.toJSON());
+        }
+        for (POutput op : outputs.values()) {
+            RGPIO.updateFeed.writeToClients(op.toJSON());
         }
 
     }
