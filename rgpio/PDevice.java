@@ -83,20 +83,23 @@ public class PDevice {
     }
 
     public void updateAllPins() {
-        System.out.println("*** update all pins of "+HWid);
+        System.out.println("*** update all pins of "+HWid+ " get...");
         // read the input pins (get on the vinput so that this is also updated)
         for (PInput ip : inputs.values()) {
                 if (ip.vinput!=null){
-                ip.vinput.get();
+                ip.vinput.get();   // includes web update
                 }
         }
-        // set the output pins to the value they were last set to
+                System.out.println("*** update all pins of "+HWid+ " set...");
+        // set the output pins to the value of its virtual output
         for (POutput op : outputs.values()) {
             if (op.voutput!= null) {  
                 new SendSetCommandThread(this, "Set/" + IOType.longToShort(op.type)
                         + ":" + op.name + "/Value:" + op.voutput.value).start();
+                op.set_value(op.voutput.value); // includes web update
             }
         }
+/*
         // web update all the pins (in case they were displayed as NOTRESPONDING)
         for (PInput ip : inputs.values()) {
             RGPIO.updateFeed.writeToClients(ip.toJSON());
@@ -104,7 +107,7 @@ public class PDevice {
         for (POutput op : outputs.values()) {
             RGPIO.updateFeed.writeToClients(op.toJSON());
         }
-
+*/
     }
 
     public String sendToDevice(String message) {
