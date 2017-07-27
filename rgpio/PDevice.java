@@ -82,32 +82,31 @@ public class PDevice {
         }
     }
 
+    public void updatePOutput(POutput op) {
+        if (op.voutput != null) {
+            new SendSetCommandThread(this, "Set/" + IOType.longToShort(op.type)
+                    + ":" + op.name + "/Value:" + op.voutput.value).start();
+            op.set_value(op.voutput.value); // includes web update
+        }
+    }
+
+    public void updatePInput(PInput ip) {
+        if (ip.vinput != null) {
+            ip.vinput.get();   // includes web update
+        }
+    }
+
     public void updateAllPins() {
-        System.out.println("*** update all pins of "+HWid+ " get...");
-        // read the input pins (get on the vinput so that this is also updated)
+        System.out.println("*** update all pins of " + HWid + " get...");
+
         for (PInput ip : inputs.values()) {
-                if (ip.vinput!=null){
-                ip.vinput.get();   // includes web update
-                }
+            updatePInput(ip);
         }
-                System.out.println("*** update all pins of "+HWid+ " set...");
-        // set the output pins to the value of its virtual output
+        System.out.println("*** update all pins of " + HWid + " set...");
+
         for (POutput op : outputs.values()) {
-            if (op.voutput!= null) {  
-                new SendSetCommandThread(this, "Set/" + IOType.longToShort(op.type)
-                        + ":" + op.name + "/Value:" + op.voutput.value).start();
-                op.set_value(op.voutput.value); // includes web update
-            }
+            updatePOutput(op);
         }
-/*
-        // web update all the pins (in case they were displayed as NOTRESPONDING)
-        for (PInput ip : inputs.values()) {
-            RGPIO.updateFeed.writeToClients(ip.toJSON());
-        }
-        for (POutput op : outputs.values()) {
-            RGPIO.updateFeed.writeToClients(op.toJSON());
-        }
-*/
     }
 
     public String sendToDevice(String message) {
@@ -203,7 +202,7 @@ public class PDevice {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-            poutput.set_value(null); // will send an update
+            updatePOutput(poutput);
         }
     }
 
@@ -274,7 +273,7 @@ public class PDevice {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-            pinput.set_value(null); // will trigger an update
+            updatePInput(pinput);
         }
     }
 

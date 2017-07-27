@@ -55,7 +55,6 @@ public class DeviceHandler {
                     pdevice.addPOutput(pinType, pinName, HWid, model);
                 }
             }
-            pdevice.updateAllPins();
 
         } else if (command.equals("Event")) {
 
