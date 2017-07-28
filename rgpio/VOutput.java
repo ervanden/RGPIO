@@ -10,9 +10,6 @@ public class VOutput extends VSelector {
     public IOType type;
     public Integer minMembers = null;
 
-    public VOutput(String name) {
-        this.name = name;
-    }
 
     public String toJSON() {
         JSONObject json = new JSONObject();
@@ -37,10 +34,6 @@ public class VOutput extends VSelector {
                 }
             }
         }
-    }
-
-    public String get() {
-        return value;
     }
 
 }

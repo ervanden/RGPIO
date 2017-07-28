@@ -190,7 +190,7 @@ public static final int reportInterval=20; // server sends report request every 
         return vdev;
     }
 
-    public static VInput VDigitalInput(String name) {
+    public static VDigitalInput VDigitalInput(String name) {
         VInput vin = VDigitalInputMap.get(name);
         if (vin == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
@@ -198,11 +198,11 @@ public static final int reportInterval=20; // server sends report request every 
             e.vinput = name;
             RGPIO.message(e);
         }
-        return  vin;
+        return (VDigitalInput) vin;
     }
     
 
-    public static VOutput VDigitalOutput(String name) {
+    public static VDigitalOutput VDigitalOutput(String name) {
         VOutput vout = VDigitalOutputMap.get(name);
         if (vout == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
@@ -210,10 +210,10 @@ public static final int reportInterval=20; // server sends report request every 
             e.voutput = name;
             RGPIO.message(e);
         }
-        return vout;
+        return (VDigitalOutput) vout;
     }
     
-        public static VInput VAnalogInput(String name) {
+        public static VAnalogInput VAnalogInput(String name) {
         VInput vin = VAnalogInputMap.get(name);
         if (vin == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
@@ -221,10 +221,10 @@ public static final int reportInterval=20; // server sends report request every 
             e.vinput = name;
             RGPIO.message(e);
         }
-        return vin;
+        return (VAnalogInput) vin;
     }
 
-    public static VOutput VAnalogOutput(String name) {
+    public static VAnalogOutput VAnalogOutput(String name) {
         VOutput vout = VAnalogOutputMap.get(name);
         if (vout == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
@@ -232,10 +232,10 @@ public static final int reportInterval=20; // server sends report request every 
             e.voutput = name;
             RGPIO.message(e);
         }
-        return vout;
+        return (VAnalogOutput) vout;
     }
     
-        public static VInput VStringInput(String name) {
+        public static VStringInput VStringInput(String name) {
         VInput vin = VStringInputMap.get(name);
         if (vin == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
@@ -243,10 +243,10 @@ public static final int reportInterval=20; // server sends report request every 
             e.vinput = name;
             RGPIO.message(e);
         }
-        return vin;
+        return (VStringInput) vin;
     }
 
-    public static VOutput VStringOutput(String name) {
+    public static VStringOutput VStringOutput(String name) {
         VOutput vout = VStringOutputMap.get(name);
         if (vout == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
@@ -254,7 +254,7 @@ public static final int reportInterval=20; // server sends report request every 
             e.voutput = name;
             RGPIO.message(e);
         }
-        return vout;
+        return (VStringOutput) vout;
     }
 
     public static void receiveFromDevice(String ipAddress, String message) {

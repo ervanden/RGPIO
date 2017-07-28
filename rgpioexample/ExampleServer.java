@@ -8,26 +8,28 @@ public class ExampleServer implements VInputEventListener, MessageListener {
 
 
     VDevice allDevices;
-// digital test: Pressing any button toggles the lights
-    VInput buttons;
-    VOutput lights;
-// analog test: When the button is pressed, read the sensor and set the timer    
-    VInput sensor;
-    VOutput timer;
+    VDigitalInput buttons;
+    VDigitalOutput lights;   
+    VAnalogInput sensor;
+    VAnalogOutput timer;
 
+// when any button is pressed:
+//  - the lights are toggled
+//  - the timer is set to 2*the value of the sensor
+    
     public void onInputEvent(VInput vinput) {
 
         if (vinput == buttons) {
             if (buttons.nrHigh() > 0) {
-                if (lights.get().equals("High")) {
-                    lights.set("Low");
+                if (lights.getState()) {
+                    lights.setState(false);
                 } else {
-                    lights.set("High");
+                    lights.setState(true);
                 }
                 
-                sensor.get();
-                System.out.println("SENSOR avg = "+sensor.avg());
-                timer.set(Float.toString(sensor.avg()));
+ //               sensor.get();
+
+                timer.setValue(2*sensor.avg());
 
             } else { // button released
 

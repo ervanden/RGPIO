@@ -9,7 +9,7 @@ public class VInput extends VSelector {
 
     public String name;
     public IOType type;
-    private String value;
+    public String value;
     public Integer minMembers = null;
 
     public String get_value() {

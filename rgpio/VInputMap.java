@@ -16,8 +16,16 @@ public class VInputMap extends HashMap<String, VInput> {
     public VInput add(String name) {
         VInput vinput = this.get(name);
         if (vinput == null) {
-            vinput = new VInput();
-            vinput.name=name;
+            if (type == IOType.digitalInput) {
+                vinput = new VDigitalInput();
+            }
+            if (type == IOType.analogInput) {
+                vinput = new VAnalogInput();
+            }
+            if (type == IOType.stringInput) {
+                vinput = new VStringInput();
+            }
+            vinput.name = name;
             this.put(name, vinput);
             vinput.type = type;
         }
@@ -56,7 +64,6 @@ public class VInputMap extends HashMap<String, VInput> {
 
         // add the pin to the device input map
         // and to the matching VInput map
-        
         HashMap<String, VInput> VInputs = null;
         if (type == IOType.digitalInput) {
             VInputs = RGPIO.VDigitalInputMap;
@@ -93,7 +100,7 @@ public class VInputMap extends HashMap<String, VInput> {
                 p.vinput = theOnlyVInput;
 
                 MessageEvent e = new MessageEvent(MessageType.Info);
-                e.description = "device pin assigned to "+type.name();
+                e.description = "device pin assigned to " + type.name();
                 e.HWid = HWid;
                 e.pinLabel = pinName;
                 e.vinput = p.vinput.name;
@@ -101,14 +108,14 @@ public class VInputMap extends HashMap<String, VInput> {
             }
             if (nrInstances == 0) {
                 MessageEvent e = new MessageEvent(MessageType.UnassignedPin);
-                e.description = "device pin can not be assigned to "+type.name();
+                e.description = "device pin can not be assigned to " + type.name();
                 e.HWid = HWid;
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
             if (nrInstances > 1) {
                 MessageEvent e = new MessageEvent(MessageType.UnassignedPin);
-                e.description = "device pin matches more than one "+type.name();
+                e.description = "device pin matches more than one " + type.name();
                 e.HWid = HWid;
                 e.pinLabel = pinName;
                 RGPIO.message(e);

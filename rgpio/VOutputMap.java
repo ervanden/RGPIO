@@ -16,7 +16,16 @@ public class VOutputMap extends HashMap<String, VOutput> {
     public VOutput add(String name) {
         VOutput voutput = this.get(name);
         if (voutput == null) {
-            voutput = new VOutput(name);
+            if (type == IOType.digitalOutput) {
+                voutput = new VDigitalOutput();
+            }
+            if (type == IOType.analogOutput) {
+                voutput = new VAnalogOutput();
+            }
+            if (type == IOType.stringOutput) {
+                voutput = new VStringOutput();
+            }
+            voutput.name=name;
             this.put(name, voutput);
             voutput.type = type;
         };
