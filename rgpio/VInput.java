@@ -40,7 +40,7 @@ public class VInput extends VSelector {
 
         ArrayList<SendGetCommandThread> threads = new ArrayList<>();
 
-        System.out.println("creating GET threads...");
+//        System.out.println("creating GET threads...");
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput ip : device.inputs.values()) {
                 if (ip.vinput == this) {
@@ -51,14 +51,14 @@ public class VInput extends VSelector {
             }
         }
 
-        System.out.println("waiting for all GET threads to finish...");
+//        System.out.println("waiting for all GET threads to finish...");
         for (SendGetCommandThread t : threads) {
             try {
                 t.join();
             } catch (InterruptedException ie) {
             };
         }
-        System.out.println("... all GET threads finished");
+//        System.out.println("... all GET threads finished");
 
         // send change of value to updateFeed
         for (PDevice device : RGPIO.PDeviceMap.values()) {
@@ -71,9 +71,9 @@ public class VInput extends VSelector {
         RGPIO.updateFeed.writeToClients(toJSON());
     }
 
-    private List<VInputEventListener> listeners = new ArrayList<>();
+    private List<VInputListener> listeners = new ArrayList<>();
 
-    public void addDigitalPinListener(VInputEventListener toAdd) {
+    public void addVinputListener(VInputListener toAdd) {
         listeners.add(toAdd);
     }
 
@@ -85,7 +85,7 @@ public class VInput extends VSelector {
          */
         RGPIO.updateFeed.writeToClients(toJSON());
 
-        for (VInputEventListener l : listeners) {
+        for (VInputListener l : listeners) {
             try {
                 l.onInputEvent(this);
             } catch (Exception e) {

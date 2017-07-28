@@ -4,7 +4,7 @@ import rgpioutils.MessageListener;
 import rgpioutils.MessageEvent;
 import rgpio.*;
 
-public class ExampleServer implements VInputEventListener, MessageListener {
+public class ExampleServer implements VInputListener, MessageListener {
 
 
     VDevice allDevices;
@@ -70,7 +70,7 @@ public class ExampleServer implements VInputEventListener, MessageListener {
         buttons.minMembers = 2;
         lights.minMembers = 1;
 
-        buttons.addDigitalPinListener(this);
+        buttons.addVinputListener(this);
 
         // get and set all virtual io to be in a known state
         

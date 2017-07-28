@@ -54,7 +54,7 @@ public class VInputMap extends HashMap<String, VInput> {
             System.out.printf(formatString, name, devicePins);
         }
     }
-
+/*
     public void deviceInputReported(
             String pinName,
             String HWid,
@@ -123,5 +123,7 @@ public class VInputMap extends HashMap<String, VInput> {
             RGPIO.updateFeed.writeToClients(p.toJSON());
         }
     }
-
+*/
+    
+    
 }

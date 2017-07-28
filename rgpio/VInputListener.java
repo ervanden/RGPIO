@@ -1,7 +1,7 @@
 
 package rgpio;
 
-public interface VInputEventListener {
+public interface VInputListener {
   
     void onInputEvent(VInput vinput); 
  

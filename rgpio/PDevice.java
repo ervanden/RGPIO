@@ -53,7 +53,7 @@ public class PDevice {
             if (vdevice != null) {
                 vdevice.stateChange();
             }
-            updateAllPins();
+            updateAllPins(); // includes web update to replace NOTRESPONDING
         }
         this.lastContact = new TimeStamp();
     }
@@ -73,7 +73,7 @@ public class PDevice {
         e.HWid = HWid;
         RGPIO.message(e);
 
-        // web update all the pins
+        // web update all the pins to display NOTRESPONDING
         for (PInput ip : inputs.values()) {
             RGPIO.updateFeed.writeToClients(ip.toJSON());
         }
@@ -84,9 +84,11 @@ public class PDevice {
 
     public void updatePOutput(POutput op) {
         if (op.voutput != null) {
-            new SendSetCommandThread(this, "Set/" + IOType.longToShort(op.type)
-                    + ":" + op.name + "/Value:" + op.voutput.value).start();
-            op.set_value(op.voutput.value); // includes web update
+            if (op.voutput.value != null) {
+                new SendSetCommandThread(this, "Set/" + IOType.longToShort(op.type)
+                        + ":" + op.name + "/Value:" + op.voutput.value).start();
+                op.set_value(op.voutput.value); // includes web update
+            }
         }
     }
 
