@@ -132,18 +132,18 @@ public class VInput extends VSelector {
     public Float avg() {
         float sum = 0;
         int n = 0;
-        System.out.println("---AVG calculation for " + name);
+ //       System.out.println("---AVG calculation for " + name);
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
-                    System.out.println("---physical pin " + device.HWid + "." + dip.name);
-                    System.out.println("---physical pin value=" + dip.value);
+//                    System.out.println("---physical pin " + device.HWid + "." + dip.name);
+//                    System.out.println("---physical pin value=" + dip.value);
                     if (dip.value != null) { // is null before first GET or EVENT
-                        if (!dip.value.equals("UNKNOWN")) { // is UNKNOWN after device was NOTRESPONDING
+//                        if (!dip.value.equals("UNKNOWN")) { // is UNKNOWN after device was NOTRESPONDING
                             float f = Float.parseFloat(dip.value);
                             sum = sum + f;
                             n = n + 1;
-                        }
+//                        }
                     }
                 }
             }
@@ -157,18 +157,18 @@ public class VInput extends VSelector {
 
     public Float min() {
         float result = Float.MAX_VALUE;
-        System.out.println("---MIN calculation for " + name);
+//        System.out.println("---MIN calculation for " + name);
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
-                    System.out.println("---physical pin " + device.HWid + "." + dip.name);
-                    System.out.println("---physical pin value=" + dip.value);
+ //                   System.out.println("---physical pin " + device.HWid + "." + dip.name);
+ //                   System.out.println("---physical pin value=" + dip.value);
                     if (dip.value != null) { // is null before first GET or EVENT
-                        if (!dip.value.equals("UNKNOWN")) { // is UNKNOWN after device was NOTRESPONDING
+ //                       if (!dip.value.equals("UNKNOWN")) { // is UNKNOWN after device was NOTRESPONDING
                             float f = Float.parseFloat(dip.value);
                             if (f < result) {
                                 result = f;
-                            }
+//                            }
                         }
                     }
                 }
@@ -179,18 +179,18 @@ public class VInput extends VSelector {
 
     public Float max() {
         float result = Float.MIN_VALUE;
-        System.out.println("---MAX calculation for " + name);
+//        System.out.println("---MAX calculation for " + name);
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
-                    System.out.println("---physical pin " + device.HWid + "." + dip.name);
-                    System.out.println("---physical pin value=" + dip.value);
+//                    System.out.println("---physical pin " + device.HWid + "." + dip.name);
+//                    System.out.println("---physical pin value=" + dip.value);
                     if (dip.value != null) { // is null before first GET or EVENT
-                        if (!dip.value.equals("UNKNOWN")) { // is UNKNOWN after device was NOTRESPONDING
+ //                       if (!dip.value.equals("UNKNOWN")) { // is UNKNOWN after device was NOTRESPONDING
                             float f = Float.parseFloat(dip.value);
                             if (f > result) {
                                 result = f;
-                            }
+ //                           }
                         }
                     }
                 }

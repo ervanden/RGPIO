@@ -14,37 +14,39 @@
             table .cellNotresponding{background-color:#e6e6e6}
             table .cellHigh{background-color:#ff4d4d}
             table .cellLow{background-color:#b3ccff}
+            tr .rowVisible {visibility:visible}
+            tr .rowCollapsed {visibility:collapse}
         </style>
 
         <div id="tableDiv" ></div>
 
         <br>
         <table>
-            <tr>
+            <tr id="DEVrow" class="rowCollapsed">
                 <td id="VDEVhtml">Virtual Devices</td>
                 <td id="PDEVhtml">Physical Devices</td>
             </tr>
-            <tr>
+            <tr id="VDIProw" class="rowCollapsed">
                 <td id="VDIPhtml">Virtual Digital Inputs</td>
                 <td id="PDIPhtml">Physical Digital Inputs</td>
             </tr>
-            <tr>
+            <tr id="VDOProw" class="rowCollapsed">
                 <td id="VDOPhtml">Virtual Digital Outputs</td>
                 <td id="PDOPhtml">Physical Digital Outputs</td>
             </tr>
-            <tr>
+            <tr id="VAIProw" class="rowCollapsed">
                 <td id="VAIPhtml">Virtual Analog Inputs</td>
                 <td id="PAIPhtml">Physical Analog Inputs</td>
             </tr>
-            <tr>
+            <tr id="VAOProw" class="rowCollapsed">
                 <td id="VAOPhtml">Virtual Analog Outputs</td>
                 <td id="PAOPhtml">Physical Analog Outputs</td>
             </tr>
-            <tr>
+            <tr id="VSIProw" class="rowCollapsed">
                 <td id="VSIPhtml">Virtual String Inputs</td>
                 <td id="PSIPhtml">Physical String Inputs</td>
             </tr>
-            <tr>
+            <tr id="VSOProw" class="rowCollapsed">
                 <td id="VSOPhtml">Virtual String Outputs</td>
                 <td id="PSOPhtml">Physical String Outputs</td>
             </tr>
@@ -181,9 +183,9 @@
             VDEVTable.setKeys(["name"]);
             VDEVTable.setCellColors(cellColors);
             var VDEVhtml = VDEVTable.createTable("VDEVTable", "VDEV");
-            
+
             //physical i/o
-            
+
             var PDIPTable = new TableGenerator();
             PDIPTable.setDocument(document);
             PDIPTable.setColumns(["device", "name", "value"]);
@@ -244,7 +246,7 @@
 
             var VAIPTable = new TableGenerator();
             VAIPTable.setDocument(document);
-            VAIPTable.setColumns(["name", "min","max","avg"]);
+            VAIPTable.setColumns(["name", "min", "max", "avg"]);
             VAIPTable.setKeys(["name"]);
             VAIPTable.setCellColors(cellColors);
             var VAIPhtml = VAIPTable.createTable("VAIPTable", "VAIP");
@@ -280,22 +282,22 @@
 
             document.getElementById("VDEVhtml").appendChild(VDEVhtml);
             document.getElementById("PDEVhtml").appendChild(PDEVhtml);
-            
+
             document.getElementById("VDIPhtml").appendChild(VDIPhtml);
             document.getElementById("PDIPhtml").appendChild(PDIPhtml);
             document.getElementById("VDOPhtml").appendChild(VDOPhtml);
             document.getElementById("PDOPhtml").appendChild(PDOPhtml);
-            
+
             document.getElementById("VAIPhtml").appendChild(VAIPhtml);
             document.getElementById("PAIPhtml").appendChild(PAIPhtml);
             document.getElementById("VAOPhtml").appendChild(VAOPhtml);
             document.getElementById("PAOPhtml").appendChild(PAOPhtml);
-                                  
+
             document.getElementById("VSIPhtml").appendChild(VSIPhtml);
             document.getElementById("PSIPhtml").appendChild(PSIPhtml);
             document.getElementById("VSOPhtml").appendChild(VSOPhtml);
             document.getElementById("PSOPhtml").appendChild(PSOPhtml);
-            
+
             $(document).ready(function () {
                 /*
                  $.post("getStatus.php",
@@ -337,7 +339,7 @@
                     var updateFeed = new EventSource("updateFeed.php");
                     updateFeed.onmessage = function (event) {
                         if (event.data.length > 0) {  // php sends empty string from time to time
-                                     document.getElementById("messageDiv").innerHTML += "update " + event.data + "<br>";
+                            document.getElementById("messageDiv").innerHTML += "update " + event.data + "<br>";
                             try {
                                 var obj = JSON.parse(event.data);
                             } catch (e) {
@@ -345,45 +347,59 @@
                             }
                             if (obj.object == "PDEV") {
                                 PDEVTable.fillRow(obj);
+                                document.getElementById("DEVrow").setAttribute("class", "rowVisible");
                             }
                             if (obj.object == "VDEV") {
                                 VDEVTable.fillRow(obj);
+                                document.getElementById("DEVrow").setAttribute("class", "rowVisible");
                             }
                             if ((obj.object == "VIO") && (obj.type == "digitalInput")) {
                                 VDIPTable.fillRow(obj);
+                                document.getElementById("DIProw").setAttribute("class", "rowVisible");
                             }
                             if ((obj.object == "VIO") && (obj.type == "digitalOutput")) {
                                 VDOPTable.fillRow(obj);
+                                document.getElementById("DOProw").setAttribute("class", "rowVisible");
                             }
                             if ((obj.object == "PIO") && (obj.type == "digitalInput")) {
                                 PDIPTable.fillRow(obj);
+                                document.getElementById("DIProw").setAttribute("class", "rowVisible");
                             }
                             if ((obj.object == "PIO") && (obj.type == "digitalOutput")) {
                                 PDOPTable.fillRow(obj);
+                                document.getElementById("DOProw").setAttribute("class", "rowVisible");
                             }
                             if ((obj.object == "VIO") && (obj.type == "analogInput")) {
                                 VAIPTable.fillRow(obj);
+                                document.getElementById("AIProw").setAttribute("class", "rowVisible");
                             }
                             if ((obj.object == "VIO") && (obj.type == "analogOutput")) {
                                 VAOPTable.fillRow(obj);
+                                document.getElementById("AOProw").setAttribute("class", "rowVisible");
                             }
                             if ((obj.object == "PIO") && (obj.type == "analogInput")) {
                                 PAIPTable.fillRow(obj);
+                                document.getElementById("AIProw").setAttribute("class", "rowVisible");
                             }
                             if ((obj.object == "PIO") && (obj.type == "analogOutput")) {
                                 PAOPTable.fillRow(obj);
+                                document.getElementById("AOProw").setAttribute("class", "rowVisible");
                             }
                             if ((obj.object == "VIO") && (obj.type == "stringInput")) {
                                 VSIPTable.fillRow(obj);
+                                document.getElementById("SIProw").setAttribute("class", "rowVisible");
                             }
                             if ((obj.object == "VIO") && (obj.type == "stringOutput")) {
                                 VSOPTable.fillRow(obj);
+                                document.getElementById("SOProw").setAttribute("class", "rowVisible");
                             }
                             if ((obj.object == "PIO") && (obj.type == "stringInput")) {
                                 PSIPTable.fillRow(obj);
+                                document.getElementById("SIProw").setAttribute("class", "rowVisible");
                             }
                             if ((obj.object == "PIO") && (obj.type == "stringOutput")) {
                                 PSOPTable.fillRow(obj);
+                                document.getElementById("SOProw").setAttribute("class", "rowVisible");
                             }
                         }
                     };
@@ -394,7 +410,7 @@
                     var messageFeed = new EventSource("messageFeed.php");
                     messageFeed.onmessage = function (event) {
                         if (event.data.length > 0) {  // php sends empty string from time to time
-     //                       document.getElementById("messageDiv").innerHTML += event.data + "<br>";
+                            //                       document.getElementById("messageDiv").innerHTML += event.data + "<br>";
                         }
                     };
                 } else {
