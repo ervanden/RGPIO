@@ -1,4 +1,4 @@
 #! /bin/bash
 
-java -jar RGPIO.jar server
+java -jar /home/pi/git/RGPIO/run/RGPIO.jar server
 

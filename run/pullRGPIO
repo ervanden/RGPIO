@@ -1,5 +1,5 @@
 #! /bin/bash
-cd RGPIO
+cd /home/pi/git/RGPIO
 git pull
 
 
