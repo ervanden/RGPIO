@@ -1,0 +1,13 @@
+Device:allDevices/Model:RELAY
+Device:allDevices/Model:RASPBERRY
+Device:allDevices/Model:PIR
+DigitalInput:button/Model:PIR/Pin:02
+DigitalInput:button/HWid:1234567/Pin:03
+DigitalInput:button/Model:RASPBERRY/Pin:button
+DigitalInput:button/HWid:1625496/Pin:2
+DigitalOutput:light/Model:PIR/Pin:00
+DigitalOutput:light/Model:RASPBERRY/Pin:buzzer
+DigitalOutput:light/Model:RELAY/Pin:00
+DigitalOutput:light/HWid:1625496/Pin:0
+AnalogInput:sensor/Model:RASPBERRY/Pin:sensor
+AnalogOutput:timer/Model:RASPBERRY/Pin:timer

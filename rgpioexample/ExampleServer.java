@@ -46,7 +46,7 @@ public class ExampleServer implements VInputListener, MessageListener {
 
         String deviceFile;
         if (System.getProperty("file.separator").equals("/")) {
-            deviceFile = System.getProperty("user.home") + "/RGPIO/devices.txt";
+            deviceFile = System.getProperty("user.home") + "git/RGPIO/run/devices.txt";
         } else {
             deviceFile = System.getProperty("user.home") + "\\Documents\\RGPIO\\devices.txt";
         }

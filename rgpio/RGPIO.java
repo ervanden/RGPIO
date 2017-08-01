@@ -400,7 +400,7 @@ public static final int reportInterval=20; // server sends report request every 
 
                 if (selectors != 1) {
                     MessageEvent e = new MessageEvent(MessageType.Info);
-                    e.description = "invalid line : " + inputLine + " selectors " + selectors;
+                    e.description = "skipped line : " + inputLine + " selectors " + selectors;
                     RGPIO.message(e);
                 }
 

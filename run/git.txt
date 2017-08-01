@@ -1,0 +1,21 @@
+
+
+git clone https://github.com/ervanden/RGPIO.git
+
+
+  471  vi devices.html
+  472  vi getStatus.php
+  473  vi devices.html
+ 
+  476  git remote
+  477  git remote -v
+
+  480  git remote show origin
+ 
+  482  git status
+  483  git add html/getStatus.php
+  484  git add html/devices.html
+  485  git commit  ( -m message )?
+ 
+  494  git push origin master
+

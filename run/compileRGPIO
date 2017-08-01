@@ -1,0 +1,7 @@
+#! /bin/bash
+cd RGPIO
+javac  -classpath /opt/pi4j/lib/'*' */*.java
+jar cvfe RGPIO.jar main/RGPIOmain */*.class > /dev/null
+mv RGPIO.jar ..
+
+
