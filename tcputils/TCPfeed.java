@@ -37,13 +37,14 @@ class FeedThread extends Thread {
 
             try {
                 outToClient.writeBytes(s + "\n");
-
+/*
                 // delay of 10ms to avoid flooding of the client.
                 // If events come in too fast, they are dropped at the browser
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException ie) {
                 };
+ */
             } catch (SocketException se) {
                 Console.println("socket exception while writing to client");
                 socket.close();
