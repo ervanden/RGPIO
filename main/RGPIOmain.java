@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import rgpioexample.*;
 import tcputils.TCPClient;
+import utils.JSON2Object;
 
 /*
  main program that can be used
@@ -131,7 +132,8 @@ public class RGPIOmain {
             TCPClient.connect(server, port, command, false);
             
         } else {
-            usage();
+ //           usage();
+            JSON2Object.getObjects();
         }
     }
 }
