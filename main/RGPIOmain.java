@@ -4,7 +4,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import rgpioexample.*;
+import rgpioutils.DeviceFileEntry;
 import tcputils.TCPClient;
 import utils.JSON2Object;
 
@@ -133,7 +135,12 @@ public class RGPIOmain {
             
         } else {
  //           usage();
-            JSON2Object.getObjects();
+            ArrayList<Object> l;
+            l= JSON2Object.readJSONFile(System.getProperty("user.home") + "\\Documents\\RGPIO\\devices.txt",DeviceFileEntry.class);
+            for (Object o : l){
+                DeviceFileEntry dfe=(DeviceFileEntry)o;
+                System.out.println(dfe.toString());
+            }
         }
     }
 }
