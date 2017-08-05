@@ -71,14 +71,9 @@ public class ExampleServer implements VInputListener, MessageListener {
         lights.minMembers = 1;
 
         buttons.addVinputListener(this);
-
-        // get and set all virtual io to be in a known state
         
-//        buttons.get();
-//        sensor.get();
-        
-        lights.set("Low");
-        timer.set("7777");
+        lights.setState(true);
+        timer.setValue(999);
 
 
         while (true) {

@@ -343,46 +343,45 @@ public class RGPIO {
             if (dfe.Pin != null) {
                 pin = dfe.Pin;
             }
-            
-                            int selectors = 0;
-                if (device != null) {
-                    if (model != null) {
-                        device.addSelectSpec(null, "Model", model);
-                        selectors++;
-                    }
-                    if (HWid != null) {
-                        device.addSelectSpec(null, "HWid", HWid);
-                        selectors++;
-                    }
-                }
-                if ((voutput != null) && (pin != null)) {
-                    if (model != null) {
-                        voutput.addSelectSpec(pin, "Model", model);
-                        selectors++;
-                    }
-                    if (HWid != null) {
-                        voutput.addSelectSpec(pin, "HWid", HWid);
-                        selectors++;
-                    }
-                }
 
-                if ((vinput != null) && (pin != null)) {
-                    if (model != null) {
-                        vinput.addSelectSpec(pin, "Model", model);
-                        selectors++;
-                    } 
-                    if (HWid != null) {
-                        vinput.addSelectSpec(pin, "HWid", HWid);
-                        selectors++;
-                    }
+            int selectors = 0;
+            if (device != null) {
+                if (model != null) {
+                    device.addSelectSpec(null, "Model", model);
+                    selectors++;
                 }
-
-                if (selectors != 1) {
-                    MessageEvent e = new MessageEvent(MessageType.Info);
-                    e.description = "Skipped invalid entry : " + dfe.toString()+" selectors="+selectors;
-                    RGPIO.message(e);
+                if (HWid != null) {
+                    device.addSelectSpec(null, "HWid", HWid);
+                    selectors++;
                 }
+            }
+            if ((voutput != null) && (pin != null)) {
+                if (model != null) {
+                    voutput.addSelectSpec(pin, "Model", model);
+                    selectors++;
+                }
+                if (HWid != null) {
+                    voutput.addSelectSpec(pin, "HWid", HWid);
+                    selectors++;
+                }
+            }
 
+            if ((vinput != null) && (pin != null)) {
+                if (model != null) {
+                    vinput.addSelectSpec(pin, "Model", model);
+                    selectors++;
+                }
+                if (HWid != null) {
+                    vinput.addSelectSpec(pin, "HWid", HWid);
+                    selectors++;
+                }
+            }
+
+            if (selectors != 1) {
+                MessageEvent e = new MessageEvent(MessageType.Info);
+                e.description = "Skipped invalid entry : " + dfe.toString() + " selectors=" + selectors;
+                RGPIO.message(e);
+            }
 
         }
     }

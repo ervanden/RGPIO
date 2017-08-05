@@ -27,7 +27,7 @@ class FeedThread extends Thread {
         super("Server Thread");
         this.socket = socket;
         this.listener = listener;
-        Console.verbose(false);
+        Console.verbose(true);
     }
 
     public void writeToClient(String s) {
@@ -44,7 +44,7 @@ class FeedThread extends Thread {
                     Thread.sleep(10);
                 } catch (InterruptedException ie) {
                 };
- */
+*/
             } catch (SocketException se) {
                 Console.println("socket exception while writing to client");
                 socket.close();
@@ -74,7 +74,7 @@ class FeedThread extends Thread {
                     ArrayList<String> reply;
                     reply = listener.onClientRequest(clientID, "status");
                     for (String r : reply) {
-//                        System.out.println("----feed init = "+r);
+Console.println("----feed init = "+r);
                         writeToClient(r);
                     }
                 }
