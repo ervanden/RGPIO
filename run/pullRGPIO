@@ -1,5 +1,8 @@
 #! /bin/bash
 cd /home/pi/git/RGPIO
 git pull
+# to use in case of local modifications (will force pull and overwrite local changes)
+# git reset --hard origin/master
+
 
 

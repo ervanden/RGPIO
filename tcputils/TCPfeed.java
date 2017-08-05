@@ -107,7 +107,7 @@ public class TCPfeed extends Thread {
     public TCPfeed(int portNumber) {
         super();
         this.portNumber = portNumber;
-        Console.verbose(false);
+        Console.verbose(true);
     }
 
     private TCPserverListener listener = null;
