@@ -1,4 +1,4 @@
 #! /bin/bash
 
-sudo java -classpath /home/pi/git/RGPIO/run/RGPIO.jar:/opt/pi4j/lib/'*' main/RGPIOmain device
+java -cp /home/pi/git/RGPIO:/home/pi/git/RGPIO/lib/'*' main/RGPIOmain device
 

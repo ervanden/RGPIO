@@ -1,7 +1,10 @@
 #! /bin/bash
 cd /home/pi/git/RGPIO
-javac  -classpath /opt/pi4j/lib/'*' */*.java
-jar cvfe RGPIO.jar main/RGPIOmain */*.class > /dev/null
-mv RGPIO.jar /home/pi/git/RGPIO/run
+javac  -classpath /home/pi/git/RGPIO/lib/'*' */*.java
+
+#javac  -classpath /opt/pi4j/lib/'*':/home/pi/git/RGPIO/lib/'*' */*.java
+#javac  -classpath /opt/pi4j/lib/'*' */*.java
+#jar cvfe RGPIO.jar main/RGPIOmain */*.class > /dev/null
+#mv RGPIO.jar /home/pi/git/RGPIO/run
 
 
