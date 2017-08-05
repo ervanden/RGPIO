@@ -338,10 +338,10 @@ public class RGPIO {
                 model = dfe.Model;
             }
             if (dfe.HWid != null) {
-                model = dfe.HWid;
+                HWid = dfe.HWid;
             }
             if (dfe.Pin != null) {
-                model = dfe.Pin;
+                pin = dfe.Pin;
             }
             
                             int selectors = 0;
@@ -370,7 +370,7 @@ public class RGPIO {
                     if (model != null) {
                         vinput.addSelectSpec(pin, "Model", model);
                         selectors++;
-                    }
+                    } 
                     if (HWid != null) {
                         vinput.addSelectSpec(pin, "HWid", HWid);
                         selectors++;
@@ -379,7 +379,7 @@ public class RGPIO {
 
                 if (selectors != 1) {
                     MessageEvent e = new MessageEvent(MessageType.Info);
-                    e.description = "Skipped invalid entry : " + dfe.toString();
+                    e.description = "Skipped invalid entry : " + dfe.toString()+" selectors="+selectors;
                     RGPIO.message(e);
                 }
 
