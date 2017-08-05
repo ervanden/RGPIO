@@ -1,0 +1,6 @@
+#! /bin/bash
+
+java -cp /home/pi/git/RGPIO:/home/pi/git/RGPIO/lib/'*' main/RGPIOmain tcpclient  $*
+
+
+
