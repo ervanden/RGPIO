@@ -20,8 +20,10 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import rgpioutils.DeviceFileEntry;
 import tcputils.TCPfeed;
 import tcputils.TCPserver;
+import utils.JSON2Object;
 
 class DeviceMonitorThread extends Thread {
 
@@ -89,11 +91,11 @@ class DeviceProbeThread extends Thread {
                 UDPSender.send("Report", "255.255.255.255", null, RGPIO.devicePort, 0, 1);
                 //timeout==0  no use to wait for a reply here, it is sent to the listener
                 //retries==1  send only once now, the broadcast is repeated anyway
-                Thread.sleep(reportInterval*1000);
+                Thread.sleep(reportInterval * 1000);
                 // Check if a device has not responded within the last reportInterval.
                 long now = new TimeStamp().getTimeInMillis();
                 for (PDevice device : RGPIO.PDeviceMap.values()) {
-                    if ((now - device.lastContact.getTimeInMillis()) > reportInterval*1000) {
+                    if ((now - device.lastContact.getTimeInMillis()) > reportInterval * 1000) {
                         device.setNotResponding("device did not respond in last " + reportInterval + " sec");
                     }
                 }
@@ -142,7 +144,7 @@ public class RGPIO {
     public static final int messageFeedPort = 2601; // server listens on this port. Clients can connect to message feed.
     public static final int clientRequestPort = 2602; // server listens on this port. Clients can send requests.
     public static final int updateFeedPort = 2603;  // server listens on this port. Client can get status updates from this feed
-public static final int reportInterval=20; // server sends report request every reportInterval sec.
+    public static final int reportInterval = 20; // server sends report request every reportInterval sec.
 
     public static void initialize(String configurationDir) {
 
@@ -183,7 +185,7 @@ public static final int reportInterval=20; // server sends report request every 
         VDevice vdev = VDeviceMap.get(name);
         if (vdev == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "PDevice is not defined in devices.txt ";
+            e.description = "VDevice is not defined in devices.txt ";
             e.vdevice = name;
             RGPIO.message(e);
         }
@@ -200,7 +202,6 @@ public static final int reportInterval=20; // server sends report request every 
         }
         return (VDigitalInput) vin;
     }
-    
 
     public static VDigitalOutput VDigitalOutput(String name) {
         VOutput vout = VDigitalOutputMap.get(name);
@@ -212,8 +213,8 @@ public static final int reportInterval=20; // server sends report request every 
         }
         return (VDigitalOutput) vout;
     }
-    
-        public static VAnalogInput VAnalogInput(String name) {
+
+    public static VAnalogInput VAnalogInput(String name) {
         VInput vin = VAnalogInputMap.get(name);
         if (vin == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
@@ -234,8 +235,8 @@ public static final int reportInterval=20; // server sends report request every 
         }
         return (VAnalogOutput) vout;
     }
-    
-        public static VStringInput VStringInput(String name) {
+
+    public static VStringInput VStringInput(String name) {
         VInput vin = VStringInputMap.get(name);
         if (vin == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
@@ -300,6 +301,93 @@ public static final int reportInterval=20; // server sends report request every 
     }
 
     public static void readDevicesFile(String fileName) {
+        ArrayList<Object> l;
+        l = JSON2Object.readJSONFile(fileName, DeviceFileEntry.class);
+        for (Object o : l) {
+            DeviceFileEntry dfe = (DeviceFileEntry) o;
+            System.out.println(dfe.toString());
+            VDevice device = null;
+            VInput vinput = null;
+            VOutput voutput = null;
+            String model = null;
+            String HWid = null;
+            String pin = null;
+
+            if (dfe.Device != null) {
+                device = RGPIO.VDeviceMap.add(dfe.Device);
+            }
+            if (dfe.DigitalInput != null) {
+                vinput = RGPIO.VDigitalInputMap.add(dfe.DigitalInput);
+            }
+            if (dfe.DigitalOutput != null) {
+                voutput = RGPIO.VDigitalOutputMap.add(dfe.DigitalOutput);
+            }
+            if (dfe.AnalogInput != null) {
+                vinput = RGPIO.VAnalogInputMap.add(dfe.AnalogInput);
+            }
+            if (dfe.AnalogOutput != null) {
+                voutput = RGPIO.VAnalogOutputMap.add(dfe.AnalogOutput);
+            }
+            if (dfe.StringInput != null) {
+                vinput = RGPIO.VStringInputMap.add(dfe.StringInput);
+            }
+            if (dfe.StringOutput != null) {
+                voutput = RGPIO.VStringOutputMap.add(dfe.StringOutput);
+            }
+            if (dfe.Model != null) {
+                model = dfe.Model;
+            }
+            if (dfe.HWid != null) {
+                model = dfe.HWid;
+            }
+            if (dfe.Pin != null) {
+                model = dfe.Pin;
+            }
+            
+                            int selectors = 0;
+                if (device != null) {
+                    if (model != null) {
+                        device.addSelectSpec(null, "Model", model);
+                        selectors++;
+                    }
+                    if (HWid != null) {
+                        device.addSelectSpec(null, "HWid", HWid);
+                        selectors++;
+                    }
+                }
+                if ((voutput != null) && (pin != null)) {
+                    if (model != null) {
+                        voutput.addSelectSpec(pin, "Model", model);
+                        selectors++;
+                    }
+                    if (HWid != null) {
+                        voutput.addSelectSpec(pin, "HWid", HWid);
+                        selectors++;
+                    }
+                }
+
+                if ((vinput != null) && (pin != null)) {
+                    if (model != null) {
+                        vinput.addSelectSpec(pin, "Model", model);
+                        selectors++;
+                    }
+                    if (HWid != null) {
+                        vinput.addSelectSpec(pin, "HWid", HWid);
+                        selectors++;
+                    }
+                }
+
+                if (selectors != 1) {
+                    MessageEvent e = new MessageEvent(MessageType.Info);
+                    e.description = "Skipped invalid entry : " + dfe.toString();
+                    RGPIO.message(e);
+                }
+
+
+        }
+    }
+
+    public static void readDevicesFile2(String fileName) {
 
         BufferedReader inputStream;
 

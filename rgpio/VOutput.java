@@ -1,6 +1,6 @@
 package rgpio;
 
-import utils.JSONObject;
+import utils.JSONString;
 import udputils.SendSetCommandThread;
 
 public class VOutput extends VSelector {
@@ -12,7 +12,7 @@ public class VOutput extends VSelector {
 
 
     public String toJSON() {
-        JSONObject json = new JSONObject();
+        JSONString json = new JSONString();
         json.addProperty("object", "VIO");
         json.addProperty("name", name);
         json.addProperty("value", value);

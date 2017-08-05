@@ -3,7 +3,7 @@ package rgpio;
 import rgpioutils.MessageType;
 import rgpioutils.MessageEvent;
 import utils.TimeStamp;
-import utils.JSONObject;
+import utils.JSONString;
 import java.util.HashMap;
 import udputils.SendSetCommandThread;
 import udputils.UDPSender;
@@ -32,7 +32,7 @@ public class PDevice {
      public HashMap<String, POutput> stringOutputs = new HashMap<>(); // key is pin label
      */
     public String toJSON() {
-        JSONObject json = new JSONObject();
+        JSONString json = new JSONString();
         json.addProperty("object", "PDEV");
         json.addProperty("model", modelName);
         json.addProperty("HWid", HWid);

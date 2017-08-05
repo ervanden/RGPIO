@@ -1,10 +1,10 @@
 package utils;
 
-public class JSONObject {
+public class JSONString {
 
     String s;
 
-    public JSONObject() {
+    public JSONString() {
         s = "{";
     }
 

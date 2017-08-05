@@ -1,6 +1,6 @@
 package rgpioutils;
 
-import utils.JSONObject;
+import utils.JSONString;
 import utils.TimeStamp;
 
 public class MessageEvent {
@@ -70,7 +70,7 @@ public class MessageEvent {
 
     public String toJSON() {
 
-        JSONObject json = new JSONObject();
+        JSONString json = new JSONString();
 
         TimeStamp timeStamp = new TimeStamp(0);
         timeStamp.setTimeInMillis(time);

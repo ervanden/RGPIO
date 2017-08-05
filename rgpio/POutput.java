@@ -1,6 +1,6 @@
 package rgpio;
 
-import utils.JSONObject;
+import utils.JSONString;
 
 public class POutput {
 
@@ -21,7 +21,7 @@ public class POutput {
     }
 
     public String toJSON() {
-        JSONObject json = new JSONObject();
+        JSONString json = new JSONString();
         json.addProperty("object", "PIO");
         json.addProperty("name", name);
         json.addProperty("type", type.name());

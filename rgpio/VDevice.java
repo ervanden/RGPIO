@@ -1,6 +1,6 @@
 package rgpio;
 
-import utils.JSONObject;
+import utils.JSONString;
 
 public class VDevice extends VSelector {
 
@@ -14,7 +14,7 @@ public class VDevice extends VSelector {
     }
 
     public String toJSON() {
-        JSONObject json = new JSONObject();
+        JSONString json = new JSONString();
         json.addProperty("object", "VDEV");
         json.addProperty("name", name);
         json.addProperty("activeMembers", activeMembers.toString());
