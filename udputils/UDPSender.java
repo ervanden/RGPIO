@@ -20,7 +20,7 @@ public class UDPSender {
             byte[] receiveData = new byte[1024];
 
             MessageEvent e = new MessageEvent(MessageType.SendMessage);
-            e.description = "<" + message + ">";
+            e.description = "|" + message + "|";
             e.ipAddress = ipAddress;
             if (device != null) {
                 e.HWid = device.HWid;
@@ -45,7 +45,7 @@ public class UDPSender {
                         reply = reply.substring(0, receivePacket.getLength());
 
                         MessageEvent e1 = new MessageEvent(MessageType.SendMessage);
-                        e1.description = ">REPLY(" + r + ") : " + reply;
+                        e1.description = "REPLY(" + r + ") : " + reply;
                         e1.ipAddress = ipAddress;
                         if (device != null) {
                             e1.HWid = device.HWid;

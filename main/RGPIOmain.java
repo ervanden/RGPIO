@@ -6,7 +6,7 @@ import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import rgpioexample.*;
-import rgpioutils.ChatServer;
+import tcputils.WSServer;
 import tcputils.TCPClient;
 
 /*
@@ -133,9 +133,9 @@ public class RGPIOmain {
             TCPClient.connect(server, port, command, false);
             
         } else {
-            try {
-            new ChatServer(8887).start();
-            } catch (UnknownHostException uhe){};
+
+            new WSServer(8887).start();
+
         }
     }
 }

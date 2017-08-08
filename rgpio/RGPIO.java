@@ -22,7 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import rgpioutils.DeviceFileEntry;
 import tcputils.TCPfeed;
-import tcputils.TCPserver;
+import tcputils.TCPServer_old;
+import tcputils.WSServer;
 import utils.JSON2Object;
 
 class DeviceMonitorThread extends Thread {
@@ -61,7 +62,7 @@ class DeviceMonitorThread extends Thread {
                     serverSocket.send(sendPacket);
 
                     MessageEvent e = new MessageEvent(MessageType.SendMessage);
-                    e.description = "OK to <" + message + ">";
+                    e.description = "OK to |" + message + "|";
                     e.ipAddress = deviceIPAddress.toString().substring(1);
                     RGPIO.message(e);
                 }
@@ -135,9 +136,8 @@ public class RGPIO {
     public static VOutputMap VAnalogOutputMap;
     public static VOutputMap VStringOutputMap;
 
-    public static TCPfeed messageFeed;
-    public static TCPfeed updateFeed;
-    public static TCPserver clientRequests;
+    public static TCPfeed messageFeed=null;
+    public static WSServer updateFeed;
 
     public static final int serverPort = 2600;  // server listens on this port for commands from devices
     public static final int devicePort = 2500;  // devices listen on this port for server commands
@@ -167,16 +167,13 @@ public class RGPIO {
         deviceProbeThread.start();
 
         Console.verbose(false); // Controls  debug output from tcputils classes
+/*        
         messageFeed = new TCPfeed(messageFeedPort);
         messageFeed.start();
-
-//       clientRequests = new TCPserver(clientRequestPort);
-//       no client requests implemented at this time
+*/
         ClientHandler clientHandler = new ClientHandler();
-//        clientRequests.addListener(clientHandler);
-//        clientRequests.start();
-
-        updateFeed = new TCPfeed(updateFeedPort);
+        updateFeed = new WSServer(updateFeedPort);
+        System.out.println("adding listener");
         updateFeed.addListener(clientHandler);
         updateFeed.start();
     }
@@ -275,8 +272,8 @@ public class RGPIO {
         // a message is generated from within RGPIO.
         // Send it out to clients connected to the message feed
         // and call all the listeners
-        if (messageFeed != null) {  // when running as device, there is no messageFeed
-            messageFeed.writeToClients(e.toJSON());
+        if (updateFeed != null) {  // when running as device, there is no messageFeed
+            updateFeed.sendToAll(e.toJSON());
         }
 
         for (MessageListener l : listeners) {

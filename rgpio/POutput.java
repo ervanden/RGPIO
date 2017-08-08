@@ -13,7 +13,7 @@ public class POutput {
 
     public void set_value(String newValue) {
         value = newValue;
-        RGPIO.updateFeed.writeToClients(toJSON());
+        RGPIO.updateFeed.sendToAll(toJSON());
     }
 
     public String get_value() {

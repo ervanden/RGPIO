@@ -8,7 +8,7 @@ public class DeviceHandler {
     public static boolean handleDeviceMessage(String deviceIPAddress, String message) {
 
         MessageEvent e = new MessageEvent(MessageType.ReceivedMessage);
-        e.description = "<" + message + ">";
+        e.description = "|" + message + "|";
         e.ipAddress = deviceIPAddress;
         RGPIO.message(e);
 

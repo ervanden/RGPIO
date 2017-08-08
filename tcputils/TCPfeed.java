@@ -21,9 +21,9 @@ class FeedThread extends Thread {
     String clientID;
     DataOutputStream outToClient;
     BufferedReader inFromServer;
-    private TCPserverListener listener = null;
+    private WSServerListener listener = null;
 
-    public FeedThread(Socket socket, TCPserverListener listener) {
+    public FeedThread(Socket socket, WSServerListener listener) {
         super("Server Thread");
         this.socket = socket;
         this.listener = listener;
@@ -110,9 +110,9 @@ public class TCPfeed extends Thread {
         Console.verbose(true);
     }
 
-    private TCPserverListener listener = null;
+    private WSServerListener listener = null;
 
-    public void addListener(TCPserverListener l) {
+    public void addListener(WSServerListener l) {
         if (listener != null) {
             System.out.println("TCPfeed can only have 1 listener");
         } else {
@@ -120,7 +120,7 @@ public class TCPfeed extends Thread {
         }
     }
 
-    public void writeToClients(String s) {
+    public void sendToAll(String s) {
         Console.println("TCPfeed received msg to be forwarded: " + s);
         Console.println("nr of client threads=" + serverThreads.size());
 

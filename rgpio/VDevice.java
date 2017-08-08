@@ -30,7 +30,7 @@ public class VDevice extends VSelector {
                 }
             }
         }
-        RGPIO.updateFeed.writeToClients(toJSON());
+        RGPIO.updateFeed.sendToAll(toJSON());
     }
 
 }

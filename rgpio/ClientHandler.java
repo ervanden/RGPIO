@@ -5,7 +5,7 @@ import rgpioutils.MessageEvent;
 import java.util.ArrayList;
 import tcputils.*;
 
-public class ClientHandler implements TCPserverListener {
+public class ClientHandler implements WSServerListener {
 
     public ArrayList<String> onClientRequest(String clientID, String request) {
         ArrayList<String> reply = new ArrayList<>();
@@ -40,7 +40,7 @@ public class ClientHandler implements TCPserverListener {
             }
         } else {
             MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "unrecognized request from client : <" + request + ">";
+            e.description = "unrecognized request from client : |" + request + "|";
             e.ipAddress = clientID;
             RGPIO.message(e);
         }

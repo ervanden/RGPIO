@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package rgpioutils;
+package tcputils;
 
 /*
  * Copyright (c) 2010-2017 Nathan Rajlich
@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.java_websocket.WebSocket;
@@ -42,15 +43,27 @@ import org.java_websocket.WebSocketImpl;
 import org.java_websocket.framing.Framedata;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
+import utils.Console;
 
-/**
- * A simple WebSocketServer implementation. Keeps track of a "chatroom".
- */
-public class ChatServer extends WebSocketServer {
 
-	public ChatServer( int port ) throws UnknownHostException {
+public class WSServer extends WebSocketServer {
+
+	public WSServer( int port ){ // throws UnknownHostException {
+
 		super( new InetSocketAddress( port ) );
+        Console.verbose(true);
 	}
+        
+    private static WSServerListener listener = null;
+
+    public void addListener(WSServerListener l) {
+        if (listener != null) {
+            System.out.println("WSServer can only have 1 listener");
+        } else {
+            listener = l;
+                        System.out.println("WSServer listener added");
+        }
+    }
 
 
 	@Override
@@ -66,9 +79,17 @@ public class ChatServer extends WebSocketServer {
 	}
 
 	@Override
-	public void onMessage( WebSocket conn, String message ) {
-		this.sendToAll( message );
-		System.out.println( conn + ": " + message );
+	public void onMessage( WebSocket clientConnection, String request ) {
+
+                    ArrayList<String> reply;
+                    Console.println("REQUEST FROM CLIENT " + clientConnection + " : " + request);
+                    reply = listener.onClientRequest(clientConnection.toString(), request);
+                    for (String r : reply) {
+                        clientConnection.send(r);
+                    }
+                   
+                    Console.println("DONE WITH CLIENT " + clientConnection);
+
 	}
 
 	@Override

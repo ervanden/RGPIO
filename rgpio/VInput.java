@@ -64,11 +64,11 @@ public class VInput extends VSelector {
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput ip : device.inputs.values()) {
                 if (ip.vinput == this) {
-                    RGPIO.updateFeed.writeToClients(ip.toJSON());
+                    RGPIO.updateFeed.sendToAll(ip.toJSON());
                 }
             }
         }
-        RGPIO.updateFeed.writeToClients(toJSON());
+        RGPIO.updateFeed.sendToAll(toJSON());
     }
 
     private List<VInputListener> listeners = new ArrayList<>();
@@ -83,7 +83,7 @@ public class VInput extends VSelector {
          - forward the the web interface
          - forward to the application via the listener
          */
-        RGPIO.updateFeed.writeToClients(toJSON());
+        RGPIO.updateFeed.sendToAll(toJSON());
 
         for (VInputListener l : listeners) {
             try {

@@ -49,7 +49,7 @@ public class PDevice {
         if (status != PDeviceStatus.ACTIVE) {
             System.out.println("pdev " + HWid + " changed from " + status + " to ACTIVE ");
             status = PDeviceStatus.ACTIVE;
-            RGPIO.updateFeed.writeToClients(toJSON());
+            RGPIO.updateFeed.sendToAll(toJSON());
             if (vdevice != null) {
                 vdevice.stateChange();
             }
@@ -61,7 +61,7 @@ public class PDevice {
     public void setNotResponding(String msg) {
         if (status != PDeviceStatus.NOTRESPONDING) {
             status = PDeviceStatus.NOTRESPONDING;
-            RGPIO.updateFeed.writeToClients(toJSON());
+            RGPIO.updateFeed.sendToAll(toJSON());
             if (vdevice != null) {
                 vdevice.stateChange();
             }
@@ -75,10 +75,10 @@ public class PDevice {
 
         // web update all the pins to display NOTRESPONDING
         for (PInput ip : inputs.values()) {
-            RGPIO.updateFeed.writeToClients(ip.toJSON());
+            RGPIO.updateFeed.sendToAll(ip.toJSON());
         }
         for (POutput op : outputs.values()) {
-            RGPIO.updateFeed.writeToClients(op.toJSON());
+            RGPIO.updateFeed.sendToAll(op.toJSON());
         }
     }
 

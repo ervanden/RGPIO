@@ -13,7 +13,7 @@ public class PInput {
 
     public void set_value(String newValue) {
         value = newValue;
-        RGPIO.updateFeed.writeToClients(toJSON());
+        RGPIO.updateFeed.sendToAll(toJSON());
         vinput.pinValueChange();
     }
 

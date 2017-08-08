@@ -37,7 +37,7 @@ public class MessageEvent {
 
         msg = msg + timeStamp.asString();
         msg = msg + " " + type.toString();
-        msg = msg + " \"" + description + " \"";
+        msg = msg + " \"" + description + "\"";
         if (HWid != null) {
             msg = msg + " HWid=" + HWid;
         }
@@ -78,6 +78,7 @@ public class MessageEvent {
         json.addProperty("time", timeStamp.asString());
         json.addProperty("type", type.toString());
         json.addProperty("description", description);
+//               json.addProperty("description", "|description|");
         if (HWid != null) {
             json.addProperty("HWid", HWid);
         }

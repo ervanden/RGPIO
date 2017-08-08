@@ -23,7 +23,7 @@ public class VOutput extends VSelector {
     public void set(String newValue) {
 
         value = newValue;
-        RGPIO.updateFeed.writeToClients(toJSON());
+        RGPIO.updateFeed.sendToAll(toJSON());
 
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (POutput p : device.outputs.values()) {
