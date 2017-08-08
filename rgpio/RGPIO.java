@@ -166,7 +166,6 @@ public class RGPIO {
         DeviceProbeThread deviceProbeThread = new DeviceProbeThread(reportInterval);
         deviceProbeThread.start();
 
-        Console.verbose(false); // Controls  debug output from tcputils classes
 /*        
         messageFeed = new TCPfeed(messageFeedPort);
         messageFeed.start();
@@ -269,13 +268,16 @@ public class RGPIO {
 
     public static void message(MessageEvent e) {
 
-        // a message is generated from within RGPIO.
-        // Send it out to clients connected to the message feed
-        // and call all the listeners
+        // This method forwards the messages from RGPIO.
+        
+        // Send the message  to clients connected to the message feed
+/*
         if (updateFeed != null) {  // when running as device, there is no messageFeed
             updateFeed.sendToAll(e.toJSON());
         }
+*/
 
+        // Call all the listeners
         for (MessageListener l : listeners) {
             try {
                 l.onMessage(e);
