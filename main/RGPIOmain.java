@@ -4,11 +4,10 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
+import java.net.UnknownHostException;
 import rgpioexample.*;
-import rgpioutils.DeviceFileEntry;
+import rgpioutils.ChatServer;
 import tcputils.TCPClient;
-import utils.JSON2Object;
 
 /*
  main program that can be used
@@ -134,13 +133,9 @@ public class RGPIOmain {
             TCPClient.connect(server, port, command, false);
             
         } else {
- //           usage();
-            ArrayList<Object> l;
-            l= JSON2Object.readJSONFile(System.getProperty("user.home") + "\\Documents\\RGPIO\\devices.txt",DeviceFileEntry.class);
-            for (Object o : l){
-                DeviceFileEntry dfe=(DeviceFileEntry)o;
-                System.out.println(dfe.toString());
-            }
+            try {
+            new ChatServer(8887).start();
+            } catch (UnknownHostException uhe){};
         }
     }
 }

@@ -12,10 +12,22 @@
 
         <div id="messageDiv" style="overflow-y:scroll; height:400px;border-style:solid;border-width:1px;"></div>
 
+<form>
+  MESSAGE:<br>
+  <input type="text" id="messageField" name="message"><br>
+  <button type="button" id="sendButton">send!</button>
+</form>
+
         <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 
         <script>
 
+var sendBtn = document.getElementById('sendButton');
+
+  //add event listener
+ sendBtn.addEventListener('click', function(event) {
+    ws.send(document.getElementById('messageField').value);
+  });
 
             function WebSocketTest()
             {
@@ -24,15 +36,13 @@
 //               alert("WebSocket is supported by your Browser!");
 
                     // Let us open a web socket
-                    var ws = new WebSocket("ws://192.168.0.5:8080");
+                    ws = new WebSocket("ws://192.168.0.3:8887");
 
                     ws.onopen = function ()
                     {
                         document.getElementById("messageDiv").innerHTML += "websocket readystate=" + ws.readyState + " <br>";
                         // Web Socket is connected, send data using send()
-                        ws.send("Message1\n");
-                                                ws.send("Message2\n");
-                                                                        ws.send("Message3\n");
+                        document.getElementById("messageDiv").innerHTML += "connected.<br>";
                     };
 
                     ws.onmessage = function (evt)
