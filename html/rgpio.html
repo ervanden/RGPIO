@@ -2,8 +2,8 @@
 <html>
     <body>
 
+
         <!--
-        
         -->
 
         <style type="text/css">
@@ -16,7 +16,26 @@
             table .cellLow{background-color:#b3ccff}
             .rowVisible {display:inline}
             .rowCollapsed {display:none}
+            input.white {background-color:white}
+            input.green {background-color:green}
+            input.grey {background-color:grey}
+            input.red {background-color:red}
         </style>
+
+        <form>
+            RGPIO Server:
+            <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://192.168.0.5:2603">
+            <button type="button" id="connectButton">Connect</button>
+        </form>
+        <br>
+
+
+        <!--
+var connBtn = document.getElementById('connectButton');
+add event listener
+connBtn.addEventListener('click', function(event) {});
+        -->
+
 
         <div id="tableDiv" ></div>
 
@@ -83,8 +102,6 @@
             </table>
             <br>
         </div>
-
-        <p>physical device updates</p>
 
         <div id="messageDiv" style="overflow-y:scroll; height:400px;border-style:solid;border-width:1px;"></div>
 
@@ -330,224 +347,111 @@
             document.getElementById("VSOPhtml").appendChild(VSOPhtml);
             document.getElementById("PSOPhtml").appendChild(PSOPhtml);
 
-            $(document).ready(function () {
-                /*
-                 $.post("getStatus.php",
-                 {},
-                 function (data, status) {
-                 var lines = data.split("\n");
-                 for (var i = 0; i < lines.length; i++) {
-                 if (lines[i].length > 0) {  // php sends empty string from time to time
-                 // document.getElementById("messageDiv").innerHTML += "status " + lines[i] + "<br>";
-                 try {
-                 var obj = JSON.parse(lines[i]);
-                 } catch (e) {
-                 console.log("getStatus : JSON syntax error");
-                 }
-                 if (obj.object == "PDEV") {
-                 PDEVTable.fillRow(obj);
-                 }
-                 if (obj.object == "VDEV") {
-                 VDEVTable.fillRow(obj);
-                 }
-                 if ((obj.object == "VIO") && (obj.type == "digitalInput")) {
-                 VDIPTable.fillRow(obj);
-                 }
-                 if ((obj.object == "VIO") && (obj.type == "digitalOutput")) {
-                 VDOPTable.fillRow(obj);
-                 }
-                 if ((obj.object == "PIO") && (obj.type == "digitalInput")) {
-                 PDIPTable.fillRow(obj);
-                 }
-                 if ((obj.object == "PIO") && (obj.type == "digitalOutput")) {
-                 PDOPTable.fillRow(obj);
-                 }
-                 }
-                 }
-                 }
-                 );
-                 */
+
+            $("#connectButton").click(
+                    function () {
+
+                        if ("WebSocket" in window)
+                        {
+                            var serverAddress = document.getElementById('serverAddress').value;
+                            ws = new WebSocket(serverAddress);
+
+                            ws.onopen = function ()
+                            {
+//                        document.getElementById("messageDiv").innerHTML += "websocket readystate=" + ws.readyState + " <br>";
+//                        document.getElementById("messageDiv").innerHTML += "connected.<br>";
+                                document.getElementById("serverAddress").className = "green";
+                                ws.send("status");
+                            };
+
+                            ws.onclose = function (evt)
+                            {
+                                document.getElementById("serverAddress").className = "red";
+//                        document.getElementById("messageDiv").innerHTML += "closed code=" + evt.close + " reason=" + evt.reason + " <br>";
+                            };
+
+                            ws.onerror = function ()
+                            {
+                                document.getElementById("serverAddress").className = "red";
+                            };
+
+                            ws.onmessage = function (event)
+                            {
+                                if (event.data.length > 0) {
+                                    document.getElementById("messageDiv").innerHTML += event.data + "<br>";
+                                    try {
+                                        var obj = JSON.parse(event.data);
+                                    } catch (e) {
+                                        console.log("websocket : JSON syntax error");
+                                    }
+                                    if (obj.object == "PDEV") {
+                                        PDEVTable.fillRow(obj);
+                                        document.getElementById("DEVrow").setAttribute("class", "rowVisible");
+                                    }
+                                    if (obj.object == "VDEV") {
+                                        VDEVTable.fillRow(obj);
+                                        document.getElementById("DEVrow").setAttribute("class", "rowVisible");
+                                    }
+                                    if ((obj.object == "VIO") && (obj.type == "digitalInput")) {
+                                        VDIPTable.fillRow(obj);
+                                        document.getElementById("DIProw").setAttribute("class", "rowVisible");
+                                    }
+                                    if ((obj.object == "VIO") && (obj.type == "digitalOutput")) {
+                                        VDOPTable.fillRow(obj);
+                                        document.getElementById("DOProw").setAttribute("class", "rowVisible");
+                                    }
+                                    if ((obj.object == "PIO") && (obj.type == "digitalInput")) {
+                                        PDIPTable.fillRow(obj);
+                                        document.getElementById("DIProw").setAttribute("class", "rowVisible");
+                                    }
+                                    if ((obj.object == "PIO") && (obj.type == "digitalOutput")) {
+                                        PDOPTable.fillRow(obj);
+                                        document.getElementById("DOProw").setAttribute("class", "rowVisible");
+                                    }
+                                    if ((obj.object == "VIO") && (obj.type == "analogInput")) {
+                                        VAIPTable.fillRow(obj);
+                                        document.getElementById("AIProw").setAttribute("class", "rowVisible");
+                                    }
+                                    if ((obj.object == "VIO") && (obj.type == "analogOutput")) {
+                                        VAOPTable.fillRow(obj);
+                                        document.getElementById("AOProw").setAttribute("class", "rowVisible");
+                                    }
+                                    if ((obj.object == "PIO") && (obj.type == "analogInput")) {
+                                        PAIPTable.fillRow(obj);
+                                        document.getElementById("AIProw").setAttribute("class", "rowVisible");
+                                    }
+                                    if ((obj.object == "PIO") && (obj.type == "analogOutput")) {
+                                        PAOPTable.fillRow(obj);
+                                        document.getElementById("AOProw").setAttribute("class", "rowVisible");
+                                    }
+                                    if ((obj.object == "VIO") && (obj.type == "stringInput")) {
+                                        VSIPTable.fillRow(obj);
+                                        document.getElementById("SIProw").setAttribute("class", "rowVisible");
+                                    }
+                                    if ((obj.object == "VIO") && (obj.type == "stringOutput")) {
+                                        VSOPTable.fillRow(obj);
+                                        document.getElementById("SOProw").setAttribute("class", "rowVisible");
+                                    }
+                                    if ((obj.object == "PIO") && (obj.type == "stringInput")) {
+                                        PSIPTable.fillRow(obj);
+                                        document.getElementById("SIProw").setAttribute("class", "rowVisible");
+                                    }
+                                    if ((obj.object == "PIO") && (obj.type == "stringOutput")) {
+                                        PSOPTable.fillRow(obj);
+                                        document.getElementById("SOProw").setAttribute("class", "rowVisible");
+                                    }
+                                }
+                            };
 
 
-                if ("WebSocket" in window)
-                {
-                    ws = new WebSocket("ws://192.168.0.5:2603");
-
-                    ws.onopen = function ()
-                    {
-                        document.getElementById("messageDiv").innerHTML += "websocket readystate=" + ws.readyState + " <br>";
-                        document.getElementById("messageDiv").innerHTML += "connected.<br>";
-                    };
-
-                    ws.onmessage = function (event)
-                    {
-                        if (event.data.length > 0) { 
-                            document.getElementById("messageDiv").innerHTML += "update " + event.data + "<br>";
-                            try {
-                                var obj = JSON.parse(event.data);
-                            } catch (e) {
-                                console.log("websocket : JSON syntax error");
-                            }
-                            if (obj.object == "PDEV") {
-                                PDEVTable.fillRow(obj);
-                                document.getElementById("DEVrow").setAttribute("class", "rowVisible");
-                            }
-                            if (obj.object == "VDEV") {
-                                VDEVTable.fillRow(obj);
-                                document.getElementById("DEVrow").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "VIO") && (obj.type == "digitalInput")) {
-                                VDIPTable.fillRow(obj);
-                                document.getElementById("DIProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "VIO") && (obj.type == "digitalOutput")) {
-                                VDOPTable.fillRow(obj);
-                                document.getElementById("DOProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "PIO") && (obj.type == "digitalInput")) {
-                                PDIPTable.fillRow(obj);
-                                document.getElementById("DIProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "PIO") && (obj.type == "digitalOutput")) {
-                                PDOPTable.fillRow(obj);
-                                document.getElementById("DOProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "VIO") && (obj.type == "analogInput")) {
-                                VAIPTable.fillRow(obj);
-                                document.getElementById("AIProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "VIO") && (obj.type == "analogOutput")) {
-                                VAOPTable.fillRow(obj);
-                                document.getElementById("AOProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "PIO") && (obj.type == "analogInput")) {
-                                PAIPTable.fillRow(obj);
-                                document.getElementById("AIProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "PIO") && (obj.type == "analogOutput")) {
-                                PAOPTable.fillRow(obj);
-                                document.getElementById("AOProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "VIO") && (obj.type == "stringInput")) {
-                                VSIPTable.fillRow(obj);
-                                document.getElementById("SIProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "VIO") && (obj.type == "stringOutput")) {
-                                VSOPTable.fillRow(obj);
-                                document.getElementById("SOProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "PIO") && (obj.type == "stringInput")) {
-                                PSIPTable.fillRow(obj);
-                                document.getElementById("SIProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "PIO") && (obj.type == "stringOutput")) {
-                                PSOPTable.fillRow(obj);
-                                document.getElementById("SOProw").setAttribute("class", "rowVisible");
-                            }
                         }
-                    };
 
-                    ws.onerror = function ()
-                    {
-                        alert("websocket error!..");
-                    };
+                        else
+                        {
 
-                    ws.onclose = function (evt)
-                    {
-                        document.getElementById("messageDiv").innerHTML += "closed code=" + evt.close + " reason=" + evt.reason + " <br>";
-                        alert("Connection is closed...");
-                    };
-                }
-
-                else
-                {
-
-                    alert("WebSocket NOT supported by your Browser!");
-                }
-/*
-                if (typeof (EventSource) !== "undefined") {
-                    var updateFeed = new EventSource("updateFeed.php");
-                    updateFeed.onmessage = function (event) {
-                        if (event.data.length > 0) {  // php sends empty string from time to time
-                            document.getElementById("messageDiv").innerHTML += "update " + event.data + "<br>";
-                            try {
-                                var obj = JSON.parse(event.data);
-                            } catch (e) {
-                                console.log("updateFeed: JSON syntax error");
-                            }
-                            if (obj.object == "PDEV") {
-                                PDEVTable.fillRow(obj);
-                                document.getElementById("DEVrow").setAttribute("class", "rowVisible");
-                            }
-                            if (obj.object == "VDEV") {
-                                VDEVTable.fillRow(obj);
-                                document.getElementById("DEVrow").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "VIO") && (obj.type == "digitalInput")) {
-                                VDIPTable.fillRow(obj);
-                                document.getElementById("DIProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "VIO") && (obj.type == "digitalOutput")) {
-                                VDOPTable.fillRow(obj);
-                                document.getElementById("DOProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "PIO") && (obj.type == "digitalInput")) {
-                                PDIPTable.fillRow(obj);
-                                document.getElementById("DIProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "PIO") && (obj.type == "digitalOutput")) {
-                                PDOPTable.fillRow(obj);
-                                document.getElementById("DOProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "VIO") && (obj.type == "analogInput")) {
-                                VAIPTable.fillRow(obj);
-                                document.getElementById("AIProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "VIO") && (obj.type == "analogOutput")) {
-                                VAOPTable.fillRow(obj);
-                                document.getElementById("AOProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "PIO") && (obj.type == "analogInput")) {
-                                PAIPTable.fillRow(obj);
-                                document.getElementById("AIProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "PIO") && (obj.type == "analogOutput")) {
-                                PAOPTable.fillRow(obj);
-                                document.getElementById("AOProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "VIO") && (obj.type == "stringInput")) {
-                                VSIPTable.fillRow(obj);
-                                document.getElementById("SIProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "VIO") && (obj.type == "stringOutput")) {
-                                VSOPTable.fillRow(obj);
-                                document.getElementById("SOProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "PIO") && (obj.type == "stringInput")) {
-                                PSIPTable.fillRow(obj);
-                                document.getElementById("SIProw").setAttribute("class", "rowVisible");
-                            }
-                            if ((obj.object == "PIO") && (obj.type == "stringOutput")) {
-                                PSOPTable.fillRow(obj);
-                                document.getElementById("SOProw").setAttribute("class", "rowVisible");
-                            }
+                            alert("WebSocket NOT supported by your Browser!");
                         }
-                    };
-                } else {
-                    document.getElementById("messageDiv").innerHTML = "This browser does not support server-sent events...";
-                }
-                if (typeof (EventSource) !== "undefined") {
-                    var messageFeed = new EventSource("messageFeed.php");
-                    messageFeed.onmessage = function (event) {
-                        if (event.data.length > 0) {  // php sends empty string from time to time
-                            //                       document.getElementById("messageDiv").innerHTML += event.data + "<br>";
-                        }
-                    };
-                } else {
-                    document.getElementById("messageDiv").innerHTML = "This browser does not support server-sent events...";
-                }
-*/
-            }
+                    }
             );
         </script>
 
