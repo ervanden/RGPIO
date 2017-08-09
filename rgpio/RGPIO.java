@@ -4,25 +4,18 @@ import rgpioutils.MessageType;
 import rgpioutils.MessageListener;
 import rgpioutils.MessageEvent;
 import utils.TimeStamp;
-import utils.ByteOrderMark;
-import utils.Console;
+
 import udputils.UDPSender;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import rgpioutils.ConfigurationFileEntry;
 import rgpioutils.DeviceFileEntry;
 import tcputils.TCPfeed;
-import tcputils.TCPServer_old;
 import tcputils.WSServer;
 import utils.JSON2Object;
 
@@ -136,15 +129,14 @@ public class RGPIO {
     public static VOutputMap VAnalogOutputMap;
     public static VOutputMap VStringOutputMap;
 
-    public static TCPfeed messageFeed=null;
-    public static WSServer updateFeed;
+    static ConfigurationFileEntry RGPIOConfiguration;
 
-    public static final int serverPort = 2600;  // server listens on this port for commands from devices
-    public static final int devicePort = 2500;  // devices listen on this port for server commands
-    public static final int messageFeedPort = 2601; // server listens on this port. Clients can connect to message feed.
-    public static final int clientRequestPort = 2602; // server listens on this port. Clients can send requests.
-    public static final int updateFeedPort = 2603;  // server listens on this port. Client can get status updates from this feed
-    public static final int reportInterval = 20; // server sends report request every reportInterval sec.
+    public static WSServer webSocketServer;
+
+    public static int serverPort = 2600;  // server listens on this port for commands from devices
+    public static int devicePort = 2500;  // devices listen on this port for server commands
+    public static int webSocketPort = 2603;
+    public static int reportInterval = 20; // server sends report request every reportInterval sec.
 
     public static void initialize(String configurationDir) {
 
@@ -157,7 +149,8 @@ public class RGPIO {
         VAnalogOutputMap = new VOutputMap(IOType.analogOutput);
         VStringOutputMap = new VOutputMap(IOType.stringOutput);
 
-        readDevicesFile(configurationDir);
+        readConfigurationFile(configurationDir + "RGPIO.txt");
+        readDevicesFile(configurationDir + "devices.txt");
 
         // Start listening to messages from devices
         new DeviceMonitorThread().start();
@@ -166,15 +159,10 @@ public class RGPIO {
         DeviceProbeThread deviceProbeThread = new DeviceProbeThread(reportInterval);
         deviceProbeThread.start();
 
-/*        
-        messageFeed = new TCPfeed(messageFeedPort);
-        messageFeed.start();
-*/
         ClientHandler clientHandler = new ClientHandler();
-        updateFeed = new WSServer(updateFeedPort);
-        System.out.println("adding listener");
-        updateFeed.addListener(clientHandler);
-        updateFeed.start();
+        webSocketServer = new WSServer(webSocketPort);
+        webSocketServer.addListener(clientHandler);
+        webSocketServer.start();
     }
 
     public static VDevice VDevice(String name) {
@@ -183,7 +171,7 @@ public class RGPIO {
             MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "VDevice is not defined in devices.txt ";
             e.vdevice = name;
-            RGPIO.message(e);
+            message(e);
         }
         return vdev;
     }
@@ -194,7 +182,7 @@ public class RGPIO {
             MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "VDigitalInput is not defined in devices.txt ";
             e.vinput = name;
-            RGPIO.message(e);
+            message(e);
         }
         return (VDigitalInput) vin;
     }
@@ -205,7 +193,7 @@ public class RGPIO {
             MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "VDigitalOutput is not defined in devices.txt ";
             e.voutput = name;
-            RGPIO.message(e);
+            message(e);
         }
         return (VDigitalOutput) vout;
     }
@@ -216,7 +204,7 @@ public class RGPIO {
             MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "VAnalogInput is not defined in devices.txt ";
             e.vinput = name;
-            RGPIO.message(e);
+            message(e);
         }
         return (VAnalogInput) vin;
     }
@@ -227,7 +215,7 @@ public class RGPIO {
             MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "VAnalogOutput is not defined in devices.txt ";
             e.voutput = name;
-            RGPIO.message(e);
+            message(e);
         }
         return (VAnalogOutput) vout;
     }
@@ -238,7 +226,7 @@ public class RGPIO {
             MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "VStringInput is not defined in devices.txt ";
             e.vinput = name;
-            RGPIO.message(e);
+            message(e);
         }
         return (VStringInput) vin;
     }
@@ -249,7 +237,7 @@ public class RGPIO {
             MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "VStringOutput is not defined in devices.txt ";
             e.voutput = name;
-            RGPIO.message(e);
+            message(e);
         }
         return (VStringOutput) vout;
     }
@@ -269,14 +257,7 @@ public class RGPIO {
     public static void message(MessageEvent e) {
 
         // This method forwards the messages from RGPIO.
-        
         // Send the message  to clients connected to the message feed
-/*
-        if (updateFeed != null) {  // when running as device, there is no messageFeed
-            updateFeed.sendToAll(e.toJSON());
-        }
-*/
-
         // Call all the listeners
         for (MessageListener l : listeners) {
             try {
@@ -289,14 +270,28 @@ public class RGPIO {
     public static void printMaps(String title) {
 //        System.out.println("===== maps after " + title + " =======");
 //        System.out.println("\nDevice vdevice map\n");
-        RGPIO.VDeviceMap.print();
+        VDeviceMap.print();
 //        System.out.println("\nDigital input map\n");
-        RGPIO.VDigitalInputMap.print();
+        VDigitalInputMap.print();
 //        System.out.println("\nDigital output map\n");
-        RGPIO.VDigitalOutputMap.print();
+        VDigitalOutputMap.print();
 //        System.out.println();
 //        System.out.println("\nPhysical devices\n");
-        RGPIO.PDeviceMap.print();
+        PDeviceMap.print();
+    }
+
+    public static void readConfigurationFile(String fileName) {
+        ArrayList<Object> l;
+        l = JSON2Object.readJSONFile(fileName, ConfigurationFileEntry.class);
+        Object o = l.get(0); // configuration file should only have 1 json object
+        RGPIOConfiguration = (ConfigurationFileEntry) o;
+        System.out.println(RGPIOConfiguration.toString());
+
+        serverPort = RGPIOConfiguration.serverPort;
+        devicePort = RGPIOConfiguration.devicePort;
+        webSocketPort = RGPIOConfiguration.webSocketPort;
+        reportInterval = RGPIOConfiguration.reportInterval;
+
     }
 
     public static void readDevicesFile(String fileName) {
@@ -304,7 +299,7 @@ public class RGPIO {
         l = JSON2Object.readJSONFile(fileName, DeviceFileEntry.class);
         for (Object o : l) {
             DeviceFileEntry dfe = (DeviceFileEntry) o;
-            System.out.println(dfe.toString());
+//            System.out.println(dfe.toString());
             VDevice device = null;
             VInput vinput = null;
             VOutput voutput = null;
@@ -313,25 +308,25 @@ public class RGPIO {
             String pin = null;
 
             if (dfe.Device != null) {
-                device = RGPIO.VDeviceMap.add(dfe.Device);
+                device = VDeviceMap.add(dfe.Device);
             }
             if (dfe.DigitalInput != null) {
-                vinput = RGPIO.VDigitalInputMap.add(dfe.DigitalInput);
+                vinput = VDigitalInputMap.add(dfe.DigitalInput);
             }
             if (dfe.DigitalOutput != null) {
-                voutput = RGPIO.VDigitalOutputMap.add(dfe.DigitalOutput);
+                voutput = VDigitalOutputMap.add(dfe.DigitalOutput);
             }
             if (dfe.AnalogInput != null) {
-                vinput = RGPIO.VAnalogInputMap.add(dfe.AnalogInput);
+                vinput = VAnalogInputMap.add(dfe.AnalogInput);
             }
             if (dfe.AnalogOutput != null) {
-                voutput = RGPIO.VAnalogOutputMap.add(dfe.AnalogOutput);
+                voutput = VAnalogOutputMap.add(dfe.AnalogOutput);
             }
             if (dfe.StringInput != null) {
-                vinput = RGPIO.VStringInputMap.add(dfe.StringInput);
+                vinput = VStringInputMap.add(dfe.StringInput);
             }
             if (dfe.StringOutput != null) {
-                voutput = RGPIO.VStringOutputMap.add(dfe.StringOutput);
+                voutput = VStringOutputMap.add(dfe.StringOutput);
             }
             if (dfe.Model != null) {
                 model = dfe.Model;
@@ -379,128 +374,10 @@ public class RGPIO {
             if (selectors != 1) {
                 MessageEvent e = new MessageEvent(MessageType.Info);
                 e.description = "Skipped invalid entry : " + dfe.toString() + " selectors=" + selectors;
-                RGPIO.message(e);
+                message(e);
             }
 
         }
     }
 
-    public static void readDevicesFile2(String fileName) {
-
-        BufferedReader inputStream;
-
-        try {
-            System.out.println("Opening " + fileName);
-            File file = new File(fileName);
-            InputStream is = new FileInputStream(file);
-            InputStreamReader isr = new InputStreamReader(is, "UTF-8");
-            inputStream = new BufferedReader(isr);
-
-            int lineCount = 0;
-            String inputLine;
-            while ((inputLine = inputStream.readLine()) != null) {
-                if (lineCount == 0) {
-                    inputLine = ByteOrderMark.remove(inputLine);
-                }
-
-                lineCount++;
-                VDevice device = null;
-                VInput vinput = null;
-                VOutput voutput = null;
-                String model = null;
-                String HWid = null;
-                String pin = null;
-
-                String[] nameValuePairs = inputLine.split("/");
-                String name;
-                String value;
-                for (String nameValue : nameValuePairs) {
-                    //                   System.out.println(lineCount + " " + nameValue);
-                    String[] nv = nameValue.split(":");
-                    name = nv[0];
-                    value = nv[1];
-                    if (name.equals("Device")) {
-                        device = RGPIO.VDeviceMap.add(value);
-                    }
-                    if (name.equals("DigitalInput")) {
-                        vinput = RGPIO.VDigitalInputMap.add(value);
-                    }
-                    if (name.equals("DigitalOutput")) {
-                        voutput = RGPIO.VDigitalOutputMap.add(value);
-                    }
-                    if (name.equals("AnalogInput")) {
-                        vinput = RGPIO.VAnalogInputMap.add(value);
-                    }
-                    if (name.equals("AnalogOutput")) {
-                        voutput = RGPIO.VAnalogOutputMap.add(value);
-                    }
-                    if (name.equals("StringInput")) {
-                        vinput = RGPIO.VStringInputMap.add(value);
-                    }
-                    if (name.equals("StringOutput")) {
-                        voutput = RGPIO.VStringOutputMap.add(value);
-                    }
-                    if (name.equals("Model")) {
-                        model = value;
-                    }
-                    if (name.equals("HWid")) {
-                        HWid = value;
-                    }
-                    if (name.equals("Pin")) {
-                        pin = value;
-                    }
-                }
-
-                int selectors = 0;
-                if (device != null) {
-                    if (model != null) {
-                        device.addSelectSpec(null, "Model", model);
-                        selectors++;
-                    }
-                    if (HWid != null) {
-                        device.addSelectSpec(null, "HWid", HWid);
-                        selectors++;
-                    }
-                }
-                if ((voutput != null) && (pin != null)) {
-                    if (model != null) {
-                        voutput.addSelectSpec(pin, "Model", model);
-                        selectors++;
-                    }
-                    if (HWid != null) {
-                        voutput.addSelectSpec(pin, "HWid", HWid);
-                        selectors++;
-                    }
-                }
-
-                if ((vinput != null) && (pin != null)) {
-                    if (model != null) {
-                        vinput.addSelectSpec(pin, "Model", model);
-                        selectors++;
-                    }
-                    if (HWid != null) {
-                        vinput.addSelectSpec(pin, "HWid", HWid);
-                        selectors++;
-                    }
-                }
-
-                if (selectors != 1) {
-                    MessageEvent e = new MessageEvent(MessageType.Info);
-                    e.description = "skipped line : " + inputLine + " selectors " + selectors;
-                    RGPIO.message(e);
-                }
-
-            }
-            System.out.println("read from " + fileName + " : " + lineCount + " lines");
-            inputStream.close();
-        } catch (FileNotFoundException fnf) {
-            MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "file not found : " + fileName;
-            RGPIO.message(e);
-        } catch (IOException io) {
-            MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "io exception while reading file : " + fileName;
-            RGPIO.message(e);
-        }
-    }
 }

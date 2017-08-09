@@ -44,15 +44,15 @@ public class ExampleServer implements VInputListener, MessageListener {
 
     public void start() {
 
-        String deviceFile;
+        String configDir;
         if (System.getProperty("file.separator").equals("/")) {
-            deviceFile = System.getProperty("user.home") + "/git/RGPIO/run/devices.txt";
+            configDir = System.getProperty("user.home") + "/git/RGPIO/run/";
         } else {
-            deviceFile = System.getProperty("user.home") + "\\Documents\\RGPIO\\devices.txt";
+            configDir = System.getProperty("user.home") + "\\Documents\\RGPIO\\";
         }
 
         RGPIO.addMessageListener(this);
-        RGPIO.initialize(deviceFile);
+        RGPIO.initialize(configDir);
 
         // wait until TCPfeed and TCPclient listeners are ready
         try {
