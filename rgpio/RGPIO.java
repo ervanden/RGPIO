@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import rgpioutils.ConfigurationFileEntry;
 import rgpioutils.DeviceFileEntry;
-import tcputils.TCPfeed;
 import tcputils.WSServer;
 import utils.JSON2Object;
 
@@ -283,8 +282,18 @@ public class RGPIO {
     public static void readConfigurationFile(String fileName) {
         ArrayList<Object> l;
         l = JSON2Object.readJSONFile(fileName, ConfigurationFileEntry.class);
-        Object o = l.get(0); // configuration file should only have 1 json object
-        RGPIOConfiguration = (ConfigurationFileEntry) o;
+        if (l.size() != 1) {
+            System.out.println("Expected 1 JSON object in RGPIO configuration file, found : " + l.size());
+            System.out.println("Using defaults...");
+            ConfigurationFileEntry RGPIOConfiguration=new ConfigurationFileEntry();
+            RGPIOConfiguration.serverPort=2600;
+            RGPIOConfiguration.devicePort=2500;
+            RGPIOConfiguration.webSocketPort=2603;
+            RGPIOConfiguration.reportInterval=20;
+        } else {
+            Object o = l.get(0);
+            RGPIOConfiguration = (ConfigurationFileEntry) o;
+        }
         System.out.println(RGPIOConfiguration.toString());
 
         serverPort = RGPIOConfiguration.serverPort;
