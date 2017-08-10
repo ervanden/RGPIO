@@ -114,7 +114,8 @@ public class JSON2Object {
                 OutputStreamWriter isr = new OutputStreamWriter(is, "UTF-8");
                 BufferedWriter outputStream = new BufferedWriter(isr);
 
-                outputStream.write("{\n");
+                outputStream.write("{");
+                String separator="";
                 for (Object someObject : objects) {
  //                   System.out.println(":::object " + someObject.getClass().getName());
                     for (Field field : someObject.getClass().getDeclaredFields()) {
@@ -123,13 +124,14 @@ public class JSON2Object {
 //                            System.out.println(":::field " + field.getName());
                             Object value = field.get(someObject);
                             if (value != null) {
-                                outputStream.write("\""+field.getName() + "\":\"" + value+"\",\n");
+                                outputStream.write(separator+"\n\""+field.getName() + "\":\"" + value+"\"");
+                                separator=",";
                             }
                         } catch (IllegalAccessException iae) {
                         }
                     }
                 }
-                outputStream.write("}\n");
+                outputStream.write("\n}");
                 outputStream.close();
 
             } catch (IOException io) {
