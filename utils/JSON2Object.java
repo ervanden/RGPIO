@@ -114,10 +114,10 @@ public class JSON2Object {
                 OutputStreamWriter isr = new OutputStreamWriter(is, "UTF-8");
                 BufferedWriter outputStream = new BufferedWriter(isr);
 
-                outputStream.write("{");
-                String separator = "";
                 for (Object someObject : objects) {
                     //                   System.out.println(":::object " + someObject.getClass().getName());
+                    outputStream.write("{");
+                    String separator = "";
                     for (Field field : someObject.getClass().getDeclaredFields()) {
                         field.setAccessible(true); // You might want to set modifier to public first.
                         try {
@@ -136,8 +136,8 @@ public class JSON2Object {
                         } catch (IllegalAccessException iae) {
                         }
                     }
+                    outputStream.write("\n}\n");
                 }
-                outputStream.write("\n}");
                 outputStream.close();
 
             } catch (IOException io) {
