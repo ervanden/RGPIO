@@ -125,6 +125,10 @@ public class JSON2Object {
                             Object value = field.get(someObject);
                             if (value != null) {
                                 outputStream.write(separator+"\n\""+field.getName() + "\":\"" + value+"\"");
+                          outputStream.write(" "+field.getType().getName());
+                         outputStream.write(" "+field.getType().getTypeName());
+                  
+         
                                 separator=",";
                             }
                         } catch (IllegalAccessException iae) {

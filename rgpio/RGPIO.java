@@ -293,6 +293,11 @@ public class RGPIO {
             if (l.size()==0){
                 ArrayList<Object> lw = new ArrayList<>();
                 lw.add(RGPIOConfiguration);
+                DeviceFileEntry d = new DeviceFileEntry();
+                d.Pin="pin";
+                d.Model="model";
+                d.HWid="12345";
+                lw.add(d);
                 JSON2Object.writeJSONFile(fileName,lw);
             }
         } else {
