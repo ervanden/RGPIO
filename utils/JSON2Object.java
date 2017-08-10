@@ -101,21 +101,24 @@ public class JSON2Object {
             e.printStackTrace();
         }
         return jsonObject;
-        
+
     }
 
     public static void writeJSONFile(String fileName, ArrayList<Object> objects) {
 
-        for ( Object someObject : objects){
-        for (Field field : someObject.getClass().getDeclaredFields()) {
-            field.setAccessible(true); // You might want to set modifier to public first.
-            try {
-            Object value = field.get(someObject);
-            if (value != null) {
-                System.out.println(field.getName() + "=" + value);
+        for (Object someObject : objects) {
+            System.out.println(":::object " + someObject.getClass().getName());
+            for (Field field : someObject.getClass().getDeclaredFields()) {
+                field.setAccessible(true); // You might want to set modifier to public first.
+                try {
+                    System.out.println(":::field " + field.getName());
+                    Object value = field.get(someObject);
+                    if (value != null) {
+                        System.out.println(field.getName() + "=" + value);
+                    }
+                } catch (IllegalAccessException iae) {
+                }
             }
-            } catch (IllegalAccessException iae){}
-        }
         }
 
         {
