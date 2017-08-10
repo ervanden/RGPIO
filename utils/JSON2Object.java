@@ -106,21 +106,6 @@ public class JSON2Object {
 
     public static void writeJSONFile(String fileName, ArrayList<Object> objects) {
 
-        for (Object someObject : objects) {
-            System.out.println(":::object " + someObject.getClass().getName());
-            for (Field field : someObject.getClass().getDeclaredFields()) {
-                field.setAccessible(true); // You might want to set modifier to public first.
-                try {
-                    System.out.println(":::field " + field.getName());
-                    Object value = field.get(someObject);
-                    if (value != null) {
-                        System.out.println(field.getName() + "=" + value);
-                    }
-                } catch (IllegalAccessException iae) {
-                }
-            }
-        }
-
         {
             try {
 
@@ -129,13 +114,26 @@ public class JSON2Object {
                 OutputStreamWriter isr = new OutputStreamWriter(is, "UTF-8");
                 BufferedWriter outputStream = new BufferedWriter(isr);
 
-                outputStream.write("zzz");
-                outputStream.newLine();
-
+                outputStream.write("{\n");
+                for (Object someObject : objects) {
+ //                   System.out.println(":::object " + someObject.getClass().getName());
+                    for (Field field : someObject.getClass().getDeclaredFields()) {
+                        field.setAccessible(true); // You might want to set modifier to public first.
+                        try {
+//                            System.out.println(":::field " + field.getName());
+                            Object value = field.get(someObject);
+                            if (value != null) {
+                                outputStream.write("\""+field.getName() + "\":\"" + value+"\",\n");
+                            }
+                        } catch (IllegalAccessException iae) {
+                        }
+                    }
+                }
+                outputStream.write("}\n");
                 outputStream.close();
 
             } catch (IOException io) {
-
+            System.out.println("io exception");
             }
 
         }
