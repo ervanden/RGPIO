@@ -285,7 +285,7 @@ public class RGPIO {
         if (l.size() != 1) {
             System.out.println("Expected 1 JSON object in RGPIO configuration file, found : " + l.size());
             System.out.println("Using defaults...");
-            ConfigurationFileEntry RGPIOConfiguration=new ConfigurationFileEntry();
+            RGPIOConfiguration=new ConfigurationFileEntry();
             RGPIOConfiguration.serverPort=2600;
             RGPIOConfiguration.devicePort=2500;
             RGPIOConfiguration.webSocketPort=2603;
