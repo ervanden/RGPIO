@@ -21,6 +21,7 @@ public class DeviceFileEntry {
         public String StringInput;
         public String StringOutput;
         public String Pin;
+                
 
         public String toString() {
             String s = "";

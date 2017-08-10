@@ -115,21 +115,23 @@ public class JSON2Object {
                 BufferedWriter outputStream = new BufferedWriter(isr);
 
                 outputStream.write("{");
-                String separator="";
+                String separator = "";
                 for (Object someObject : objects) {
- //                   System.out.println(":::object " + someObject.getClass().getName());
+                    //                   System.out.println(":::object " + someObject.getClass().getName());
                     for (Field field : someObject.getClass().getDeclaredFields()) {
                         field.setAccessible(true); // You might want to set modifier to public first.
                         try {
 //                            System.out.println(":::field " + field.getName());
                             Object value = field.get(someObject);
                             if (value != null) {
-                                outputStream.write(separator+"\n\""+field.getName() + "\":\"" + value+"\"");
-                          outputStream.write(" "+field.getType().getName());
-                         outputStream.write(" "+field.getType().getTypeName());
-                  
-         
-                                separator=",";
+                                if (field.getType().getName().equals("java.lang.String")) {
+                                    outputStream.write(separator + "\n\"" + field.getName() + "\":\"" + value + "\"");
+                                } else if (field.getType().getName().equals("java.lang.Integer")) { // no quotes
+                                    outputStream.write(separator + "\n\"" + field.getName() + "\":" + value + "");
+                                } else {
+                                    System.out.println("Field type not implemented in JSON2Object class:" + field.getType().getName());
+                                }
+                                separator = ",";
                             }
                         } catch (IllegalAccessException iae) {
                         }
@@ -139,7 +141,7 @@ public class JSON2Object {
                 outputStream.close();
 
             } catch (IOException io) {
-            System.out.println("io exception");
+                System.out.println("io exception");
             }
 
         }
