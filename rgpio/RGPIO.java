@@ -292,7 +292,7 @@ public class RGPIO {
             RGPIOConfiguration.reportInterval=20;
             if (l.size()==0){
                 ArrayList<Object> lw = new ArrayList<>();
-                l.add(RGPIOConfiguration);
+                lw.add(RGPIOConfiguration);
                 JSON2Object.writeJSONFile(fileName,lw);
             }
         } else {
