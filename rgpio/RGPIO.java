@@ -290,6 +290,11 @@ public class RGPIO {
             RGPIOConfiguration.devicePort=2500;
             RGPIOConfiguration.webSocketPort=2603;
             RGPIOConfiguration.reportInterval=20;
+            if (l.size()==0){
+                ArrayList<Object> lw = new ArrayList<>();
+                l.add(RGPIOConfiguration);
+                JSON2Object.writeJSONFile(fileName,lw);
+            }
         } else {
             Object o = l.get(0);
             RGPIOConfiguration = (ConfigurationFileEntry) o;

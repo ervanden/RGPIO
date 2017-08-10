@@ -12,6 +12,11 @@ import java.util.ArrayList;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.Field;
 
 // utility to parse a file that contains JSON objects.
 // readJSONFile() reads the JSON objects and returns a list of java objects.
@@ -19,10 +24,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 // A class must exist which has as fields (must be public fields)  all the possible JSON object properties.
 // This class must be given as parameter. 
 // The returned objects can be cast to this class and the fields can then be used.
-
 public class JSON2Object {
 
-    public static ArrayList<Object> readJSONFile(String fileName,Class<?> valueType) {
+    public static ArrayList<Object> readJSONFile(String fileName, Class<?> valueType) {
 
         BufferedReader inputStream;
         ArrayList<Object> jsonObjects = new ArrayList<>();
@@ -48,7 +52,7 @@ public class JSON2Object {
                 if (c == '}') {
                     nbrackets--;
                 }
-    
+
                 if (nbrackets > 0) {
                     if ((c == '\n') || (c == '\r')) {
                         json = json + ' ';
@@ -60,11 +64,11 @@ public class JSON2Object {
                     if (c == '}') {
                         json = json + c;
                         System.out.println("JSON=" + json);
-                        jsonObjects.add(jsonStringToObject(json,valueType));
+                        jsonObjects.add(jsonStringToObject(json, valueType));
                         json = "";
                     }
                 }
-                if (nbrackets <0){
+                if (nbrackets < 0) {
                     System.out.println("Extraneous } ignored");
                 }
             }
@@ -82,9 +86,9 @@ public class JSON2Object {
         return jsonObjects;
     }
 
-    public static Object jsonStringToObject(String jsonString,Class<?> valueType) {
+    public static Object jsonStringToObject(String jsonString, Class<?> valueType) {
 
-        Object jsonObject=null;
+        Object jsonObject = null;
         ObjectMapper mapper = new ObjectMapper();
 
         try {
@@ -97,6 +101,41 @@ public class JSON2Object {
             e.printStackTrace();
         }
         return jsonObject;
+        
     }
 
+    public static void writeJSONFile(String fileName, ArrayList<Object> objects) {
+
+        for ( Object someObject : objects){
+        for (Field field : someObject.getClass().getDeclaredFields()) {
+            field.setAccessible(true); // You might want to set modifier to public first.
+            try {
+            Object value = field.get(someObject);
+            if (value != null) {
+                System.out.println(field.getName() + "=" + value);
+            }
+            } catch (IllegalAccessException iae){}
+        }
+        }
+
+        {
+            try {
+
+                File initialFile = new File(fileName);
+                OutputStream is = new FileOutputStream(initialFile);
+                OutputStreamWriter isr = new OutputStreamWriter(is, "UTF-8");
+                BufferedWriter outputStream = new BufferedWriter(isr);
+
+                outputStream.write("zzz");
+                outputStream.newLine();
+
+                outputStream.close();
+
+            } catch (IOException io) {
+
+            }
+
+        }
+
+    }
 }
