@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+    <body>
+
+
+        <!--
+        -->
+
+        <style type="text/css">
+            table  {border-collapse:collapse;border-spacing:0;}
+            table td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+            table th{font-family:Arial, sans-serif;font-size:14px;font-weight:bold;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+            table .cellActive{background-color:#00ff00}
+            table .cellNotresponding{background-color:#e6e6e6}
+            table .cellHigh{background-color:#ff4d4d}
+            table .cellLow{background-color:#b3ccff}
+            input.white {background-color:white}
+            input.green {background-color:green}
+            input.grey {background-color:grey}
+            input.red {background-color:red}
+        </style>
+
+        <form>
+            RGPIO Server:
+            <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://192.168.0.5:2603">
+            <button type="button" id="connectButton">Connect</button>
+        </form>
+        <br>
+
+
+        <div id="dropzone"  ondrop="drop(event)" ondragover="allowDrop(event)" style="position:relative;border:1px solid #d3d3d3;height:600px">
+
+        </div>
+        <!--
+                <div id="tableDiv" ></div>
+                    <table id="objects">
+                    </table>
+                </div>
+        -->
+
+        <div id="messageDiv" style="overflow-y:scroll; height:400px;border-style:solid;border-width:1px;"></div>
+
+        <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+        <script>
+
+     function loadObjectImage(name) {
+         var objImage = new Image();
+         objImage.onload = function (e) {
+             console.log("image " + objImage.src + " is loaded");
+             if (objImage.src.endsWith(".jpg"))
+                 console.log("it was a jpg file");
+             if (objImage.src.endsWith(".png"))
+                 console.log("it was a png file");
+             objImage.width = 100;
+             objImage.height = 100 * (objImage.naturalHeight / objImage.naturalWidth);
+         }
+         objImage.onerror = function (e) {
+             console.log("image " + objImage.src + " was not found");
+             if (objImage.src.endsWith(".jpg")) {
+                 console.log("it was a jpg file, trying png");
+                 objImage.src = objImage.src.replace(".jpg", ".png");
+             }
+         }
+         objImage.src = '/RGPIO/html/icons/' + name + '.jpg';
+         return objImage;
+     }
+
+     function objectToTable(obj) {
+//console.log('creating property table');
+         var proptable = document.createElement('table');
+         for (var key in obj) {
+//console.log('adding '+key+' ' +obj[key]);
+             var row = document.createElement('tr');
+             proptable.appendChild(row);
+             var namecell = document.createElement('td');
+             namecell.innerHTML = key;
+             row.appendChild(namecell);
+             var valuecell = document.createElement('td');
+             valuecell.innerHTML = obj[key];
+             row.appendChild(valuecell);
+         }
+//console.log('done creating property table');
+         /*
+          */
+         var table = document.createElement('table');
+         var onlyrow = document.createElement('tr');
+         table.appendChild(onlyrow);
+// cell with image
+         var imgcell = document.createElement('td');
+         var objImage = loadObjectImage(obj.name);
+         imgcell.appendChild(objImage);
+         onlyrow.appendChild(imgcell);
+// cell with properties
+         var propcell = document.createElement('td');
+         propcell.appendChild(proptable);
+         onlyrow.appendChild(propcell);
+
+         return table;
+     }
+
+
+
+     function findPos(obj) {
+         var curleft = curtop = 0;
+         if (obj.offsetParent) {
+             do {
+                 curleft += obj.offsetLeft;
+                 curtop += obj.offsetTop;
+             } while (obj = obj.offsetParent);
+             return [curleft, curtop];
+         }
+     }
+
+     function allowDrop(ev) {
+         ev.preventDefault();
+     }
+
+     function drag(ev) {
+         console.log("drag " + ev.target.id + " clientX,clientY " + ev.clientX + " " + ev.clientY);
+         console.log("drag " + ev.target.id + " target offset from parent " + ev.target.offsetLeft + " " + ev.target.offsetTop);
+         console.log("drag parentElement " + ev.target.parentElement.id);
+         console.log("drag offsetParent " + ev.target.offsetParent.id);
+         if (ev.target.parentElement !== ev.target.offsetParent) {
+             alert("parentElement is not the same as offsetElement: need to modify html");
+         }
+         var pos = findPos(ev.target.parentElement);
+         var parentX = pos[0];
+         var parentY = pos[1];
+         //console.log("drag parent position " + parentX + " " + parentY);
+         var relX = ev.clientX - parentX - ev.target.offsetLeft;
+         var relY = ev.clientY - parentY - ev.target.offsetTop;
+         //console.log("drag cursor relative to " + ev.target.id + " " + relX + " " + relY);
+         ev.dataTransfer.setData("objID", ev.target.id);
+         ev.dataTransfer.setData("relX", relX);
+         ev.dataTransfer.setData("relY", relY);
+     }
+
+     function drop(ev) {
+         ev.preventDefault();
+         var data = ev.dataTransfer.getData("objID");
+         var relX = Number(ev.dataTransfer.getData("relX"));
+         var relY = Number(ev.dataTransfer.getData("relY"));
+         var img = document.getElementById(data);
+         console.log("dropping : " + data);
+         console.log("dropping on : " + ev.target.id);
+         var canvasX = ev.clientX - ev.target.offsetLeft - relX;
+         var canvasY = ev.clientY - ev.target.offsetTop - relY;
+         console.log("drop : " + canvasX + " " + canvasY);
+
+         if (ev.target !== img) { // this happens sometimes... when dragging too close to the edge of the drop target
+             img.parentElement.removeChild(img);
+             ev.target.appendChild(img);
+             img.style.position = "absolute";
+             img.style.top = canvasY + "px";
+             img.style.left = canvasX + "px";
+         }
+     }
+
+
+
+
+     $("#connectButton").click(
+             function () {
+
+                 if ("WebSocket" in window)
+                 {
+                     var serverAddress = document.getElementById('serverAddress').value;
+                     ws = new WebSocket(serverAddress);
+
+                     ws.onopen = function ()
+                     {
+//                        document.getElementById("messageDiv").innerHTML += "websocket readystate=" + ws.readyState + " <br>";
+//                        document.getElementById("messageDiv").innerHTML += "connected.<br>";
+                         document.getElementById("serverAddress").className = "green";
+                         ws.send("status");
+                     };
+
+                     ws.onclose = function (evt)
+                     {
+                         document.getElementById("serverAddress").className = "red";
+//                        document.getElementById("messageDiv").innerHTML += "closed code=" + evt.close + " reason=" + evt.reason + " <br>";
+                     };
+
+                     ws.onerror = function ()
+                     {
+                         document.getElementById("serverAddress").className = "red";
+                     };
+
+                     ws.onmessage = function (event)
+                     {
+                         if (event.data.length > 0) {
+                             document.getElementById("messageDiv").innerHTML += event.data + "<br>";
+                             try {
+                                 var obj = JSON.parse(event.data);
+                                 /*
+                                  var objectsTable = document.getElementById("objects");
+                                  var objectTable= objectToTable(obj);
+                                  var row = document.createElement('tr');
+                                  var cell = document.createElement('td');
+                                  cell.appendChild(objectTable);
+                                  row.appendChild(cell);
+                                  objectsTable.appendChild(row);
+                                  */
+                                 var dropzone = document.getElementById("dropzone");
+                                 var objectTable = objectToTable(obj);
+                                 objectTable.id = obj.name;
+                                 dropzone.appendChild(objectTable);
+                                 objectTable.draggable = true;
+                                 objectTable.ondragstart = drag;
+
+
+                             } catch (e) {
+                                 console.log("websocket : JSON syntax error");
+                             }
+
+
+
+                         }
+                     };
+
+
+                 }
+
+                 else
+                 {
+
+                     alert("WebSocket NOT supported by your Browser!");
+                 }
+             }
+     );
+        </script>
+
+    </body>
+</html>
