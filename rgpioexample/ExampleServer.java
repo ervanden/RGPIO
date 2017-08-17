@@ -46,7 +46,7 @@ public class ExampleServer implements VInputListener, MessageListener {
 
         String configDir;
         if (System.getProperty("file.separator").equals("/")) {
-            configDir = System.getProperty("/home/pi/git/RGPIO/run/");
+            configDir = "/home/pi/git/RGPIO/run/";
         } else {
             configDir = System.getProperty("user.home") + "\\Documents\\RGPIO\\";
         }
