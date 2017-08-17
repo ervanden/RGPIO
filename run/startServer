@@ -1,0 +1,23 @@
+#! /bin/bash
+
+aaa=$(pgrep -f  main/RGPIOmain)
+if [  -n "$aaa"  ]
+then
+echo RGPIO server is running, kill it first. Exiting...
+exit
+fi
+
+loglink=/home/pi/logs/RGPIOlogfile
+logfile=/home/pi/logs/log-`date +%d-%m@%H:%M`
+[ -f $loglink ] && rm $loglink
+touch $logfile
+ln -s $logfile $loglink
+
+
+
+(
+cd /home/pi/git/RGPIO/run
+java -cp /home/pi/git/RGPIO:/home/pi/git/RGPIO/lib/'*' main/RGPIOmain server
+)  >> $loglink 2>&1 &
+
+
