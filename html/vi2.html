@@ -27,7 +27,7 @@
         <br>
 
 
-        <div id="dropzone"  ondrop="drop(event)" ondragover="allowDrop(event)" style="position:relative;border:1px solid #d3d3d3;height:600px">
+        <div id="dropzone"  ondrop="drop(event)" ondragover="allowDrop(event)" style="position:relative;border:1px solid #d3d3d3;height:900px">
 
         </div>
         <!--
@@ -44,22 +44,18 @@
         <script>
 
 g_dropzone = document.getElementById("dropzone");
+g_objects = new Object();
 
-     function loadObjectImage(name) {
+     function createObjectImage(name) {
          var objImage = new Image();
          objImage.onload = function (e) {
-             console.log("image " + objImage.src + " is loaded");
-             if (objImage.src.endsWith(".jpg"))
-                 console.log("it was a jpg file");
-             if (objImage.src.endsWith(".png"))
-                 console.log("it was a png file");
              objImage.width = 100;
              objImage.height = 100 * (objImage.naturalHeight / objImage.naturalWidth);
          }
          objImage.onerror = function (e) {
-             console.log("image " + objImage.src + " was not found");
+             //console.log("image " + objImage.src + " was not found");
              if (objImage.src.endsWith(".jpg")) {
-                 console.log("it was a jpg file, trying png");
+                 //console.log("it was a jpg file, trying png");
                  objImage.src = objImage.src.replace(".jpg", ".png");
              }
          }
@@ -67,7 +63,7 @@ g_dropzone = document.getElementById("dropzone");
          return objImage;
      }
 
-     function objectToTable(obj) {
+     function createObjectPropertyTable(obj) {
 //console.log('creating property table');
          var proptable = document.createElement('table');
          for (var key in obj) {
@@ -90,8 +86,11 @@ g_dropzone = document.getElementById("dropzone");
              row.appendChild(valuecell);
          }
 //console.log('done creating property table');
-         /*
-          */
+         return proptable;
+     }
+
+
+     function createObjectVisual(obj) {
          var table = document.createElement('table');
          var onlyrow = document.createElement('tr');
          table.appendChild(onlyrow);
@@ -101,7 +100,7 @@ g_dropzone = document.getElementById("dropzone");
          imgcell.style.fontSize="14px";
          imgcell.style.padding="5px 2px";
          imgcell.style.borderStyle="none";
-         var objImage = loadObjectImage(obj.name);
+         var objImage = createObjectImage(obj.name);
          imgcell.appendChild(objImage);
          onlyrow.appendChild(imgcell);
 // cell with properties
@@ -110,13 +109,24 @@ g_dropzone = document.getElementById("dropzone");
          propcell.style.fontSize="14px";
          propcell.style.padding="5px 2px";
          propcell.style.borderStyle="none";
+         var proptable=createObjectPropertyTable(obj);
          propcell.appendChild(proptable);
          onlyrow.appendChild(propcell);
-
          return table;
      }
 
 
+     function updateObjectVisual(visual,key,value){
+console.log("update visual "+key+" "+value);
+console.log(visual.tagName);
+      var proptable=visual.rows[0].cells[1];
+      for (var i = 0, row; row = proptable.rows[i]; i++) {
+console.log("  "+row.cells[0].innerHTML+" = "+row.cells[1].innerHTML);
+       if (row.cells[0].innerHTML === key) {
+        row.cells[1].innerHTML=value
+       }
+      }
+     }
 
      function findPos(obj) {
          var curleft = curtop = 0;
@@ -206,19 +216,84 @@ g_dropzone = document.getElementById("dropzone");
                              document.getElementById("messageDiv").innerHTML += event.data + "<br>";
                              try {
                                  var obj = JSON.parse(event.data);
-                                 var objectTable = objectToTable(obj);
-                                 objectTable.id = obj.name;
-                                 g_dropzone.appendChild(objectTable);
-                                 objectTable.draggable = true;
-                                 objectTable.ondragstart = drag;
-
-
                              } catch (e) {
                                  console.log("websocket : JSON syntax error");
                              }
+                             if (typeof obj != "undefined" ) {
 
+                                    if (obj.object == "PDEV") {
+                                     obj.key=obj.HWid;
+                                    }
+                                    if (obj.object == "VDEV") {
+                                     obj.key=obj.name;
+                                    }
+                                    if (obj.object == "VIO") {
+                                     obj.key=obj.name;
+                                    }
+                                    if (obj.object == "PIO") {
+                                     obj.key=obj.device+"/"+obj.name;
+                                    }
 
+                                 if ("key" in obj) {
+                                  if (! (obj.key in g_objects)) {  // first time this object is sent by the server
 
+                                    if ((obj.object == "VDEV") || (obj.object == "PDEV") || (obj.object == "VIO")) {
+                                     // visual is an icon and a table with properties
+                                     var objectVisual = createObjectVisual(obj);
+                                     objectVisual.id = obj.key; // must have an id to make it draggable
+                                     g_dropzone.appendChild(objectVisual);
+                                     objectVisual.draggable = true;
+                                     objectVisual.ondragstart = drag;
+                                    }
+                                    if (obj.object == "PIO") {
+                                     // create a property with the name of this PIO in the PDEV it belongs to
+                                     var pdev = g_objects[obj.device];
+                                     pdev[obj.name]=obj.value;
+                                     // replace the device visual by an updated one
+                                     g_dropzone.removeChild(pdev.visual);
+                                     var pdevVisual = createObjectVisual(pdev);
+                                     pdevVisual.id = pdev.key; // must have an id to make it draggable
+                                     g_dropzone.appendChild(pdevVisual);
+                                     pdevVisual.draggable = true;
+                                     pdevVisual.ondragstart = drag;
+//         pdevVisual.style.position = "absolute";
+//         pdevVisual.style.top = pdev.visual.top;
+//         pdevVisual.left = pdev.visual.left;
+                                     pdev.visual=pdevVisual;
+                                     // the visual for the  PIO is an entry in the device property table
+                                     objectVisual=null;
+
+                                    }
+// Add the object visual as a property to the object
+                                   obj.visual=objectVisual;
+// Put the object in g_objects. 
+// The key depends on the type of object
+                                  g_objects[obj.key]=obj;
+
+                                  }  else {   // server sent an update of the object
+
+                                    if ((obj.object == "VDEV") || (obj.object == "PDEV") || (obj.object == "VIO")) {
+                                     var presentObject=g_objects[obj.key];
+                                     for (var key in obj) {
+                                      if (presentObject[key] !== obj[key]) {
+                                       console.log("object "+obj.key+" prop:"+key+" changed from "+presentObject[key]+" to "+obj[key]);
+                                       presentObject[key]=obj[key];
+                                       updateObjectVisual(presentObject.visual,key,obj[key]);
+                                      }
+                                     }
+                                    }
+                                    if (obj.object == "PIO") {
+                                     var presentDevice = g_objects[obj.device];
+                                      if (presentDevice[obj.name] !== obj.value) {
+                                       console.log("object "+presentDevice.key+" prop:"+obj.name+" changed from "+presentDevice[obj.name]+" to "+obj.value);
+                                       presentDevice[obj.name]=obj.value;
+                                      }
+     //                                updateObjectVisual(obj);
+                                    }
+                                  }
+                                 }
+
+                            }
                          }
                      };
 
@@ -236,3 +311,6 @@ g_dropzone = document.getElementById("dropzone");
 
     </body>
 </html>
+
+
+
