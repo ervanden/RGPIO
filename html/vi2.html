@@ -45,6 +45,18 @@
 
 g_dropzone = document.getElementById("dropzone");
 g_objects = new Object();
+g_hidden = [ "visual", "key", "object" ];
+g_cellColors = {
+                "ACTIVE": "cellActive",
+                "NOTRESPONDING": "cellNotresponding",
+                "High": "cellHigh",
+                "Low": "cellLow"
+            };
+
+
+function includes(arr,obj) {
+    return (arr.indexOf(obj) != -1);
+}
 
      function createObjectImage(name) {
          var objImage = new Image();
@@ -67,23 +79,27 @@ g_objects = new Object();
 //console.log('creating property table');
          var proptable = document.createElement('table');
          for (var key in obj) {
-//console.log('adding '+key+' ' +obj[key]);
-             var row = document.createElement('tr');
-             proptable.appendChild(row);
-             var namecell = document.createElement('td');
-         namecell.style.fontFamily="Arial, sans-serif";
-         namecell.style.fontSize="14px";
-         namecell.style.padding="5px 2px";
-         namecell.style.borderStyle="none";
-             namecell.innerHTML = key;
-             row.appendChild(namecell);
-             var valuecell = document.createElement('td');
-         valuecell.style.fontFamily="Arial, sans-serif";
-         valuecell.style.fontSize="14px";
-         valuecell.style.padding="5px 2px";
-         valuecell.style.borderStyle="none";
-             valuecell.innerHTML = obj[key];
-             row.appendChild(valuecell);
+             var value=obj[key];
+             if (! includes(g_hidden,key)) {
+ //console.log('adding '+key+' ' +obj[key]);
+              var row = document.createElement('tr');
+              proptable.appendChild(row);
+              var namecell = document.createElement('td');
+          namecell.style.fontFamily="Arial, sans-serif";
+          namecell.style.fontSize="14px";
+          namecell.style.padding="5px 2px";
+          namecell.style.borderStyle="none";
+              namecell.innerHTML = key;
+              row.appendChild(namecell);
+              var valuecell = document.createElement('td');
+          valuecell.style.fontFamily="Arial, sans-serif";
+          valuecell.style.fontSize="14px";
+          valuecell.style.padding="5px 2px";
+          valuecell.style.borderStyle="none";
+              valuecell.innerHTML = value;
+              if (value in g_cellColors) valuecell.setAttribute("class", g_cellColors[value]);
+              row.appendChild(valuecell);
+          }
          }
 //console.log('done creating property table');
          return proptable;
@@ -117,13 +133,18 @@ g_objects = new Object();
 
 
      function updateObjectVisual(visual,key,value){
+
 console.log("update visual "+key+" "+value);
-console.log(visual.tagName);
-      var proptable=visual.rows[0].cells[1];
+
+  var tablerows=visual.getElementsByTagName('TR');
+  var rowentries=tablerows[0].getElementsByTagName('TD');
+  // one of the cells contains an image, the other cell contains the table of properties
+  if (rowentries[0].children[0].tagName ==="TABLE") proptable=rowentries[0].children[0];
+  if (rowentries[1].children[0].tagName ==="TABLE") proptable=rowentries[1].children[0];
       for (var i = 0, row; row = proptable.rows[i]; i++) {
-console.log("  "+row.cells[0].innerHTML+" = "+row.cells[1].innerHTML);
        if (row.cells[0].innerHTML === key) {
-        row.cells[1].innerHTML=value
+        row.cells[1].innerHTML=value;
+             if (value in g_cellColors) row.cells[1].setAttribute("class", g_cellColors[value]);
        }
       }
      }
@@ -288,7 +309,7 @@ console.log("  "+row.cells[0].innerHTML+" = "+row.cells[1].innerHTML);
                                        console.log("object "+presentDevice.key+" prop:"+obj.name+" changed from "+presentDevice[obj.name]+" to "+obj.value);
                                        presentDevice[obj.name]=obj.value;
                                       }
-     //                                updateObjectVisual(obj);
+                                     updateObjectVisual(presentDevice.visual,obj.name,obj.value);
                                     }
                                   }
                                  }
@@ -311,6 +332,3 @@ console.log("  "+row.cells[0].innerHTML+" = "+row.cells[1].innerHTML);
 
     </body>
 </html>
-
-
-
