@@ -46,6 +46,7 @@
             <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://192.168.0.5:2603">
             <button type="button" id="connectButton">Connect</button>
             <button type="button" id="propertySelectButton">Properties</button>
+            <button type="button" id="saveDrawingButton">Save Drawing</button>
         </form>
         <br>
 
@@ -78,7 +79,7 @@
             var g_allProperties = new Set();
             var g_hiddenProperties = new Set();
             g_hiddenProperties.add("key");
-            g_hiddenProperties.add("type");
+            g_hiddenProperties.add("visual");
 
             g_cellColors = {
                 "ACTIVE": "cellActive",
@@ -91,7 +92,8 @@
 
             g_selectList = document.createElement("select");
             g_selectList.multiple = true;
-            document.getElementById("modalform").insertBefore(g_selectList, g_modalform.childNodes[0]);
+            modalform = document.getElementById("modalform");
+            modalform.insertBefore(g_selectList, modalform.childNodes[0]);
             g_modal = document.getElementById('myModal');
 
 // load and display the dropzone background image
@@ -122,14 +124,14 @@
 
             function createObjectPropertyTable(obj) {
                 var proptable = document.createElement('table');
-                proptable.id="propertyTable";
+                proptable.className = "propertyTable";
                 for (var key in obj) {
                     var value = obj[key];
                     //console.log('adding '+key+' ' +obj[key]);
                     var row = document.createElement('tr');
-                    row.id="propertyRow";
+                    row.className = "propertyRow";
                     proptable.appendChild(row);
-                    
+
                     var namecell = document.createElement('td');
                     namecell.style.fontFamily = "Arial, sans-serif";
                     namecell.style.fontSize = "14px";
@@ -137,7 +139,7 @@
                     namecell.style.borderStyle = "none";
                     namecell.innerHTML = key;
                     row.appendChild(namecell);
-                    
+
                     var valuecell = document.createElement('td');
                     valuecell.style.fontFamily = "Arial, sans-serif";
                     valuecell.style.fontSize = "14px";
@@ -150,7 +152,7 @@
 
                     // if the property is encountered for the first time, add to g_allProperties and
                     // create an option in the select element
-                    
+
                     if (!g_allProperties.has(key)) {
                         g_allProperties.add(key);
 
@@ -171,6 +173,7 @@
 
             function createObjectVisual(obj) {
                 var table = document.createElement('table');
+                table.className = "objectVisual";
                 table.style.backgroundColor = "white";
                 var onlyrow = document.createElement('tr');
                 table.appendChild(onlyrow);
@@ -198,15 +201,7 @@
 
             function updateObjectVisual(visual, key, value) {
 
-                console.log("update visual " + key + " " + value);
-
-                var tablerows = visual.getElementsByTagName('TR');
-                var rowentries = tablerows[0].getElementsByTagName('TD');
-                // one of the cells contains an image, the other cell contains the table of properties
-                if (rowentries[0].children[0].tagName === "TABLE")
-                    proptable = rowentries[0].children[0];
-                if (rowentries[1].children[0].tagName === "TABLE")
-                    proptable = rowentries[1].children[0];
+                proptable = visual.getElementsByClassName("propertyTable")[0];
                 for (var i = 0, row; row = proptable.rows[i]; i++) {
                     if (row.cells[0].innerHTML === key) {
                         row.cells[1].innerHTML = value;
@@ -395,16 +390,36 @@
                     }
             );
 
-/*
-            function includes(arr, obj) {
-                return (arr.indexOf(obj) != -1);
-            }
-*/
+            /*
+             function includes(arr, obj) {
+             return (arr.indexOf(obj) != -1);
+             }
+             */
 
 // set the hidden properties to 'selected' and open the modal 
 
-            var btn = document.getElementById("propertySelectButton");
-            btn.onclick = function () {
+            document.getElementById("saveDrawingButton").onclick = function () {
+
+                visuals = g_dropzone.getElementsByClassName("objectVisual");
+                for (var i = 0, visual; visual = visuals; i++) {
+                    console.log(" object visual " + visual);
+                    // find the key of this object
+                    proptable = visual.getElementsByClassName("propertyTable")[0];
+                    for (var i = 0, row; row = proptable.rows[i]; i++) {
+                        var key;
+                        if (row.cells[0].innerHTML === "key") {
+                            key = value;
+                        }
+                        console.log("    key=" + key);
+                    }
+                }
+
+
+            }
+
+// set the hidden properties to 'selected' and open the modal 
+
+            document.getElementById("propertySelectButton").onclick = function () {
                 var options = Array.from(g_selectList.childNodes);
                 console.log(" select options: " + options.length);
                 options.forEach(function (option) {
@@ -426,11 +441,24 @@
             applyButton.onclick = function () {
                 var options = Array.from(g_selectList.childNodes);
                 g_hiddenProperties.clear();
+                g_hiddenProperties.add("key");
+                g_hiddenProperties.add("visual");
                 options.forEach(function (opt) {
                     if (opt.selected)
                         g_hiddenProperties.add(opt.innerHTML);
                 });
                 g_modal.style.display = "none";
+
+                // hide the properties in g_hiddenProperties
+
+                propRows = document.getElementsByClassName("propertyRow");
+                for (var i = 0, row; row = propRows[i]; i++) {
+                    var keycell = row.children[0];
+                    if (g_hiddenProperties.has(keycell.innerHTML)) {
+                        row.style.display = "none";
+                    }
+                }
+
 
             }
 
@@ -451,3 +479,4 @@
 
     </body>
 </html>
+
