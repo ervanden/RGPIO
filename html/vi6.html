@@ -46,6 +46,7 @@
             <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://192.168.0.5:2603">
             <button type="button" id="connectButton">Connect</button>
             <button type="button" id="propertySelectButton">Properties</button>
+            <button type="button" id="deviceSelectButton">Devices</button>
             <button type="button" id="saveDrawingButton">Save Drawing</button>
         </form>
         <br>
@@ -55,12 +56,22 @@
 
         </div>
 
-        <!-- property selection modal box, hidden by default-->
-        <div id="myModal" class="modal">
+        <!-- device selection modal box, hidden by default-->
+        <div id="deviceModal" class="modal">
             <div class="modal-content">
-                <form id="modalform">
-                    <button type="button" id="applyButton">Apply</button>
-                    <button type="button" id="cancelButton">Cancel</button>
+                <form id="devicemodalform">
+                    <button type="button" id="deviceApply">Apply</button>
+                    <button type="button" id="deviceCancel">Cancel</button>
+                </form>
+            </div>
+
+        </div>
+        <!-- property selection modal box, hidden by default-->
+        <div id="propertyModal" class="modal">
+            <div class="modal-content">
+                <form id="propertymodalform">
+                    <button type="button" id="propertyApply">Apply</button>
+                    <button type="button" id="propertyCancel">Cancel</button>
                 </form>
             </div>
 
@@ -88,13 +99,21 @@
                 "Low": "cellLow"
             };
 
+// create the selector in the device selection modal and insert as leftmost element
+
+            g_deviceSelect = document.createElement("select");
+            g_deviceSelect.multiple = true;
+            devicemodalform = document.getElementById("devicemodalform");
+            devicemodalform.insertBefore(g_deviceSelect, devicemodalform.childNodes[0]);
+            g_deviceModal = document.getElementById('deviceModal');
+
 // create the selector in the property selection modal and insert as leftmost element
 
-            g_selectList = document.createElement("select");
-            g_selectList.multiple = true;
-            modalform = document.getElementById("modalform");
-            modalform.insertBefore(g_selectList, modalform.childNodes[0]);
-            g_modal = document.getElementById('myModal');
+            g_propertySelect = document.createElement("select");
+            g_propertySelect.multiple = true;
+            propertymodalform = document.getElementById("propertymodalform");
+            propertymodalform.insertBefore(g_propertySelect, propertymodalform.childNodes[0]);
+            g_propertyModal = document.getElementById('propertyModal');
 
 // load and display the dropzone background image
 
@@ -159,7 +178,7 @@
                         var option = document.createElement("option");
                         option.value = key;
                         option.text = key;
-                        g_selectList.appendChild(option);
+                        g_propertySelect.appendChild(option);
 //                        console.log("there are " + g_allProperties.size + " different properties");
                     }
                     if (g_hiddenProperties.has(key)) {
@@ -174,6 +193,10 @@
             function createObjectVisual(obj) {
                 var table = document.createElement('table');
                 table.className = "objectVisual";
+                table.style.position = "absolute";
+                table.style.top = "0px";
+                table.style.left = "0px";
+
                 table.style.backgroundColor = "white";
                 var onlyrow = document.createElement('tr');
                 table.appendChild(onlyrow);
@@ -196,6 +219,18 @@
                 propcell.appendChild(proptable);
                 onlyrow.appendChild(propcell);
                 return table;
+            }
+
+            function visualToObject(visual) {
+                // lookup the object's key in the property table
+                var proptable = visual.getElementsByClassName("propertyTable")[0];
+                for (var j = 0, row; row = proptable.rows[j]; j++) {
+                    var key;
+                    if (row.cells[0].innerHTML === "key") {
+                        key = row.cells[1].innerHTML;
+                    }
+                }
+                return g_objects[key];
             }
 
 
@@ -352,6 +387,14 @@
 // The key depends on the type of object
                                                 g_objects[obj.key] = obj;
 
+// create an option in the  device select element
+                                                var option = document.createElement("option");
+                                                option.value = obj.key;
+                                                option.text = obj.key;
+                                                g_deviceSelect.appendChild(option);
+//                        console.log("there are " + g_allProperties.size + " different properties");
+
+
                                             } else {   // server sent an update of the object
 
                                                 if ((obj.object == "VDEV") || (obj.object == "PDEV") || (obj.object == "VIO")) {
@@ -396,34 +439,42 @@
              }
              */
 
-// set the hidden properties to 'selected' and open the modal 
 
             document.getElementById("saveDrawingButton").onclick = function () {
 
                 visuals = g_dropzone.getElementsByClassName("objectVisual");
-console.log(" nr of visuals "+visuals.length);
+                console.log(" nr of visuals " + visuals.length);
                 for (var i = 0, visual; visual = visuals[i]; i++) {
-                    console.log(" object visual " + visual);
-                    // find the key of this object
-                    var proptable = visual.getElementsByClassName("propertyTable")[0];
-                    for (var j = 0, row; row = proptable.rows[j]; j++) {
-                        var key;
-//console.log(" looking for key  "+row.cells[0].innerHTML+" "+row.cells[1].innerHTML);
-                        if (row.cells[0].innerHTML === "key") {
-                            key = row.cells[1].innerHTML;
-                        }
-                    }
-                    console.log("    key=" + key);
-                    console.log("      x="+visual.style.left+" y="+visual.style.top);
-                }
+                    var obj = visualToObject(visual);
+                    //console.log(" visual   object.key=" + obj.key+"   x="+visual.style.left+" y="+visual.style.top);
+                    var store = new Object();
+                    store.key = obj.key;
+                    console.log(" obj key " + obj.key);
+                    console.log(typeof visual.style.top);
+                    console.log(typeof visual.style.left);
+                    store.left = visual.style.left;
+                    store.top = visual.style.top;
 
+                    var msg = new Object();
+                    msg.cmd = "store";
+                    msg.arg1 = "floorplan3";
+                    msg.arg2 = JSON.stringify(store);
+
+                    console.log(JSON.stringify(msg));
+                    console.log(msg.cmd);
+                    console.log(msg.arg1);
+                    console.log(msg.arg2);
+
+                }
 
             }
 
-// set the hidden properties to 'selected' and open the modal 
+
+// property selection modal 
 
             document.getElementById("propertySelectButton").onclick = function () {
-                var options = Array.from(g_selectList.childNodes);
+                // set the hidden properties to 'selected' and open the modal 
+                var options = Array.from(g_propertySelect.childNodes);
                 console.log(" select options: " + options.length);
                 options.forEach(function (option) {
                     if (g_hiddenProperties.has(option.value)) {
@@ -432,17 +483,17 @@ console.log(" nr of visuals "+visuals.length);
                         option.selected = false;
                     }
                 });
-                g_selectList.size = options.length; // display all properties
+                g_propertySelect.size = options.length; // display all properties
 
-                g_modal.style.display = "block";
+                g_propertyModal.style.display = "block";
             }
 
 
 // when apply is clicked, the list g_hiddenProps is rebuilt with the selected properties
 
-            var applyButton = document.getElementById("applyButton");
-            applyButton.onclick = function () {
-                var options = Array.from(g_selectList.childNodes);
+            var propertyApply = document.getElementById("propertyApply");
+            propertyApply.onclick = function () {
+                var options = Array.from(g_propertySelect.childNodes);
                 g_hiddenProperties.clear();
                 g_hiddenProperties.add("key");
                 g_hiddenProperties.add("visual");
@@ -450,7 +501,7 @@ console.log(" nr of visuals "+visuals.length);
                     if (opt.selected)
                         g_hiddenProperties.add(opt.innerHTML);
                 });
-                g_modal.style.display = "none";
+                g_propertyModal.style.display = "none";
 
                 // hide the properties in g_hiddenProperties
 
@@ -459,6 +510,8 @@ console.log(" nr of visuals "+visuals.length);
                     var keycell = row.children[0];
                     if (g_hiddenProperties.has(keycell.innerHTML)) {
                         row.style.display = "none";
+                    } else {
+                        row.style.display = "";
                     }
                 }
 
@@ -466,15 +519,58 @@ console.log(" nr of visuals "+visuals.length);
             }
 
 
-            var cancelButton = document.getElementById("cancelButton");
-            cancelButton.onclick = function () {
-                g_modal.style.display = "none";
+            var propertyCancel = document.getElementById("propertyCancel");
+            propertyCancel.onclick = function () {
+                g_propertyModal.style.display = "none";
             }
+
+// device selection modal 
+
+            document.getElementById("deviceSelectButton").onclick = function () {
+                // set the visible devices to 'selected' and open the modal
+                var options = Array.from(g_deviceSelect.childNodes);
+                console.log(" select options: " + options.length);
+                options.forEach(function (option) {
+                    if (g_objects[option.value].visual.style.display === "none") {
+                        option.selected = true;
+                    } else {
+                        option.selected = false;
+                    }
+                });
+                g_deviceSelect.size = options.length; // display all properties
+
+                g_deviceModal.style.display = "block";
+            }
+
+
+            var deviceApply = document.getElementById("deviceApply");
+            deviceApply.onclick = function () {
+                var options = Array.from(g_deviceSelect.childNodes);
+                options.forEach(function (option) {
+                    if (option.selected) {
+                        g_objects[option.value].visual.style.display = "none"
+                    } else {
+                        g_objects[option.value].visual.style.display = ""
+                    }
+                });
+
+                g_deviceModal.style.display = "none";
+            }
+
+
+            var deviceCancel = document.getElementById("deviceCancel");
+            deviceCancel.onclick = function () {
+                g_deviceModal.style.display = "none";
+            }
+
 
 // When the user clicks anywhere outside of the modal, close it
             window.onclick = function (event) {
-                if (event.target == g_modal) {
-                    g_modal.style.display = "none";
+                if (event.target == g_propertyModal) {
+                    g_propertyModal.style.display = "none";
+                }
+                if (event.target == g_deviceModal) {
+                    g_deviceModal.style.display = "none";
                 }
             }
 
