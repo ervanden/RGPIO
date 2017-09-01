@@ -5,10 +5,7 @@
  */
 package rgpioutils;
 
-/**
- *
- * @author ervanden
- */
+
 public class DeviceFileEntry {
 
         public String Device;

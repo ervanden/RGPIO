@@ -3,14 +3,21 @@ package rgpio;
 import rgpioutils.MessageType;
 import rgpioutils.MessageEvent;
 import java.util.ArrayList;
+import rgpioutils.WebClientCommand;
 import tcputils.*;
+import utils.JSON2Object;
 
 public class ClientHandler implements WSServerListener {
 
     public ArrayList<String> onClientRequest(String clientID, String request) {
         ArrayList<String> reply = new ArrayList<>();
 
-        if (request.equals("status")) {
+        WebClientCommand cmd;
+        cmd = (WebClientCommand) JSON2Object.jsonStringToObject(request, WebClientCommand.class);
+
+        System.out.println(cmd.toString());
+
+        if (cmd.Command.equals("status")) {
             for (PDevice d : RGPIO.PDeviceMap.values()) {
                 reply.add(d.toJSON());
                 for (PInput ip : d.inputs.values()) {

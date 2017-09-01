@@ -84,7 +84,7 @@
         <script>
 
 
-
+            var g_ws;
             var g_dropzone = document.getElementById("dropzone");
             var g_objects = new Object();
             var g_allProperties = new Set();
@@ -221,16 +221,16 @@
                 return table;
             }
 
-            function visualToObject(visual) {
-                // lookup the object's key in the property table
-                var proptable = visual.getElementsByClassName("propertyTable")[0];
-                for (var j = 0, row; row = proptable.rows[j]; j++) {
-                    var key;
-                    if (row.cells[0].innerHTML === "key") {
-                        key = row.cells[1].innerHTML;
+            function visualToObject(visual){
+                    // lookup the object's key in the property table
+                    var proptable = visual.getElementsByClassName("propertyTable")[0];
+                    for (var j = 0, row; row = proptable.rows[j]; j++) {
+                        var key;
+                        if (row.cells[0].innerHTML === "key") {
+                            key = row.cells[1].innerHTML;
+                        }
                     }
-                }
-                return g_objects[key];
+                    return g_objects[key];
             }
 
 
@@ -306,28 +306,28 @@
                         if ("WebSocket" in window)
                         {
                             var serverAddress = document.getElementById('serverAddress').value;
-                            ws = new WebSocket(serverAddress);
+                            g_ws = new WebSocket(serverAddress);
 
-                            ws.onopen = function ()
+                            g_ws.onopen = function ()
                             {
-//                        document.getElementById("messageDiv").innerHTML += "websocket readystate=" + ws.readyState + " <br>";
+//                        document.getElementById("messageDiv").innerHTML += "websocket readystate=" + g_ws.readyState + " <br>";
 //                        document.getElementById("messageDiv").innerHTML += "connected.<br>";
                                 document.getElementById("serverAddress").className = "green";
-                                ws.send("status");
+                                g_ws.send("status");
                             };
 
-                            ws.onclose = function (evt)
+                            g_ws.onclose = function (evt)
                             {
                                 document.getElementById("serverAddress").className = "red";
 //                        document.getElementById("messageDiv").innerHTML += "closed code=" + evt.close + " reason=" + evt.reason + " <br>";
                             };
 
-                            ws.onerror = function ()
+                            g_ws.onerror = function ()
                             {
                                 document.getElementById("serverAddress").className = "red";
                             };
 
-                            ws.onmessage = function (event)
+                            g_ws.onmessage = function (event)
                             {
                                 if (event.data.length > 0) {
                                     document.getElementById("messageDiv").innerHTML += event.data + "<br>";
@@ -387,13 +387,13 @@
 // The key depends on the type of object
                                                 g_objects[obj.key] = obj;
 
-// create an option in the  device select element
-                                                var option = document.createElement("option");
-                                                option.value = obj.key;
-                                                option.text = obj.key;
-                                                g_deviceSelect.appendChild(option);
-//                        console.log("there are " + g_allProperties.size + " different properties");
-
+// create an option in the  device select element (only if the object has a visual)
+                        if (obj.visual != null) {
+                         var option = document.createElement("option");
+                         option.value = obj.key;
+                         option.text = obj.key;
+                         g_deviceSelect.appendChild(option);
+                        }
 
                                             } else {   // server sent an update of the object
 
@@ -401,7 +401,6 @@
                                                     var presentObject = g_objects[obj.key];
                                                     for (var key in obj) {
                                                         if (presentObject[key] !== obj[key]) {
-                                                            console.log("object " + obj.key + " prop:" + key + " changed from " + presentObject[key] + " to " + obj[key]);
                                                             presentObject[key] = obj[key];
                                                             updateObjectVisual(presentObject.visual, key, obj[key]);
                                                         }
@@ -410,7 +409,6 @@
                                                 if (obj.object == "PIO") {
                                                     var presentDevice = g_objects[obj.device];
                                                     if (presentDevice[obj.name] !== obj.value) {
-                                                        console.log("object " + presentDevice.key + " prop:" + obj.name + " changed from " + presentDevice[obj.name] + " to " + obj.value);
                                                         presentDevice[obj.name] = obj.value;
                                                     }
                                                     updateObjectVisual(presentDevice.visual, obj.name, obj.value);
@@ -420,7 +418,7 @@
 
                                     }
                                 }
-                            };
+                            }
 
 
                         }
@@ -443,30 +441,27 @@
             document.getElementById("saveDrawingButton").onclick = function () {
 
                 visuals = g_dropzone.getElementsByClassName("objectVisual");
-                console.log(" nr of visuals " + visuals.length);
+console.log(" nr of visuals "+visuals.length);
                 for (var i = 0, visual; visual = visuals[i]; i++) {
-                    var obj = visualToObject(visual);
+                    var obj=visualToObject(visual);
                     //console.log(" visual   object.key=" + obj.key+"   x="+visual.style.left+" y="+visual.style.top);
-                    var store = new Object();
-                    store.key = obj.key;
-                    console.log(" obj key " + obj.key);
-                    console.log(typeof visual.style.top);
-                    console.log(typeof visual.style.left);
-                    store.left = visual.style.left;
-                    store.top = visual.style.top;
+                    var store=new Object();
+                    store.key=obj.key;
+                    store.left=visual.style.left;
+                    store.top=visual.style.top;
 
-                    var msg = new Object();
-                    msg.cmd = "store";
-                    msg.arg1 = "floorplan3";
-                    msg.arg2 = JSON.stringify(store);
+                    var msg=new Object();
+                    msg.cmd="store";
+                    msg.arg1="floorplan3";
+                    msg.arg2=JSON.stringify(store);
 
-                    console.log(JSON.stringify(msg));
+                    g_ws.send(JSON.stringify(msg));
                     console.log(msg.cmd);
                     console.log(msg.arg1);
                     console.log(msg.arg2);
-
+                    
                 }
-
+                
             }
 
 
@@ -548,9 +543,9 @@
                 var options = Array.from(g_deviceSelect.childNodes);
                 options.forEach(function (option) {
                     if (option.selected) {
-                        g_objects[option.value].visual.style.display = "none"
+g_objects[option.value].visual.style.display = "none"
                     } else {
-                        g_objects[option.value].visual.style.display = ""
+g_objects[option.value].visual.style.display = ""
                     }
                 });
 
