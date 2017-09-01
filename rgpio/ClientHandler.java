@@ -45,6 +45,10 @@ public class ClientHandler implements WSServerListener {
             for (VOutput op : RGPIO.VStringOutputMap.values()) {
                 reply.add(op.toJSON());
             }
+        } else if (cmd.Command.equals("store")) {
+            System.out.println("request to store");
+            System.out.println(" file " + cmd.Arg1);
+            System.out.println(" data " + cmd.Arg2);
         } else {
             MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "unrecognized request from client : |" + request + "|";

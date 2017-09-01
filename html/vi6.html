@@ -313,7 +313,9 @@
 //                        document.getElementById("messageDiv").innerHTML += "websocket readystate=" + g_ws.readyState + " <br>";
 //                        document.getElementById("messageDiv").innerHTML += "connected.<br>";
                                 document.getElementById("serverAddress").className = "green";
-                                g_ws.send("status");
+                                var cmd = new Object();
+                                cmd.Command="status";
+                                g_ws.send(JSON.stringify(cmd));
                             };
 
                             g_ws.onclose = function (evt)
@@ -445,20 +447,21 @@ console.log(" nr of visuals "+visuals.length);
                 for (var i = 0, visual; visual = visuals[i]; i++) {
                     var obj=visualToObject(visual);
                     //console.log(" visual   object.key=" + obj.key+"   x="+visual.style.left+" y="+visual.style.top);
-                    var store=new Object();
-                    store.key=obj.key;
-                    store.left=visual.style.left;
-                    store.top=visual.style.top;
+                    var position=new Object();
+                    position.object="POSITION";
+                    position.key=obj.key;
+                    position.left=visual.style.left;
+                    position.top=visual.style.top;
 
-                    var msg=new Object();
-                    msg.cmd="store";
-                    msg.arg1="floorplan3";
-                    msg.arg2=JSON.stringify(store);
+                    var cmd=new Object();
+                    cmd.Command="store";
+                    cmd.Arg1="floorplan3";
+                    cmd.Arg2=JSON.stringify(position);
 
-                    g_ws.send(JSON.stringify(msg));
-                    console.log(msg.cmd);
-                    console.log(msg.arg1);
-                    console.log(msg.arg2);
+                    g_ws.send(JSON.stringify(cmd));
+                    console.log(cmd.Command);
+                    console.log(cmd.Arg1);
+                    console.log(cmd.Arg2);
                     
                 }
                 
