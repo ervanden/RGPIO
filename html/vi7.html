@@ -211,11 +211,7 @@
                 imgcell.style.fontSize = "14px";
                 imgcell.style.padding = "5px 2px";
                 imgcell.style.borderStyle = "none";
-try {
                 var objImage = createObjectImage(obj.name, 50);
-} catch(err) {
-console.log("error message="+err.message);
-}
                 imgcell.appendChild(objImage);
                 onlyrow.appendChild(imgcell);
 // cell with properties
@@ -452,6 +448,10 @@ console.log("error message="+err.message);
 
             document.getElementById("saveDrawingButton").onclick = function () {
 
+                    var cmd=new Object();
+                    cmd.Command="store";
+                    cmd.Arg1="floorplan3";
+
                 visuals = g_dropzone.getElementsByClassName("objectVisual");
 console.log(" nr of visuals "+visuals.length);
                 for (var i = 0, visual; visual = visuals[i]; i++) {
@@ -463,17 +463,19 @@ console.log(" nr of visuals "+visuals.length);
                     position.left=visual.style.left;
                     position.top=visual.style.top;
 
-                    var cmd=new Object();
-                    cmd.Command="store";
-                    cmd.Arg1="floorplan3";
                     cmd.Arg2=JSON.stringify(position);
-
                     g_ws.send(JSON.stringify(cmd));
                     console.log(cmd.Command);
                     console.log(cmd.Arg1);
                     console.log(cmd.Arg2);
+
                     
                 }
+                    cmd.Arg2=".";
+                    g_ws.send(JSON.stringify(cmd));
+                    console.log(cmd.Command);
+                    console.log(cmd.Arg1);
+                    console.log(cmd.Arg2);
                 
             }
 

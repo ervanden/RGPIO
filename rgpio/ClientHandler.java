@@ -59,9 +59,17 @@ public class ClientHandler implements WSServerListener {
                 reply.add(op.toJSON());
             }
         } else if (cmd.Command.equals("store")) {
+            /*
+            store basename data1   -- file /home/pi/RGPIO/storage/basename.txt   is opened for writing
+                                   -- data1 is written
+            store basename data2   -- data2 is written
+            store basename data3   -- data3 is written
+            store basename .       -- file is closed
+            */
             if (openFile == null) {
-                try {
+                try {                                       
                     String fileName = "/home/pi/RGPIO/storage/" + cmd.Arg1 + ".txt";
+                    reply.add("opening file : "+fileName);
                     File file = new File(fileName);
                     OutputStream is = new FileOutputStream(file);
                     OutputStreamWriter isr = new OutputStreamWriter(is, "UTF-8");
@@ -75,6 +83,7 @@ public class ClientHandler implements WSServerListener {
             if (!cmd.Arg2.equals(".")) {
                 try {
                     openFile.write(cmd.Arg2);
+                    reply.add("storing : "+cmd.Arg2);
                     openFile.newLine();
                 } catch (IOException io) {
                     reply.add("IOException");
