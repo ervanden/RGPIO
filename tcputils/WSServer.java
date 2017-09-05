@@ -78,6 +78,7 @@ public class WSServer extends WebSocketServer {
         Console.println("REQUEST FROM CLIENT " + clientConnection + " : " + request);
         reply = listener.onClientRequest(clientConnection.toString(), request);
         for (String r : reply) {
+            Console.println(" reply : "+r);
             clientConnection.send(r);
         }
 
