@@ -1,10 +1,14 @@
 package rgpio;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -17,7 +21,7 @@ import utils.JSON2Object;
 
 public class ClientHandler implements WSServerListener {
 
-    BufferedWriter openFile = null;
+    BufferedWriter storeFile = null;
 
     public ClientHandler() {
     }
@@ -65,15 +69,15 @@ public class ClientHandler implements WSServerListener {
             store basename data2   -- data2 is written
             store basename data3   -- data3 is written
             store basename .       -- file is closed
-            */
-            if (openFile == null) {
-                try {                                       
+             */
+            if (storeFile == null) {
+                try {
                     String fileName = "/home/pi/RGPIO/storage/" + cmd.Arg1 + ".txt";
-                    reply.add("opening file : "+fileName);
+                    reply.add("opening file : " + fileName);
                     File file = new File(fileName);
                     OutputStream is = new FileOutputStream(file);
                     OutputStreamWriter isr = new OutputStreamWriter(is, "UTF-8");
-                    openFile = new BufferedWriter(isr);
+                    storeFile = new BufferedWriter(isr);
                 } catch (FileNotFoundException fnf) {
                     reply.add("File not found");
                 } catch (UnsupportedEncodingException uee) {
@@ -82,26 +86,52 @@ public class ClientHandler implements WSServerListener {
             }
             if (!cmd.Arg2.equals(".")) {
                 try {
-                    openFile.write(cmd.Arg2);
-                    reply.add("storing : "+cmd.Arg2);
-                    openFile.newLine();
+                    storeFile.write(cmd.Arg2);
+                    reply.add("storing : " + cmd.Arg2);
+                    storeFile.newLine();
                 } catch (IOException io) {
                     reply.add("IOException");
                 }
             } else {
                 try {
-                    openFile.close();
+                    storeFile.close();
                 } catch (IOException ioe) {
                     reply.add("IOException");
                 }
-                openFile = null;
+                storeFile = null;
+            }
+        } else if (cmd.Command.equals("load")) {
+            /*
+            store basename  -- file /home/pi/RGPIO/storage/basename.txt   is opened for reading
+                            -- and the content is sent back as reply
+             */
+
+            try {
+                BufferedReader loadFile = null;
+                String fileName = "/home/pi/RGPIO/storage/" + cmd.Arg1 + ".txt";
+                reply.add("opening file : " + fileName);
+                File file = new File(fileName);
+                InputStream is = new FileInputStream(file);
+                InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+                loadFile = new BufferedReader(isr);
+
+                String line;
+                while ((line = loadFile.readLine()) != null) {
+                    reply.add(line);
+                };
+                loadFile.close();
+
+            } catch (IOException ioe) {
+                reply.add("IO Exception");
             }
 
         } else {
             MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "unrecognized request from client : |" + request + "|";
+            e.description = "unrecognized websocket request : |" + request + "|";
             e.ipAddress = clientID;
             RGPIO.message(e);
+            
+            reply.add("unrecognized websocket request : "+request);
         }
 
         return reply;
