@@ -2,7 +2,36 @@ package rgpioexample;
 
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.*;
+import java.time.LocalDateTime;
 import pidevice.*;
+
+class SensorThread extends Thread {
+    
+    int interval;
+
+    public SensorThread(int interval) {
+        super("SensorThread");
+        this.interval=interval;
+    }
+
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(interval*1000);
+                LocalDateTime now = LocalDateTime.now();
+                int sec = now.getSecond();
+                if (sec > 30) {
+                    ExampleDevice.sensorValue = 60 - sec;
+                } else {
+                    ExampleDevice.sensorValue = sec;
+                }
+                System.out.println(" sensor value =  " + ExampleDevice.sensorValue);
+
+            } catch (InterruptedException ie) {
+            }
+        }
+    }
+}
 
 public class ExampleDevice implements SetCommandListener, GetCommandListener, GpioPinListenerDigital {
 
@@ -17,6 +46,8 @@ public class ExampleDevice implements SetCommandListener, GetCommandListener, Gp
     // analog input and analog output for test only, no effect on GPIO
     DeviceInput sensor;
     DeviceOutput timer;
+    
+    static int sensorValue=0;
 
     // corresponding GPIO pins
     static GpioController gpio;
@@ -83,6 +114,8 @@ public class ExampleDevice implements SetCommandListener, GetCommandListener, Gp
         timer.setCommandListener = this;
         sensor.getCommandListener = this;
 
+        (new SensorThread(1)).start();  // reads and modifies the value of the sensor every second
+                
         PiDevice.runDevice();
 
 // convert listener thread back to in line so runDevice does not exit
