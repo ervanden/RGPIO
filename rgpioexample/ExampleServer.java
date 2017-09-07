@@ -78,14 +78,8 @@ public class ExampleServer implements VInputListener, MessageListener {
 
         while (true) {
             try {
-                Thread.sleep(3000);
-                /*
-                 RGPIO.receiveFromDevice("192.168.0.99", "Report/HWid:1625496/Model:RELAY/Uptime:10/Dop:0/Dip:2");
-                 Thread.sleep(3000);
-                 RGPIO.receiveFromDevice("192.168.0.99", "Event/HWid:1625496/Model:RELAY/Dip:2/Value:Low");
-                 Thread.sleep(3000);
-                 RGPIO.receiveFromDevice("192.168.0.99", "Event/HWid:1625496/Model:RELAY/Dip:2/Value:High");
-                 */
+                Thread.sleep(5000);
+                sensor.get();
             } catch (InterruptedException ie) {
             }
         }

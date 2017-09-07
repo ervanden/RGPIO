@@ -47,7 +47,7 @@ public class ExampleDevice implements SetCommandListener, GetCommandListener, Gp
     DeviceInput sensor;
     DeviceOutput timer;
     
-    static int sensorValue=0;
+    static Integer sensorValue=0;
 
     // corresponding GPIO pins
     static GpioController gpio;
@@ -76,8 +76,7 @@ public class ExampleDevice implements SetCommandListener, GetCommandListener, Gp
             return ("?");   // impossible?
         }
         if (deviceInput == sensor) {
-            System.out.println("analog input <sensor> reads: 1000");
-            return ("1000");
+            return (sensorValue.toString());
         }
         return ("impossible!");
     }

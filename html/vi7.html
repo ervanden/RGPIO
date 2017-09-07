@@ -47,6 +47,7 @@
             <button type="button" id="connectButton">Connect</button>
             <button type="button" id="propertySelectButton">Properties</button>
             <button type="button" id="deviceSelectButton">Devices</button>
+            <button type="button" id="loadDrawingButton">Load Drawing</button>
             <button type="button" id="saveDrawingButton">Save Drawing</button>
         </form>
         <br>
@@ -341,7 +342,8 @@
                                     try {
                                         var obj = JSON.parse(event.data);
                                     } catch (e) {
-                                        console.log("websocket : JSON syntax error");
+                                        console.log("websocket : JSON syntax error: "+event.data);
+                                       
                                     }
                                     if (typeof obj != "undefined") {
 
@@ -360,6 +362,7 @@
 
                                         if ("key" in obj) {
                                             if (!(obj.key in g_allElements)) {  // first time this object is sent by the server
+                                    document.getElementById("messageDiv").innerHTML += " first occurrence<br>";
 
                                                 if ((obj.object == "VDEV") || (obj.object == "PDEV") || (obj.object == "VIO")) {
                                                     // visual is an icon and a table with properties
@@ -391,12 +394,12 @@
 // Add the object visual as a property to the object
                                                 obj.visual = objectVisual;
 
-//  If the element has a visual representation:
-//    -  put the object in g_allElements. 
-//    - create an option in the  device select element
+// Put the object in g_allElements, so that next messages are treated as update
 
-                        if (obj.visual != null) {
                          g_allElements[obj.key] = obj;
+// Create an option in the  device select element. PIO can not be selected, since its visual is an entry in the property table
+// that is controlled by g_hiddenProperties
+                        if ((obj.object == "VDEV") || (obj.object == "PDEV") || (obj.object == "VIO")) {
                          var option = document.createElement("option");
                          option.value = obj.key;
                          option.text = obj.key;
@@ -407,12 +410,18 @@
 
                                                 if ((obj.object == "VDEV") || (obj.object == "PDEV") || (obj.object == "VIO")) {
                                                     var presentObject = g_allElements[obj.key];
+                                                    if (("top" in obj) && ("left" in obj)) {
+                                                      presentObject.visual.style.left=obj.left;
+                                                      presentObject.visual.style.top=obj.top;
+
+                                                    } else {
                                                     for (var key in obj) {
                                                         if (presentObject[key] !== obj[key]) {
                                                             presentObject[key] = obj[key];
                                                             updateObjectVisual(presentObject.visual, key, obj[key]);
                                                         }
                                                     }
+                                                  }
                                                 }
                                                 if (obj.object == "PIO") {
                                                     var presentDevice = g_allElements[obj.device];
@@ -453,13 +462,18 @@
                     cmd.Arg1="floorplan3";
 
                 visuals = g_dropzone.getElementsByClassName("objectVisual");
-console.log(" nr of visuals "+visuals.length);
                 for (var i = 0, visual; visual = visuals[i]; i++) {
                     var obj=visualToObject(visual);
                     //console.log(" visual   object.key=" + obj.key+"   x="+visual.style.left+" y="+visual.style.top);
                     var position=new Object();
-                    position.object="POSITION";
-                    position.key=obj.key;
+                    position.object=obj.object;
+                    // store HWid or name so that the element key can be reconstructed from the object
+                    if ((obj.object == "VDEV") || (obj.object == "VIO")) {
+                     position.name=obj.name;
+                    }
+                    if (obj.object == "PDEV") {
+                     position.HWid=obj.HWid;
+                    }
                     position.left=visual.style.left;
                     position.top=visual.style.top;
 
@@ -477,6 +491,13 @@ console.log(" nr of visuals "+visuals.length);
                     console.log(cmd.Arg1);
                     console.log(cmd.Arg2);
                 
+            }
+
+            document.getElementById("loadDrawingButton").onclick = function () {
+                    var cmd=new Object();
+                    cmd.Command="load";
+                    cmd.Arg1="floorplan3";
+                    g_ws.send(JSON.stringify(cmd));
             }
 
 
