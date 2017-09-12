@@ -1,14 +1,10 @@
 package rgpio;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -100,29 +96,27 @@ public class ClientHandler implements WSServerListener {
                 }
                 storeFile = null;
             }
-        } else if (cmd.Command.equals("load")) {
+        } else if (cmd.Command.equals("backgrounds")) {
             /*
-            store basename  -- file /home/pi/RGPIO/storage/basename.txt   is opened for reading
-                            -- and the content is sent back as reply
-             */
+            backgrounds  -- the names of all files in  /home/pi/git/RGPIO/html/backgrounds are returned to the client
+            */
 
-            try {
-                BufferedReader loadFile = null;
-                String fileName = "/home/pi/RGPIO/storage/" + cmd.Arg1 + ".txt";
-                reply.add("opening file : " + fileName);
-                File file = new File(fileName);
-                InputStream is = new FileInputStream(file);
-                InputStreamReader isr = new InputStreamReader(is, "UTF-8");
-                loadFile = new BufferedReader(isr);
+            String dir;
+            dir= "C:\\Users\\ervanden\\Documents\\java\\RGPIO\\html\\backgrounds";
+            dir="/home/pi/git/RGPIO/html/backgrounds";
 
-                String line;
-                while ((line = loadFile.readLine()) != null) {
-                    reply.add(line);
-                };
-                loadFile.close();
-
-            } catch (IOException ioe) {
-                reply.add("IO Exception");
+            File[] files = new File(dir).listFiles();//If dir does not denote a directory, then listFiles() returns null. 
+            String basename = "";
+            String fullname = "";
+            for (File file : files) {
+                if (file.isFile()) {
+                    fullname = file.getName();
+                    int pos = fullname.lastIndexOf(".");
+                    if (pos > 0) {
+                        basename = fullname.substring(0, pos);
+                    }
+                    reply.add(basename);
+                }
             }
 
         } else {
@@ -130,8 +124,8 @@ public class ClientHandler implements WSServerListener {
             e.description = "unrecognized websocket request : |" + request + "|";
             e.ipAddress = clientID;
             RGPIO.message(e);
-            
-            reply.add("unrecognized websocket request : "+request);
+
+            reply.add("unrecognized websocket request : " + request);
         }
 
         return reply;
