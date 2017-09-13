@@ -1,10 +1,14 @@
 package rgpio;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -60,11 +64,11 @@ public class ClientHandler implements WSServerListener {
             }
         } else if (cmd.Command.equals("store")) {
             /*
-            store basename data1   -- file /home/pi/RGPIO/storage/basename.txt   is opened for writing
-                                   -- data1 is written
-            store basename data2   -- data2 is written
-            store basename data3   -- data3 is written
-            store basename .       -- file is closed
+             store basename data1   -- file /home/pi/RGPIO/storage/basename.txt   is opened for writing
+             -- data1 is written
+             store basename data2   -- data2 is written
+             store basename data3   -- data3 is written
+             store basename .       -- file is closed
              */
             if (storeFile == null) {
                 try {
@@ -96,14 +100,41 @@ public class ClientHandler implements WSServerListener {
                 }
                 storeFile = null;
             }
+        } else if (cmd.Command.equals("load")) {
+            /*
+             load basename   -- file /home/pi/RGPIO/storage/basename.txt   is read and its content sent to the client
+             */
+
+            try {
+                String fileName = "/home/pi/RGPIO/storage/" + cmd.Arg1 + ".txt";
+                reply.add("opening file : " + fileName);
+                File file = new File(fileName);
+                InputStream is = new FileInputStream(file);
+                InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+                BufferedReader loadFile = new BufferedReader(isr);
+
+                String l;
+                while ((l = loadFile.readLine()) != null) {
+                    reply.add(l);
+                }
+                loadFile.close();
+            } catch (FileNotFoundException fnf) {
+                reply.add("File not found");
+            } catch (IOException ioe) {
+                reply.add("IOException");
+            }
+
         } else if (cmd.Command.equals("backgrounds")) {
             /*
-            backgrounds  -- the names of all files in  /home/pi/git/RGPIO/html/backgrounds are returned to the client
-            */
+             backgrounds  -- the names of all files in  /home/pi/git/RGPIO/html/backgrounds are returned to the client
+             */
 
             String dir;
-            dir= "C:\\Users\\ervanden\\Documents\\java\\RGPIO\\html\\backgrounds";
-            dir="/home/pi/git/RGPIO/html/backgrounds";
+            dir = "C:\\Users\\ervanden\\Documents\\java\\RGPIO\\html\\backgrounds";
+            dir = "/home/pi/git/RGPIO/html/backgrounds";
+
+            String jsonReply = "{ \"object\":\"BACKGROUNDS\", \"list\": [";
+            String separator = "";
 
             File[] files = new File(dir).listFiles();//If dir does not denote a directory, then listFiles() returns null. 
             String basename = "";
@@ -115,9 +146,12 @@ public class ClientHandler implements WSServerListener {
                     if (pos > 0) {
                         basename = fullname.substring(0, pos);
                     }
-                    reply.add(basename);
+                    jsonReply = jsonReply + separator + "\"" + basename + "\"";
+                    separator = ", ";
                 }
             }
+            jsonReply = jsonReply + "] }";
+            reply.add(jsonReply);
 
         } else {
             MessageEvent e = new MessageEvent(MessageType.Info);
