@@ -15,6 +15,7 @@ class SensorThread extends Thread {
     }
 
     public void run() {
+        // sensor value goes up and down between 0 and 30
         while (true) {
             try {
                 Thread.sleep(interval*1000);
@@ -25,8 +26,6 @@ class SensorThread extends Thread {
                 } else {
                     ExampleDevice.sensorValue = sec;
                 }
-                System.out.println(" sensor value =  " + ExampleDevice.sensorValue);
-
             } catch (InterruptedException ie) {
             }
         }
