@@ -125,20 +125,28 @@
                 return (arr.indexOf(obj) !== -1);
             }
 
-            function elementIsHidden(element){
-              if (element.visual.style.display == "none") return true; else return false;
+            function elementIsHidden(element) {
+                if (element.visual.style.display == "none")
+                    return true;
+                else
+                    return false;
             }
-            function hideElement(element){
-if ("visual" in element) {
-              element.visual.style.display = "none";
-}
+            function hideElement(element) {
+                if ("visual" in element) {
+                    element.visual.style.display = "none";
+                }
             }
-            function unhideElement(element){
-if ("visual" in element) {
-              element.visual.style.display = "";
-}
+            function unhideElement(element) {
+                if ("visual" in element) {
+                    element.visual.style.display = "";
+                }
             }
 
+            function resetHiddenProperties() {
+                g_hiddenProperties.clear();
+                g_hiddenProperties.add("key");
+                g_hiddenProperties.add("visual");
+            }
 
             function loadImage(name, width) {
                 var objImage = new Image();
@@ -226,6 +234,7 @@ if ("visual" in element) {
                 imgcell.style.padding = "5px 2px";
                 imgcell.style.borderStyle = "none";
                 var objImage = loadImage('/RGPIO/html/icons/' + obj.name, 50);
+                objImage.draggable = false;
                 imgcell.appendChild(objImage);
                 onlyrow.appendChild(imgcell);
 // cell with properties
@@ -242,7 +251,7 @@ if ("visual" in element) {
 
             function visualToObject(visual) {
                 // lookup the object's key in the property table
-                var proptable = visual.getElementsByClassName("propertyTable")[0];
+                proptable = visual.getElementsByClassName("propertyTable")[0];
                 for (var j = 0, row; row = proptable.rows[j]; j++) {
                     var key;
                     if (row.cells[0].innerHTML === "key") {
@@ -329,8 +338,8 @@ if ("visual" in element) {
 
                             g_ws.onopen = function ()
                             {
-                        document.getElementById("messageDiv").innerHTML += "websocket readystate=" + g_ws.readyState + " <br>";
-                        document.getElementById("messageDiv").innerHTML += "connected.<br>";
+                                document.getElementById("messageDiv").innerHTML += "websocket readystate=" + g_ws.readyState + " <br>";
+                                document.getElementById("messageDiv").innerHTML += "connected.<br>";
                                 document.getElementById("serverAddress").className = "green";
                                 var cmd = new Object();
                                 cmd.Command = "backgrounds";
@@ -343,7 +352,7 @@ if ("visual" in element) {
                             g_ws.onclose = function (evt)
                             {
                                 document.getElementById("serverAddress").className = "red";
-                        document.getElementById("messageDiv").innerHTML += "closed code=" + evt.close + " reason=" + evt.reason + " <br>";
+                                document.getElementById("messageDiv").innerHTML += "closed code=" + evt.close + " reason=" + evt.reason + " <br>";
                             };
 
                             g_ws.onerror = function ()
@@ -354,7 +363,7 @@ if ("visual" in element) {
                             g_ws.onmessage = function (event)
                             {
                                 if (event.data.length > 0) {
-                                    console.log("WS: "+ event.data);
+                                    console.log("WS: " + event.data);
                                     try {
                                         var obj = JSON.parse(event.data);
                                     } catch (e) {
@@ -364,6 +373,7 @@ if ("visual" in element) {
                                     if (typeof obj != "undefined") {
 
                                         if (obj.object == "BACKGROUNDS") {
+                                            // sent in response to 'backgrounds' request. This builds the options list for the drawing select                                            
                                             var drawingSelector = document.getElementById("drawingSelector");
                                             var drawings = obj.list;
                                             for (var i = 0; i < drawings.length; i++) {
@@ -372,6 +382,11 @@ if ("visual" in element) {
                                                 option.text = drawings[i];
                                                 drawingSelector.appendChild(option);
                                             }
+                                        }
+                                        if (obj.object == "PROPERTY") {
+// sent as part of the response to the 'load' request. Lists the properties and if they are hidden
+                                            if (obj.hidden)
+                                                g_hiddenProperties.add(obj.name);
                                         }
                                         if (obj.object == "PDEV") {
                                             obj.key = obj.HWid;
@@ -388,7 +403,7 @@ if ("visual" in element) {
 
                                         if ("key" in obj) {
                                             if (!(obj.key in g_allElements)) {  // first time this object is sent by the server
-                                                document.getElementById("messageDiv").innerHTML += "new element "+obj.key+"<br>";
+                                                document.getElementById("messageDiv").innerHTML += "new element " + obj.key + "<br>";
 
                                                 if ((obj.object == "VDEV") || (obj.object == "PDEV") || (obj.object == "VIO")) {
                                                     // visual is an icon and a table with properties
@@ -436,11 +451,11 @@ if ("visual" in element) {
                                                     if (("top" in obj) && ("left" in obj)) {
                                                         presentObject.visual.style.left = obj.left;
                                                         presentObject.visual.style.top = obj.top;
-if (obj.hidden) {
-presentObject.visual.style.display="none";
-} else {
-presentObject.visual.style.display="";
-}
+                                                        if (obj.hidden) {
+                                                            presentObject.visual.style.display = "none";
+                                                        } else {
+                                                            presentObject.visual.style.display = "";
+                                                        }
 
                                                     } else {
                                                         for (var key in obj) {
@@ -466,9 +481,7 @@ presentObject.visual.style.display="";
                             }
 
 
-                        }
-
-                        else
+                        } else
                         {
 
                             alert("WebSocket NOT supported by your Browser!");
@@ -484,6 +497,7 @@ presentObject.visual.style.display="";
                     var cmd = new Object();
                     cmd.Command = "store";
                     cmd.Arg1 = g_drawing;
+// store top,left,hidden of all elements
 
                     visuals = g_dropzone.getElementsByClassName("objectVisual");
                     for (var i = 0, visual; visual = visuals[i]; i++) {
@@ -500,24 +514,39 @@ presentObject.visual.style.display="";
                         }
                         position.left = visual.style.left;
                         position.top = visual.style.top;
-                        if (visual.style.display=="") position.hidden=false;
-                        if (visual.style.display=="none") position.hidden=true;
-
+                        if (visual.style.display == "")
+                            position.hidden = false;
+                        if (visual.style.display == "none")
+                            position.hidden = true;
                         cmd.Arg2 = JSON.stringify(position);
                         g_ws.send(JSON.stringify(cmd));
                         console.log(cmd.Command);
                         console.log(cmd.Arg1);
                         console.log(cmd.Arg2);
-
-
                     }
+
+                    // store the properties that are hidden for this drawing                   
+                    var hiddenProperties = Array.from(g_hiddenProperties);
+                    hiddenProperties.forEach(function (property) {
+                        var p = new Object();
+                        p.object = "PROPERTY";
+                        p.name = property;
+                        p.hidden = true;
+                        cmd.Arg2 = JSON.stringify(p);
+                        g_ws.send(JSON.stringify(cmd));
+                        console.log(cmd.Command);
+                        console.log(cmd.Arg1);
+                        console.log(cmd.Arg2);
+                    });
+
                     cmd.Arg2 = ".";
                     g_ws.send(JSON.stringify(cmd));
                     console.log(cmd.Command);
                     console.log(cmd.Arg1);
                     console.log(cmd.Arg2);
+
                 }
-            }
+            };
 
             function loadSelectedDrawing() {
                 var drawingSelector = document.getElementById("drawingSelector");
@@ -535,10 +564,14 @@ presentObject.visual.style.display="";
                             dropzone.appendChild(g_background);
 
 // hide all elements by default
-                for (var key in g_allElements) {
-                  hideElement(g_allElements[key]);
-                }  
-      
+                            for (var key in g_allElements) {
+                                hideElement(g_allElements[key]);
+                            }
+
+// unhide all properties by default
+
+                            resetHiddenProperties();
+
 // ask the server to send the position and hidden status of all the elements
                             var cmd = new Object();
                             cmd.Command = "load";
@@ -575,9 +608,7 @@ presentObject.visual.style.display="";
             var propertyApply = document.getElementById("propertyApply");
             propertyApply.onclick = function () {
                 var options = Array.from(g_propertySelect.childNodes);
-                g_hiddenProperties.clear();
-                g_hiddenProperties.add("key");
-                g_hiddenProperties.add("visual");
+                resetHiddenProperties();
                 options.forEach(function (option) {
                     if (option.selected)
                         g_hiddenProperties.add(option.innerHTML);
