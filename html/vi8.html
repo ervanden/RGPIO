@@ -50,7 +50,6 @@
             </select>
             <button type="button" id="propertySelectButton">Properties</button>
             <button type="button" id="deviceSelectButton">Devices</button>
-            <button type="button" id="loadDrawingButton">Load Drawing</button>
             <button type="button" id="saveDrawingButton">Save Drawing</button>
         </form>
         <br>
@@ -94,7 +93,6 @@
             var g_background = "none";
             var g_allElements = new Object();
             var g_allProperties = new Set();
-            var g_hiddenElements = new Set();
             var g_hiddenProperties = new Set();
             g_hiddenProperties.add("key");
             g_hiddenProperties.add("visual");
@@ -127,6 +125,19 @@
                 return (arr.indexOf(obj) !== -1);
             }
 
+            function elementIsHidden(element){
+              if (element.visual.style.display == "none") return true; else return false;
+            }
+            function hideElement(element){
+if ("visual" in element) {
+              element.visual.style.display = "none";
+}
+            }
+            function unhideElement(element){
+if ("visual" in element) {
+              element.visual.style.display = "";
+}
+            }
 
 
             function loadImage(name, width) {
@@ -318,8 +329,8 @@
 
                             g_ws.onopen = function ()
                             {
-//                        document.getElementById("messageDiv").innerHTML += "websocket readystate=" + g_ws.readyState + " <br>";
-//                        document.getElementById("messageDiv").innerHTML += "connected.<br>";
+                        document.getElementById("messageDiv").innerHTML += "websocket readystate=" + g_ws.readyState + " <br>";
+                        document.getElementById("messageDiv").innerHTML += "connected.<br>";
                                 document.getElementById("serverAddress").className = "green";
                                 var cmd = new Object();
                                 cmd.Command = "backgrounds";
@@ -332,7 +343,7 @@
                             g_ws.onclose = function (evt)
                             {
                                 document.getElementById("serverAddress").className = "red";
-//                        document.getElementById("messageDiv").innerHTML += "closed code=" + evt.close + " reason=" + evt.reason + " <br>";
+                        document.getElementById("messageDiv").innerHTML += "closed code=" + evt.close + " reason=" + evt.reason + " <br>";
                             };
 
                             g_ws.onerror = function ()
@@ -343,11 +354,11 @@
                             g_ws.onmessage = function (event)
                             {
                                 if (event.data.length > 0) {
-                                    document.getElementById("messageDiv").innerHTML += event.data + "<br>";
+                                    console.log("WS: "+ event.data);
                                     try {
                                         var obj = JSON.parse(event.data);
                                     } catch (e) {
-                                        console.log("websocket : JSON syntax error: " + event.data);
+                                        document.getElementById("messageDiv").innerHTML += event.data + "<br>";
 
                                     }
                                     if (typeof obj != "undefined") {
@@ -377,7 +388,7 @@
 
                                         if ("key" in obj) {
                                             if (!(obj.key in g_allElements)) {  // first time this object is sent by the server
-                                                document.getElementById("messageDiv").innerHTML += " first occurrence<br>";
+                                                document.getElementById("messageDiv").innerHTML += "new element "+obj.key+"<br>";
 
                                                 if ((obj.object == "VDEV") || (obj.object == "PDEV") || (obj.object == "VIO")) {
                                                     // visual is an icon and a table with properties
@@ -425,6 +436,11 @@
                                                     if (("top" in obj) && ("left" in obj)) {
                                                         presentObject.visual.style.left = obj.left;
                                                         presentObject.visual.style.top = obj.top;
+if (obj.hidden) {
+presentObject.visual.style.display="none";
+} else {
+presentObject.visual.style.display="";
+}
 
                                                     } else {
                                                         for (var key in obj) {
@@ -484,6 +500,8 @@
                         }
                         position.left = visual.style.left;
                         position.top = visual.style.top;
+                        if (visual.style.display=="") position.hidden=false;
+                        if (visual.style.display=="none") position.hidden=true;
 
                         cmd.Arg2 = JSON.stringify(position);
                         g_ws.send(JSON.stringify(cmd));
@@ -516,7 +534,12 @@
                             g_background = loadImage("/RGPIO/html/backgrounds/" + g_drawing, 1600);
                             dropzone.appendChild(g_background);
 
-// ask the server to send the position of all the elements
+// hide all elements by default
+                for (var key in g_allElements) {
+                  hideElement(g_allElements[key]);
+                }  
+      
+// ask the server to send the position and hidden status of all the elements
                             var cmd = new Object();
                             cmd.Command = "load";
                             cmd.Arg1 = g_drawing;
@@ -582,16 +605,16 @@
 
 // device selection modal 
 
+            // when device select  is clicked, the options of hidden elements are set to selected
             document.getElementById("deviceSelectButton").onclick = function () {
                 // set the visible devices to 'selected' and open the modal
                 var options = Array.from(g_deviceSelect.childNodes);
-                console.log(" select options: " + options.length);
                 options.forEach(function (option) {
-                    if (g_hiddenElements.has(option.value)) {
-                        console.log(" present hidden element: " + option.innerHTML);
+                    if (elementIsHidden(g_allElements[option.value])) {
+                        console.log(" present hidden element: " + option.value);
                         option.selected = true;
                     } else {
-                        console.log(" present not hidden element: " + option.innerHTML);
+                        console.log(" present not hidden element: " + option.value);
                         option.selected = false;
                     }
                 });
@@ -600,32 +623,23 @@
                 g_deviceModal.style.display = "block";
             }
 
-            // when apply is clicked, the list g_hiddenElements is rebuilt with the selected elements
+            // when apply is clicked, select elements are hidden
 
             var deviceApply = document.getElementById("deviceApply");
             deviceApply.onclick = function () {
                 var options = Array.from(g_deviceSelect.childNodes);
-                g_hiddenElements.clear();
                 options.forEach(function (option) {
                     if (option.selected) {
-                        console.log(" new hidden element: " + option.innerHTML);
-                        g_hiddenElements.add(option.innerHTML);
+                        console.log(" hiding element: " + option.value);
+                        hideElement(g_allElements[option.value]);
+                    } else {
+                        console.log(" unhiding element: " + option.value);
+                        unhideElement(g_allElements[option.value]);
                     }
                 });
 
                 g_deviceModal.style.display = "none";
 
-                // hide the elements in g_hiddenElements
-
-                for (var key in g_allElements) {
-                    if ("visual" in  g_allElements[key]) {
-                        if (g_hiddenElements.has(key)) {
-                            g_allElements[key].visual.style.display = "none";
-                        } else {
-                            g_allElements[key].visual.style.display = "";
-                        }
-                    }
-                }
             }
 
 
