@@ -1,6 +1,6 @@
 
 
-package rgpioutils;
+package rgpio;
 
 
 public enum MessageType {

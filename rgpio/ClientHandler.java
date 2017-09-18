@@ -12,8 +12,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import rgpioutils.MessageType;
-import rgpioutils.MessageEvent;
 import java.util.ArrayList;
 import rgpioutils.WebClientCommand;
 import tcputils.*;

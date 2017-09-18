@@ -1,7 +1,5 @@
 package rgpio;
 
-import rgpioutils.MessageType;
-import rgpioutils.MessageEvent;
 import utils.TimeStamp;
 import utils.*;
 

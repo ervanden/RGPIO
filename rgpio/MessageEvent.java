@@ -1,4 +1,4 @@
-package rgpioutils;
+package rgpio;
 
 import utils.JSONString;
 import utils.TimeStamp;

@@ -1,8 +1,5 @@
 package rgpio;
 
-import rgpioutils.MessageType;
-import rgpioutils.MessageListener;
-import rgpioutils.MessageEvent;
 import utils.TimeStamp;
 
 import udputils.UDPSender;
@@ -290,14 +287,9 @@ public class RGPIO {
             RGPIOConfiguration.devicePort=2500;
             RGPIOConfiguration.webSocketPort=2603;
             RGPIOConfiguration.reportInterval=20;
-            if (l.size()==0){
+            if (l.size()==0){  // create the RGPIO.txt file with the defaults
                 ArrayList<Object> lw = new ArrayList<>();
                 lw.add(RGPIOConfiguration);
-                DeviceFileEntry d = new DeviceFileEntry();
-                d.Pin="pin";
-                d.Model="model";
-                d.HWid="12345";
-                lw.add(d);
                 JSON2Object.writeJSONFile(fileName,lw);
             }
         } else {

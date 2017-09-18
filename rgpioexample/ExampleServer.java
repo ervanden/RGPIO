@@ -1,7 +1,7 @@
 package rgpioexample;
 
-import rgpioutils.MessageListener;
-import rgpioutils.MessageEvent;
+import rgpio.MessageListener;
+import rgpio.MessageEvent;
 import rgpio.*;
 
 public class ExampleServer implements VInputListener, MessageListener {

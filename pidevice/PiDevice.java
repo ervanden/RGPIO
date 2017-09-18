@@ -1,7 +1,7 @@
 package pidevice;
 
-import rgpioutils.MessageListener;
-import rgpioutils.MessageEvent;
+import rgpio.MessageListener;
+import rgpio.MessageEvent;
 import udputils.UDPSender;
 import java.io.BufferedReader;
 import java.io.IOException;

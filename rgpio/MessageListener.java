@@ -1,4 +1,6 @@
-package rgpioutils;
+package rgpio;
+
+import rgpio.MessageEvent;
 
 public interface MessageListener {
 

@@ -1,8 +1,5 @@
 package rgpio;
 
-import rgpioutils.MessageType;
-import rgpioutils.MessageEvent;
-
 public class DeviceHandler {
 
     public static boolean handleDeviceMessage(String deviceIPAddress, String message) {

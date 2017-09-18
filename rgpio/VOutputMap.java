@@ -1,7 +1,5 @@
 package rgpio;
 
-import rgpioutils.MessageType;
-import rgpioutils.MessageEvent;
 import java.util.HashMap;
 
 public class VOutputMap extends HashMap<String, VOutput> {

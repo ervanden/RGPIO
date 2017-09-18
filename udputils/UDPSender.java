@@ -1,7 +1,7 @@
 package udputils;
 
-import rgpioutils.MessageType;
-import rgpioutils.MessageEvent;
+import rgpio.MessageType;
+import rgpio.MessageEvent;
 import rgpio.PDevice;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
