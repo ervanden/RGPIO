@@ -4,8 +4,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-import rgpioexample.*;
 import tcputils.WSServer;
 import tcputils.TCPClient;
 
@@ -116,13 +114,7 @@ public class RGPIOmain {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else if (mode.equals("server")) {
-
-            (new ExampleServer()).start();
-
-        } else if (mode.equals("device")) {
-
-            (new ExampleDevice()).start();
+        
 
         } else if (mode.equals("tcpclient")) {
 

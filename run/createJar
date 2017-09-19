@@ -1,0 +1,17 @@
+#! /bin/bash
+
+/home/pi/git/RGPIO/run/compileRGPIO
+
+echo Creating jar file...
+sleep 1
+
+cd /home/pi/git/RGPIO
+jar cvfe RGPIO.jar main/RGPIOmain */*.class  > /dev/null
+mv RGPIO.jar /home/pi/git/RGPIO/lib
+
+echo Jar file in /home/pi/git/RGPIO/lib
+echo
+ls -l /home/pi/git/RGPIO/lib/RGPIO.jar
+echo
+
+
