@@ -101,7 +101,7 @@ public class WSServer extends WebSocketServer {
 
     @Override
     public void onStart() {
-        System.out.println("Server started!");
+        System.out.println("Websocket server started!");
     }
 
     public void sendToAll(String text) {

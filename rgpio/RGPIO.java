@@ -296,7 +296,6 @@ public class RGPIO {
             Object o = l.get(0);
             RGPIOConfiguration = (ConfigurationFileEntry) o;
         }
-        System.out.println(RGPIOConfiguration.toString());
 
         serverPort = RGPIOConfiguration.serverPort;
         devicePort = RGPIOConfiguration.devicePort;

@@ -73,7 +73,6 @@ public class JSON2Object {
                 }
             }
 
-            System.out.println("read from " + fileName + " : " + charCount + " chars");
             if (!json.equals("")) {
                 System.out.println("reached end of file while parsing object : " + json);
             }
