@@ -1,23 +1,26 @@
 #! /bin/bash
 
-aaa=$(pgrep -f  main/RGPIOmain)
-if [  -n "$aaa"  ]
+if [  -n "$(pgrep -f  SterreborneServer)"  ]
 then
 echo RGPIO server is running, kill it first. Exiting...
 exit
 fi
 
-loglink=/home/pi/logs/RGPIOlogfile
-logfile=/home/pi/logs/log-`date +%d-%m@%H:%M`
-[ -f $loglink ] && rm $loglink
-touch $logfile
-ln -s $logfile $loglink
+if  [ "$1" = "nolog" ] ; then
 
+ java -cp /home/pi/RGPIO/SterreborneServer.jar:/home/pi/git/RGPIO/lib/'*' sterreborneserver/SterreborneServer
 
+else
 
-(
-cd /home/pi/git/RGPIO/run
-java -cp /home/pi/git/RGPIO:/home/pi/git/RGPIO/lib/'*' main/RGPIOmain server
-)  >> $loglink 2>&1 &
+ loglink=/home/pi/RGPIO/logs/RGPIOlogfile
+ logfile=/home/pi/RGPIO/logs/log-`date +%d-%m@%H:%M`
+ [ -f $loglink ] && rm $loglink
+ touch $logfile
+ ln -s $logfile $loglink
 
+ (
+ cd /home/pi/git/RGPIO/run
+ java -cp /home/pi/RGPIO/SterreborneServer.jar:/home/pi/git/RGPIO/lib/'*' sterreborneserver/SterreborneServer
+ )  >> $loglink 2>&1 &
 
+fi

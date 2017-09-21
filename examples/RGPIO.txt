@@ -1,6 +1,6 @@
 
-{"serverPort"=2600,
- "devicePort"=2500,
- "webSocketPort"=2603,
- "reportInterval"=20
+{"serverPort":2600,
+ "devicePort":2500,
+ "webSocketPort":2603,
+ "reportInterval":20
 }

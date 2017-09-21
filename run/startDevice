@@ -1,4 +1,13 @@
 #! /bin/bash
 
-sudo java -cp /home/pi/git/RGPIO:/home/pi/git/RGPIO/lib/'*' main/RGPIOmain device
+if [  -n "$(pgrep -f  SterreborneDevice)"  ]
+then
+echo RGPIO device is running, kill it first. Exiting...
+exit
+fi
+
+java -cp /home/pi/RGPIO/SterreborneDevice.jar:/home/pi/git/RGPIO/lib/'*' sterrebornedevice/SterreborneDevice
+
+
+
 
