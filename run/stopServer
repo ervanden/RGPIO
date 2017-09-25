@@ -1,4 +1,6 @@
 #! /bin/bash
 
-pkill -f SterreborneServer
+sudo pkill -f SterreborneServer
+
+#sudo because runs as root when started from rc.local
 

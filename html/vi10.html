@@ -43,11 +43,13 @@
 
         <form>
             RGPIO Server:
-            <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://192.168.1.100:2603">
+            <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://192.168.0.5:2603">
             <button type="button" id="connectButton">Connect</button>
             <select id="drawingSelector" onchange="loadSelectedDrawing();">
                 <option value="none"> Select a drawing </option>
             </select>
+<button type="button" onclick="setScaleFactor(1.1);" >Icon+</button>
+<button type="button" onclick="setScaleFactor(0.9);" >Icon-</button>
             <button type="button" id="propertySelectButton">Properties</button>
             <button type="button" id="deviceSelectButton">Devices</button>
             <button type="button" id="saveDrawingButton">Save Drawing</button>
@@ -167,6 +169,7 @@
                 }
                 if ("top" in element) element.visual.style.top = element.top;
                 if ("left" in element) element.visual.style.left = element.left;
+                if ("scale" in element) element.visual.style.transform="scale("+element.scale+")";
             }
 
 
@@ -238,12 +241,10 @@
 
 
             function createObjectVisual(obj) {
-console.log("create object visual of  "+obj.key);
+//console.log("create object visual of  "+obj.key);
                 var table = document.createElement('table');
                 table.className = "objectVisual";
                 table.style.position = "absolute";
-                table.style.top = "0px";
-                table.style.left = "0px";
                 table.style.display = "none"; // not displayed until a drawing is selected
 
                 table.style.backgroundColor = "white";
@@ -274,6 +275,7 @@ console.log("create object visual of  "+obj.key);
                 g_dropzone.appendChild(objectVisual);
                 objectVisual.draggable = true;
                 objectVisual.ondragstart = drag;
+                objectVisual.onclick = scaleVisual;
                 objectVisual.style.display = "none"; // not displayed until a drawing is selected
                 obj.visual = objectVisual;
  
@@ -308,6 +310,33 @@ console.log("create object visual of  "+obj.key);
                 }
             }
 
+g_scaleFactor=1;
+
+ function setScaleFactor(f){g_scaleFactor=f;}
+
+ function scaleVisual() {
+     var element=visualToObject(this);
+//     console.log("  scaleVisual "+visual.id+ " scale="+visual.scale);
+     if (!("scale" in element)) element.scale=1;
+     element.scale=element.scale*g_scaleFactor;
+     positionElement(element);
+} 
+
+
+   function findPos(obj) {
+         var curleft = curtop = 0;
+         if (obj.offsetParent) {
+             do {
+                 curleft += obj.offsetLeft;
+                 curtop += obj.offsetTop;
+             } while (obj = obj.offsetParent);
+             return [curleft, curtop];
+         }
+     }
+
+     function allowDrop(ev) {
+         ev.preventDefault();
+     }
             function findPos(obj) {
                 var curleft = curtop = 0;
                 if (obj.offsetParent) {
@@ -355,7 +384,12 @@ console.log("create object visual of  "+obj.key);
                 var canvasX = ev.clientX - g_dropzone.offsetLeft - relX;
                 var canvasY = ev.clientY - g_dropzone.offsetTop - relY;
 
-                img.style.position = "absolute";
+//                img.style.position = "absolute";
+                var obj = visualToObject(img);
+                obj.top = canvasY + "px";
+                obj.left = canvasX + "px";
+
+//                img.style.position = "absolute";
                 img.style.top = canvasY + "px";
                 img.style.left = canvasX + "px";
             }
@@ -397,7 +431,7 @@ console.log("create object visual of  "+obj.key);
                             g_ws.onmessage = function (event)
                             {
                                 if (event.data.length > 0) {
-                                    console.log("WS: " + event.data);
+                                    //console.log("WS: " + event.data);
                                     try {
                                         var obj = JSON.parse(event.data);
                                     } catch (e) {
@@ -439,12 +473,12 @@ console.log("create object visual of  "+obj.key);
                                         }
 
                                         if ("key" in obj) {
-console.log("checking if "+obj.key + "is in g_allElements");
+//console.log("checking if "+obj.key + "is in g_allElements");
                             for (var kkk in g_allElements) {
-                                console.log(" in: "+(g_allElements[kkk]).key);
+                                //console.log(" in: "+(g_allElements[kkk]).key);
                             }
                                             if (!(obj.key in g_allElements)) {  // first time this object is sent by the server
-console.log("first occurence of "+obj.key);
+//console.log("first occurence of "+obj.key);
                                                 document.getElementById("messageDiv").innerHTML += "new element " + obj.key + "<br>";
 
                                                 if ((obj.object == "VDEV") || (obj.object == "PDEV") || (obj.object == "VIO")) {
@@ -466,7 +500,7 @@ console.log("first occurence of "+obj.key);
 
 // Put the object in g_allElements, so that next messages are treated as update
 
-console.log("adding to g_allElements: "+obj.key);
+//console.log("adding to g_allElements: "+obj.key);
                                                 g_allElements[obj.key] = obj;
 
 // Create an option in the  device select element. PIO can not be selected, since its visual is an entry in the property table
@@ -479,7 +513,7 @@ console.log("adding to g_allElements: "+obj.key);
                                                 }
 
                                             } else {   // not the first occurrence of this object =  update 
-console.log("update of "+obj.key);
+//console.log("update of "+obj.key);
 
                                                 if ((obj.object == "VDEV") || (obj.object == "PDEV") || (obj.object == "VIO")) {
                                                     var existingElement = g_allElements[obj.key];
@@ -530,7 +564,8 @@ alert("element "+obj.key+ " is updated but has no visual");
                     var cmd = new Object();
                     cmd.Command = "store";
                     cmd.Arg1 = g_drawing;
-// store top,left,hidden of all elements
+
+// store top,left,scale,hidden of all elements
 
                     visuals = g_dropzone.getElementsByClassName("objectVisual");
                     for (var i = 0, visual; visual = visuals[i]; i++) {
@@ -545,17 +580,18 @@ alert("element "+obj.key+ " is updated but has no visual");
                         if (obj.object == "PDEV") {
                             position.HWid = obj.HWid;
                         }
-                        position.left = visual.style.left;
-                        position.top = visual.style.top;
+                        position.left = obj.left;
+                        position.top = obj.top;
+                        position.scale = obj.scale;
                         if (visual.style.display == "")
                             position.hidden = false;
                         if (visual.style.display == "none")
                             position.hidden = true;
                         cmd.Arg2 = JSON.stringify(position);
                         g_ws.send(JSON.stringify(cmd));
-                        console.log(cmd.Command);
-                        console.log(cmd.Arg1);
-                        console.log(cmd.Arg2);
+                        //console.log(cmd.Command);
+                        //console.log(cmd.Arg1);
+                        //console.log(cmd.Arg2);
                     }
 
                     // store the properties that are hidden for this drawing                   
@@ -567,16 +603,16 @@ alert("element "+obj.key+ " is updated but has no visual");
                         p.hidden = true;
                         cmd.Arg2 = JSON.stringify(p);
                         g_ws.send(JSON.stringify(cmd));
-                        console.log(cmd.Command);
-                        console.log(cmd.Arg1);
-                        console.log(cmd.Arg2);
+                        //console.log(cmd.Command);
+                        //console.log(cmd.Arg1);
+                        //console.log(cmd.Arg2);
                     });
 
                     cmd.Arg2 = ".";
                     g_ws.send(JSON.stringify(cmd));
-                    console.log(cmd.Command);
-                    console.log(cmd.Arg1);
-                    console.log(cmd.Arg2);
+                    //console.log(cmd.Command);
+                    //console.log(cmd.Arg1);
+                    //console.log(cmd.Arg2);
 
                 }
             };
@@ -694,10 +730,10 @@ alert("element "+obj.key+ " is updated but has no visual");
                 var options = Array.from(g_deviceSelect.childNodes);
                 options.forEach(function (option) {
                     if (option.selected) {
-                        console.log(" hiding element: " + option.value);
+                        //console.log(" hiding element: " + option.value);
                         hideElement(g_allElements[option.value]);
                     } else {
-                        console.log(" unhiding element: " + option.value);
+                        //console.log(" unhiding element: " + option.value);
                         unhideElement(g_allElements[option.value]);
                     }
                 });
