@@ -473,10 +473,7 @@ g_scaleFactor=1;
                                         }
 
                                         if ("key" in obj) {
-//console.log("checking if "+obj.key + "is in g_allElements");
-                            for (var kkk in g_allElements) {
-                                //console.log(" in: "+(g_allElements[kkk]).key);
-                            }
+
                                             if (!(obj.key in g_allElements)) {  // first time this object is sent by the server
 //console.log("first occurence of "+obj.key);
                                                 document.getElementById("messageDiv").innerHTML += "new element " + obj.key + "<br>";
