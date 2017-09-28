@@ -52,7 +52,7 @@ class CommandListener extends Thread {
 
     public void run() {
         try {
-            DatagramSocket serverSocket = new DatagramSocket(RGPIO.devicePort);
+            DatagramSocket serverSocket = new DatagramSocket(PiDevice.devicePort);
             serverSocket.setBroadcast(true);
             byte[] receiveData = new byte[1024];
             byte[] sendData;
@@ -95,6 +95,8 @@ public class PiDevice {
     static HashMap<String, IOType> inputTypeMap = new HashMap<>();
 
     static String serverIPAddress = null;
+    static int serverPort;
+    static int devicePort;
     static long bootTimeInMillis = 0;
     static TimeStamp windowsBootTime = null;
 
@@ -177,9 +179,9 @@ public class PiDevice {
         }
 
         if (serverIPAddress != null) {
-            UDPSender.send(report, serverIPAddress, null, RGPIO.serverPort, 0, 1);
+            UDPSender.send(report, serverIPAddress, null, PiDevice.serverPort, 0, 1);
         } else {
-            UDPSender.send(report, "255.255.255.255", null, RGPIO.serverPort, 0, 1);
+            UDPSender.send(report, "255.255.255.255", null, PiDevice.serverPort, 0, 1);
         }
     }
 
@@ -208,7 +210,7 @@ public class PiDevice {
                         + "/Value:" + value;
 
                 if (serverIPAddress != null) {
-                    UDPSender.send(event, serverIPAddress, null, RGPIO.serverPort, 0, 1);
+                    UDPSender.send(event, serverIPAddress, null, PiDevice.serverPort, 0, 1);
                 } else {
                     System.out.println("sendEvent() : server IP address is not known");
                 }
@@ -218,8 +220,11 @@ public class PiDevice {
         }
     }
 
-    static public void runDevice() {
+    static public void runDevice(int serverPort, int devicePort) {
 
+        PiDevice.serverPort=serverPort;
+        PiDevice.devicePort=devicePort;
+        
         MessagePrinter m = new MessagePrinter();
         RGPIO.addMessageListener(m);
 

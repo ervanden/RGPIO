@@ -122,7 +122,7 @@ class SterreborneDeviceRun implements SetCommandListener, GetCommandListener, Gp
 
         (new SensorThread(1)).start();  // reads and modifies the value of the sensor every second
 
-        PiDevice.runDevice();
+        PiDevice.runDevice(2600,2500);
 
 // todo : convert listener thread back to in line so runDevice does not exit
         
