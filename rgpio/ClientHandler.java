@@ -129,7 +129,7 @@ public class ClientHandler implements WSServerListener {
 
             String dir;
             dir = "C:\\Users\\ervanden\\Documents\\java\\RGPIO\\html\\backgrounds";
-            dir = "/home/pi/git/RGPIO/html/backgrounds";
+            dir = RGPIO.htmlDirectory + "/RGPIO/backgrounds";
 
             String jsonReply = "{ \"object\":\"BACKGROUNDS\", \"list\": [";
             String separator = "";
@@ -145,6 +145,27 @@ public class ClientHandler implements WSServerListener {
                         basename = fullname.substring(0, pos);
                     }
                     jsonReply = jsonReply + separator + "\"" + basename + "\"";
+                    separator = ", ";
+                }
+            }
+            jsonReply = jsonReply + "] }";
+            reply.add(jsonReply);
+
+        } else if (cmd.Command.equals("icons")) {
+            /*
+              the full file names of all available icons are returned to the client
+             */
+
+            String dir;
+            dir = RGPIO.htmlDirectory + "/RGPIO/icons";
+
+            String jsonReply = "{ \"object\":\"ICONS\", \"list\": [";
+            String separator = "";
+
+            File[] files = new File(dir).listFiles();//If dir does not denote a directory, then listFiles() returns null. 
+            for (File file : files) {
+                if (file.isFile()) {
+                    jsonReply = jsonReply + separator + "\"" + file.getName() + "\"";
                     separator = ", ";
                 }
             }

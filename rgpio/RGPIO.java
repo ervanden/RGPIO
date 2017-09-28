@@ -129,11 +129,12 @@ public class RGPIO {
 
     public static WSServer webSocketServer;
 
-    public static int serverPort = 2600;  // server listens on this port for commands from devices
-    public static int devicePort = 2500;  // devices listen on this port for server commands
-    public static int webSocketPort = 2603;
-    public static int reportInterval = 20; // server sends report request every reportInterval sec.
-
+    public static int serverPort;  // server listens on this port for commands from devices
+    public static int devicePort;  // devices listen on this port for server commands
+    public static int webSocketPort;
+    public static int reportInterval; // server sends report request every reportInterval sec.
+    public static String htmlDirectory;
+    
     public static void initialize(String configurationDir) {
 
         VDeviceMap = new VDeviceMap();
@@ -283,10 +284,6 @@ public class RGPIO {
             System.out.println("Expected 1 JSON object in RGPIO configuration file, found : " + l.size());
             System.out.println("Using defaults...");
             RGPIOConfiguration=new ConfigurationFileEntry();
-            RGPIOConfiguration.serverPort=2600;
-            RGPIOConfiguration.devicePort=2500;
-            RGPIOConfiguration.webSocketPort=2603;
-            RGPIOConfiguration.reportInterval=20;
             if (l.size()==0){  // create the RGPIO.txt file with the defaults
                 ArrayList<Object> lw = new ArrayList<>();
                 lw.add(RGPIOConfiguration);
@@ -301,6 +298,7 @@ public class RGPIO {
         devicePort = RGPIOConfiguration.devicePort;
         webSocketPort = RGPIOConfiguration.webSocketPort;
         reportInterval = RGPIOConfiguration.reportInterval;
+        htmlDirectory = RGPIOConfiguration.htmlDirectory;
 
     }
 

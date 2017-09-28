@@ -43,7 +43,7 @@
 
         <form>
             RGPIO Server:
-            <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://192.168.0.5:2603">
+            <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://192.168.1.100:2603">
             <button type="button" id="connectButton">Connect</button>
             <select id="drawingSelector" onchange="loadSelectedDrawing();">
                 <option value="none"> Select a drawing </option>
@@ -87,8 +87,10 @@
         <div id="messageDiv" style="overflow-y:scroll; height:400px;border-style:solid;border-width:1px;"></div>
 
         <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="icons.js"></script>
 
         <script>
+
 
 
             var g_ws;
@@ -256,7 +258,8 @@
                 imgcell.style.fontSize = "14px";
                 imgcell.style.padding = "5px 2px";
                 imgcell.style.borderStyle = "none";
-                var objImage = loadImage('/RGPIO/html/icons/' + obj.name, 50);
+                var iconName= objectIconName(obj);
+                var objImage = loadImage('/RGPIO/html/icons/' + iconName, 50);
                 objImage.draggable = false;
                 imgcell.appendChild(objImage);
                 onlyrow.appendChild(imgcell);
@@ -284,6 +287,18 @@
                 positionElement(obj);
 
             }
+
+            function objectIconName(obj){
+              if (obj.object=="VIO") {
+               if (obj.name in g_icons) return g_icons[obj.name](obj);
+               return obj.name;
+              }
+              if (obj.object=="PDEV") {
+               return obj.model;
+              }
+             }
+
+
 
             function visualToObject(visual) {
                 // lookup the object's key in the property table
@@ -473,7 +488,10 @@ g_scaleFactor=1;
                                         }
 
                                         if ("key" in obj) {
-
+//console.log("checking if "+obj.key + "is in g_allElements");
+                            for (var kkk in g_allElements) {
+                                //console.log(" in: "+(g_allElements[kkk]).key);
+                            }
                                             if (!(obj.key in g_allElements)) {  // first time this object is sent by the server
 //console.log("first occurence of "+obj.key);
                                                 document.getElementById("messageDiv").innerHTML += "new element " + obj.key + "<br>";
