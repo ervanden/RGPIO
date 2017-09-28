@@ -43,7 +43,7 @@
 
         <form>
             RGPIO Server:
-            <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://192.168.1.100:2603">
+            <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://192.168.0.5:2603">
             <button type="button" id="connectButton">Connect</button>
             <select id="drawingSelector" onchange="loadSelectedDrawing();">
                 <option value="none"> Select a drawing </option>
@@ -91,12 +91,13 @@
 
         <script>
 
-
+console.log("start g_icons.sensor="+g_icons.sensor);
 
             var g_ws;
             var g_dropzone = document.getElementById("dropzone");
             var g_drawing = "none";
             var g_background = "none";
+            var g_availableIcons = {};
             var g_allElements = new Object();
             var g_allProperties = new Set();
             var g_hiddenProperties = new Set();
@@ -175,7 +176,7 @@
             }
 
 
-            function loadImage(name, width) {
+            function loadImageByBasename(name, width) {
                 var objImage = new Image();
                 objImage.onload = function (e) {
                     objImage.width = width;
@@ -194,6 +195,17 @@
                 objImage.src = name + '.jpg';
                 return objImage;
             }
+
+            function loadImageByFilename(name, width) {
+                var objImage = new Image();
+                objImage.onload = function (e) {
+                    objImage.width = width;
+                    objImage.height = width * (objImage.naturalHeight / objImage.naturalWidth);
+                }
+                objImage.src = name;
+                return objImage;
+            }
+
 
             function createObjectPropertyTable(obj) {
                 var proptable = document.createElement('table');
@@ -253,16 +265,18 @@
                 var onlyrow = document.createElement('tr');
                 table.appendChild(onlyrow);
 // cell with image
-                var imgcell = document.createElement('td');
-                imgcell.style.fontFamily = "Arial, sans-serif";
-                imgcell.style.fontSize = "14px";
-                imgcell.style.padding = "5px 2px";
-                imgcell.style.borderStyle = "none";
+                var iconCell = document.createElement('td');
+                iconCell.className="iconCell";
+                iconCell.style.fontFamily = "Arial, sans-serif";
+                iconCell.style.fontSize = "14px";
+                iconCell.style.padding = "5px 2px";
+                iconCell.style.borderStyle = "none";
                 var iconName= objectIconName(obj);
-                var objImage = loadImage('/RGPIO/html/icons/' + iconName, 50);
+                iconCell.currentIcon=iconName;
+                var objImage = loadImageByFilename('/RGPIO/icons/' + g_availableIcons[iconName], 50);
                 objImage.draggable = false;
-                imgcell.appendChild(objImage);
-                onlyrow.appendChild(imgcell);
+                iconCell.appendChild(objImage);
+                onlyrow.appendChild(iconCell);
 // cell with properties
                 var propcell = document.createElement('td');
                 propcell.style.fontFamily = "Arial, sans-serif";
@@ -293,8 +307,15 @@
                if (obj.name in g_icons) return g_icons[obj.name](obj);
                return obj.name;
               }
+              if (obj.object=="VDEV") {
+               if (obj.name in g_icons) return g_icons[obj.name](obj);
+               return obj.name;
+              }
               if (obj.object=="PDEV") {
-               return obj.model;
+               if (obj.HWid in g_icons) return g_icons[obj.HWid](obj);
+               if (obj.HWid in g_availableIcons) return obj.HWid;
+               if (obj.model in g_icons) return g_icons[obj.model](obj);
+               if (obj.model in g_availableIcons) return obj.model;
               }
              }
 
@@ -315,7 +336,7 @@
 
             function updateObjectVisual(visual, key, value) {
 
-                proptable = visual.getElementsByClassName("propertyTable")[0];
+                var proptable = visual.getElementsByClassName("propertyTable")[0];
                 for (var i = 0, row; row = proptable.rows[i]; i++) {
                     if (row.cells[0].innerHTML === key) {
                         row.cells[1].innerHTML = value;
@@ -323,6 +344,18 @@
                             row.cells[1].setAttribute("class", g_cellColors[value]);
                     }
                 }
+
+
+                var iconCell = visual.getElementsByClassName("iconCell")[0];
+                var iconName= objectIconName(visualToObject(visual));
+                if (iconCell.currentIcon !== iconName){
+                 var objImage = loadImageByFilename('/RGPIO/icons/' + g_availableIcons[iconName], 50);
+                 objImage.draggable = false;
+                 iconCell.removeChild(iconCell.childNodes[0]);  // remove the current icon
+                 iconCell.appendChild(objImage);
+                 iconCell.currentIcon=iconName;
+                }
+
             }
 
 g_scaleFactor=1;
@@ -425,9 +458,10 @@ g_scaleFactor=1;
                                 document.getElementById("messageDiv").innerHTML += "connected.<br>";
                                 document.getElementById("serverAddress").className = "green";
                                 var cmd = new Object();
+                                cmd.Command = "icons";
+                                g_ws.send(JSON.stringify(cmd));
                                 cmd.Command = "backgrounds";
                                 g_ws.send(JSON.stringify(cmd));
-                                var cmd = new Object();
                                 cmd.Command = "status";
                                 g_ws.send(JSON.stringify(cmd));
                             };
@@ -455,8 +489,19 @@ g_scaleFactor=1;
                                     }
                                     if (typeof obj != "undefined") {
 
+                                        if (obj.object == "ICONS") {
+                                            // sent in response to 'icons' request. 
+                                            var icons = obj.list;
+                                            for (var i = 0; i < icons.length; i++) {
+                                                var filename=icons[i];
+                                                var basename=filename.split(".")[0];
+                                                g_availableIcons[basename]=filename;
+console.log("adding to available icons : "+basename+" : "+filename);
+                                            }
+                                        }
                                         if (obj.object == "BACKGROUNDS") {
-                                            // sent in response to 'backgrounds' request. This builds the options list for the drawing select                                            
+                                            // sent in response to 'backgrounds' request. 
+                                            // here we build the options list for the drawing select                                            
                                             var drawingSelector = document.getElementById("drawingSelector");
                                             var drawings = obj.list;
                                             for (var i = 0; i < drawings.length; i++) {
@@ -644,7 +689,7 @@ alert("element "+obj.key+ " is updated but has no visual");
 // display the dropzone background image (replace existing one if any)
                             if (g_background !== "none")
                                 dropzone.removeChild(g_background);
-                            g_background = loadImage("/RGPIO/html/backgrounds/" + g_drawing, 1600);
+                            g_background = loadImageByBasename("/RGPIO/backgrounds/" + g_drawing, 1600);
                             dropzone.appendChild(g_background);
 
 // hide all elements by default

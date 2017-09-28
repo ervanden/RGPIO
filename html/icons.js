@@ -1,5 +1,19 @@
 
-g_icons={};
+g_icons = {
+ sensor : sensorIcon,
+ "1622821" : heatingIcon
+}
+
+console.log(" in icons.js: "+g_icons["1622821"]);
+
+function sensorIcon(sensor) {
+ console.log("sensorIcon is called avg="+sensor.avg);
+ if (sensor.avg > 15) return "fullglass"; else return "emptyglass";
+}
+function heatingIcon(relay) {
+ console.log("heatingIcon is called 0="+relay["0"]);
+ if (relay["0"]==="High") return "flame"; else return "cold";
+}
 
 /* The code in this file determines which icon is displayed for a device.
 
