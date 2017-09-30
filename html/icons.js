@@ -1,17 +1,40 @@
 
 g_icons = {
- sensor : sensorIcon,
- "1622821" : heatingIcon
+ "heating" : heatingIcon,
+ "level" : levelIcon,
+ "temp" : tempIcon,
+ "1622821" : relayIcon
 }
 
-console.log(" in icons.js: "+g_icons["1622821"]);
 
-function sensorIcon(sensor) {
- console.log("sensorIcon is called avg="+sensor.avg);
- if (sensor.avg > 15) return "fullglass"; else return "emptyglass";
+function heatingIcon(heating) {
+// console.log("heatingIcon is called value="+heating.value);
+ if (heating.value == "High") return "flame"; else return "cold";
 }
-function heatingIcon(relay) {
- console.log("heatingIcon is called 0="+relay["0"]);
+
+function tempIcon(device){ return "thermometer";}
+
+
+function levelIcon(device){
+
+var l=Number(device.avg);
+var lmax=200;
+var p=l/lmax;
+if (p<0) return "level10";
+if (p<0.1) return "level9";
+if (p<0.2) return "level8";
+if (p<0.3) return "level7";
+if (p<0.4) return "level6";
+if (p<0.5) return "level5";
+if (p<0.6) return "level4";
+if (p<0.7) return "level3";
+if (p<0.8) return "level2";
+if (p<0.9) return "level1";
+return "level0";
+}
+
+function relayIcon(relay) {
+// console.log("relayIcon is called 0="+relay["0"]);
  if (relay["0"]==="High") return "flame"; else return "cold";
 }
 
@@ -31,26 +54,6 @@ The function is called with as argument an object that represents the device.
 The object has the properties that are displayed to the right of the icon.
 For a PDEV, the physical pins are also properties of this object.
 
-Example:
-
-g_icons = {
- sensor : sensorIcon,
- lights : lightsIcon,
- distance : distanceIcon
-}
-
-function sensorIcon(device) {
- if (device.value > 100) return "redHand"; else return "greenHand";
-}
-
-function lightsIcon(device) {
- if (lights.value=="High") return "lightBulb"; else return "grayCircle";
-}
-
-function distanceIcon(obj){
-
-  // this device measures the water level. 
-  // There are icons showing a reservoir filled to different levels
 
   distance=obj.00;   // distance is the value of the analog output 00.
   if (distance <10) return "reservoir100"; // reservoir almost full
@@ -59,4 +62,4 @@ function distanceIcon(obj){
   if (distance <130) return "reservoir25"; // reservoir 1/4 full
   return reservoir0"  // reservoir almost empty 
 }
-o*/
+*/
