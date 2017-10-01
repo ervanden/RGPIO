@@ -52,6 +52,7 @@ public class PDevice {
                 vdevice.stateChange();
             }
             updateAllPins(); // includes web update to replace NOTRESPONDING
+            updateVIOMembers();
         }
         this.lastContact = new TimeStamp();
     }
@@ -63,6 +64,7 @@ public class PDevice {
             if (vdevice != null) {
                 vdevice.stateChange();
             }
+            updateVIOMembers();
         }
 
         MessageEvent e = new MessageEvent(MessageType.DeviceNotResponding);
@@ -106,6 +108,21 @@ public class PDevice {
 
         for (POutput op : outputs.values()) {
             updatePOutput(op);
+        }
+    }
+    
+        public void updateVIOMembers() {
+
+        for (PInput ip : inputs.values()) {
+        if (ip.vinput != null) {
+            ip.vinput.countMembers();   // includes web update
+        }
+        }
+
+        for (POutput op : outputs.values()) {
+        if (op.voutput != null) {
+            op.voutput.countMembers();   // includes web update
+        }
         }
     }
 

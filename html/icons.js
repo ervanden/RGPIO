@@ -20,16 +20,16 @@ function levelIcon(device){
 var l=Number(device.avg);
 var lmax=200;
 var p=l/lmax;
-if (p<0) return "level10";
-if (p<0.1) return "level9";
-if (p<0.2) return "level8";
-if (p<0.3) return "level7";
-if (p<0.4) return "level6";
-if (p<0.5) return "level5";
-if (p<0.6) return "level4";
-if (p<0.7) return "level3";
-if (p<0.8) return "level2";
-if (p<0.9) return "level1";
+if (p<0.05) return "level10";
+if (p<0.15) return "level9";
+if (p<0.25) return "level8";
+if (p<0.35) return "level7";
+if (p<0.45) return "level6";
+if (p<0.55) return "level5";
+if (p<0.65) return "level4";
+if (p<0.75) return "level3";
+if (p<0.85) return "level2";
+if (p<0.95) return "level1";
 return "level0";
 }
 

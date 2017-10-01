@@ -10,6 +10,7 @@ public class VInput extends VSelector {
     public String name;
     public IOType type;
     public String value;
+    public Integer members=null;
     public Integer minMembers = null;
 
     public String get_value() {
@@ -20,6 +21,7 @@ public class VInput extends VSelector {
         JSONString json = new JSONString();
         json.addProperty("object", "VIO");
         json.addProperty("name", name);
+                json.addProperty("members", members.toString());
         json.addProperty("type", type.name());
         if (type == IOType.digitalInput) {
             json.addProperty("nrHigh", nrHigh().toString());
@@ -93,6 +95,22 @@ public class VInput extends VSelector {
         }
     }
 
+    public void countMembers(){
+        int members=0;
+        for (PDevice device : RGPIO.PDeviceMap.values()) {
+            for (PInput p : device.inputs.values()) {
+                if (p.vinput == this) {
+                    if (device.get_status()==PDeviceStatus.ACTIVE) members++;
+                }
+            }
+        }
+        if (this.members!=members){
+            this.members=members;
+            RGPIO.webSocketServer.sendToAll(toJSON());
+        }
+    }
+    
+    
     public Integer nrHigh() {
         int nrHigh = 0;
         for (PDevice device : RGPIO.PDeviceMap.values()) {
@@ -151,7 +169,7 @@ public class VInput extends VSelector {
         if (n > 0) {
             return sum / n;
         } else {
-            return Float.MAX_VALUE;
+            return 0f;
         }
     }
 
