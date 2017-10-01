@@ -10,7 +10,7 @@ public class VInput extends VSelector {
     public String name;
     public IOType type;
     public String value;
-    public Integer members=null;
+    public Integer members=0;
     public Integer minMembers = null;
 
     public String get_value() {
@@ -96,16 +96,18 @@ public class VInput extends VSelector {
     }
 
     public void countMembers(){
-        int members=0;
+        System.out.println("counting members of VInput "+name);
+        int m=0;
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput p : device.inputs.values()) {
                 if (p.vinput == this) {
-                    if (device.get_status()==PDeviceStatus.ACTIVE) members++;
+                    System.out.println("  device "+device.HWid+" pin "+p.name +" " +device.get_status().toString() );
+                    if (device.get_status()==PDeviceStatus.ACTIVE) m++;
                 }
             }
         }
-        if (this.members!=members){
-            this.members=members;
+        if (members!=m){
+            members=m;
             RGPIO.webSocketServer.sendToAll(toJSON());
         }
     }
