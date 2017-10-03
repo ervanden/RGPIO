@@ -7,12 +7,9 @@
         -->
 
         <style type="text/css">
-            table  {border-collapse:collapse;border-spacing:0;}
-            table td{font-family:Arial, sans-serif;font-size:14px;padding:5px 2px;border-style:solid;border-width:2px;overflow:hidden;word-break:normal;}
-            table .cellActive{background-color:#00ff00}
-            table .cellNotresponding{background-color:#e6e6e6}
-            table .cellHigh{background-color:#ff4d4d}
-            table .cellLow{background-color:#b3ccff}
+            * {font-family:Arial, sans-serif;font-size:18px}
+            table  {border-collapse:collapse;border-spacing:0;padding:5px 2px;border-style:none}
+            table  {overflow:hidden;word-break:normal;}
             input.white {background-color:white}
             input.green {background-color:green}
             input.grey {background-color:grey}
@@ -48,8 +45,8 @@
             <select id="drawingSelector" onchange="loadSelectedDrawing();">
                 <option value="none"> Select a drawing </option>
             </select>
-<button type="button" onclick="setScaleFactor(1.1);" >Icon+</button>
-<button type="button" onclick="setScaleFactor(0.9);" >Icon-</button>
+            <button type="button" onclick="setScaleFactor(1.1);" >Icon+</button>
+            <button type="button" onclick="setScaleFactor(0.9);" >Icon-</button>
             <button type="button" id="propertySelectButton">Properties</button>
             <button type="button" id="deviceSelectButton">Devices</button>
             <button type="button" id="saveDrawingButton">Save Drawing</button>
@@ -58,7 +55,6 @@
 
 
         <div id="dropzone"  ondrop="drop(event)" ondragover="allowDrop(event)" style="position:relative;border:1px solid #d3d3d3">
-
         </div>
 
         <!-- device selection modal box, hidden by default-->
@@ -70,8 +66,8 @@
                     <button type="button" id="deviceCancel">Cancel</button>
                 </form>
             </div>
-
         </div>
+
         <!-- property selection modal box, hidden by default-->
         <div id="propertyModal" class="modal">
             <div class="modal-content">
@@ -81,8 +77,17 @@
                     <button type="button" id="propertyCancel">Cancel</button>
                 </form>
             </div>
-
         </div>
+
+        <!-- modal box to show message, hidden by default-->
+
+        <div id="messageModal" class="modal">
+            <div class="modal-content">
+                <p id="messageParagraph" style="font-size:25px">  Boodschap in een fles
+                </p>
+            </div>
+        </div>
+
 
         <div id="messageDiv" style="overflow-y:scroll; height:400px;border-style:solid;border-width:1px;"></div>
 
@@ -102,23 +107,33 @@
             resetHiddenProperties(); // sets the list to the properties that should always be hidden
 
             g_cellColors = {
-                "ACTIVE": "cellActive",
-                "NOTRESPONDING": "cellNotresponding",
-                "High": "cellHigh",
-                "Low": "cellLow"
+                "ACTIVE": "#00ff00",
+                "NOTRESPONDING": "#e6e6e6",
+                "High": "#ff4d4d",
+                "Low": "#b3ccff"
             };
-
 
             g_deviceSelect = document.getElementById("deviceSelect");
             g_deviceModal = document.getElementById('deviceModal');
 
             g_propertySelect = document.getElementById("propertySelect");
             g_propertyModal = document.getElementById('propertyModal');
+            g_messageModal = document.getElementById('messageModal');
 
 
             function includes(arr, obj) {
                 return (arr.indexOf(obj) !== -1);
             }
+
+            function message(text) {
+                var p = document.getElementById("messageParagraph");
+                p.innerHTML = text;
+                g_messageModal.style.display = "block";
+                setTimeout(function () {
+                    g_messageModal.style.display = "none";
+                }, 1000);
+            }
+
 
             function elementIsHidden(element) {
                 if (element.visual.style.display == "none")
@@ -160,17 +175,34 @@
             }
 
 
-            function positionElement(element){
+            function redrawElement(element) {
                 if ("hidden" in element) {
-                 if (element.hidden) {
-                  element.visual.style.display = "none";
-                 } else {
-                  element.visual.style.display = "";
-                 }
+                    if (element.hidden) {
+                        element.visual.style.display = "none";
+                    } else {
+                        element.visual.style.display = "";
+                    }
                 }
-                if ("top" in element) element.visual.style.top = element.top;
-                if ("left" in element) element.visual.style.left = element.left;
-                if ("scale" in element) element.visual.style.transform="scale("+element.scale+")";
+                if ("top" in element)
+                    element.visual.style.top = element.top;
+                if ("left" in element)
+                    element.visual.style.left = element.left;
+                if ("scale" in element)
+                    element.visual.style.transform = "scale(" + element.scale + ")";
+                if (((element.object == "VIO") && ("members" in element) && (element.members < 1))
+                        || ((element.object == "PDEV") && ("status" in element) && (element.status === "NOTRESPONDING")))
+                {
+                    // give NOTRESPONDING elements a grey background and make all property table cells transparent so  the visual is evenly grey
+                    element.visual.style.backgroundColor = "#e6e6e6";
+
+                    var proptable = element.visual.getElementsByClassName("propertyTable")[0];
+                    for (var i = 0, row; row = proptable.rows[i]; i++) {
+                        row.cells[0].style.backgroundColor = "transparent";
+                        row.cells[1].style.backgroundColor = "transparent";
+                    }
+                }
+                else
+                    element.visual.style.backgroundColor = "white";
             }
 
 
@@ -230,7 +262,10 @@
                     valuecell.style.borderStyle = "none";
                     valuecell.innerHTML = value;
                     if (value in g_cellColors)
-                        valuecell.setAttribute("class", g_cellColors[value]);
+                        valuecell.style.backgroundColor = g_cellColors[value];
+                    else
+                        valuecell.style.backgroundColor = "white";
+
                     row.appendChild(valuecell);
 
                     // if the property is encountered for the first time, add to g_allProperties and
@@ -264,13 +299,13 @@
                 table.appendChild(onlyrow);
 // cell with image
                 var iconCell = document.createElement('td');
-                iconCell.className="iconCell";
+                iconCell.className = "iconCell";
                 iconCell.style.fontFamily = "Arial, sans-serif";
                 iconCell.style.fontSize = "14px";
                 iconCell.style.padding = "5px 2px";
                 iconCell.style.borderStyle = "none";
-                var iconName= objectIconName(obj);
-                iconCell.currentIcon=iconName;
+                var iconName = objectIconName(obj);
+                iconCell.currentIcon = iconName;
                 var objImage = loadImageByFilename('/RGPIO/icons/' + g_availableIcons[iconName], 50);
                 objImage.draggable = false;
                 iconCell.appendChild(objImage);
@@ -285,7 +320,7 @@
                 propcell.appendChild(proptable);
                 onlyrow.appendChild(propcell);
 
-                var objectVisual= table;
+                var objectVisual = table;
                 objectVisual.id = obj.key; // must have an id to make it draggable
                 g_dropzone.appendChild(objectVisual);
                 objectVisual.draggable = true;
@@ -293,29 +328,35 @@
                 objectVisual.onclick = scaleVisual;
                 objectVisual.style.display = "none"; // not displayed until a drawing is selected
                 obj.visual = objectVisual;
- 
+
 // apply drawing information if available
 
-                positionElement(obj);
+                redrawElement(obj);
 
             }
 
-            function objectIconName(obj){
-              if (obj.object=="VIO") {
-               if (obj.name in g_icons) return g_icons[obj.name](obj);
-               return obj.name;
-              }
-              if (obj.object=="VDEV") {
-               if (obj.name in g_icons) return g_icons[obj.name](obj);
-               return obj.name;
-              }
-              if (obj.object=="PDEV") {
-               if (obj.HWid in g_icons) return g_icons[obj.HWid](obj);
-               if (obj.HWid in g_availableIcons) return obj.HWid;
-               if (obj.model in g_icons) return g_icons[obj.model](obj);
-               if (obj.model in g_availableIcons) return obj.model;
-              }
-             }
+            function objectIconName(obj) {
+                if (obj.object == "VIO") {
+                    if (obj.name in g_icons)
+                        return g_icons[obj.name](obj);
+                    return obj.name;
+                }
+                if (obj.object == "VDEV") {
+                    if (obj.name in g_icons)
+                        return g_icons[obj.name](obj);
+                    return obj.name;
+                }
+                if (obj.object == "PDEV") {
+                    if (obj.HWid in g_icons)
+                        return g_icons[obj.HWid](obj);
+                    if (obj.HWid in g_availableIcons)
+                        return obj.HWid;
+                    if (obj.model in g_icons)
+                        return g_icons[obj.model](obj);
+                    if (obj.model in g_availableIcons)
+                        return obj.model;
+                }
+            }
 
 
 
@@ -339,50 +380,56 @@
                     if (row.cells[0].innerHTML === key) {
                         row.cells[1].innerHTML = value;
                         if (value in g_cellColors)
-                            row.cells[1].setAttribute("class", g_cellColors[value]);
+                            row.cells[1].style.backgroundColor = g_cellColors[value];
+                        else
+                            row.cells[1].style.backgroundColor = "white";
                     }
                 }
 
 
                 var iconCell = visual.getElementsByClassName("iconCell")[0];
-                var iconName= objectIconName(visualToObject(visual));
-                if (iconCell.currentIcon !== iconName){
-                 var objImage = loadImageByFilename('/RGPIO/icons/' + g_availableIcons[iconName], 50);
-                 objImage.draggable = false;
-                 iconCell.removeChild(iconCell.childNodes[0]);  // remove the current icon
-                 iconCell.appendChild(objImage);
-                 iconCell.currentIcon=iconName;
+                var iconName = objectIconName(visualToObject(visual));
+                if (iconCell.currentIcon !== iconName) {
+                    var objImage = loadImageByFilename('/RGPIO/icons/' + g_availableIcons[iconName], 50);
+                    objImage.draggable = false;
+                    iconCell.removeChild(iconCell.childNodes[0]);  // remove the current icon
+                    iconCell.appendChild(objImage);
+                    iconCell.currentIcon = iconName;
                 }
 
             }
 
-g_scaleFactor=1;
+            g_scaleFactor = 1;
 
- function setScaleFactor(f){g_scaleFactor=f;}
 
- function scaleVisual() {
-     var element=visualToObject(this);
+            function setScaleFactor(f) {
+                g_scaleFactor = f;
+            }
+
+            function scaleVisual() {
+                var element = visualToObject(this);
 //     console.log("  scaleVisual "+visual.id+ " scale="+visual.scale);
-     if (!("scale" in element)) element.scale=1;
-     element.scale=element.scale*g_scaleFactor;
-     positionElement(element);
-} 
+                if (!("scale" in element))
+                    element.scale = 1;
+                element.scale = element.scale * g_scaleFactor;
+                redrawElement(element);
+            }
 
 
-   function findPos(obj) {
-         var curleft = curtop = 0;
-         if (obj.offsetParent) {
-             do {
-                 curleft += obj.offsetLeft;
-                 curtop += obj.offsetTop;
-             } while (obj = obj.offsetParent);
-             return [curleft, curtop];
-         }
-     }
+            function findPos(obj) {
+                var curleft = curtop = 0;
+                if (obj.offsetParent) {
+                    do {
+                        curleft += obj.offsetLeft;
+                        curtop += obj.offsetTop;
+                    } while (obj = obj.offsetParent);
+                    return [curleft, curtop];
+                }
+            }
 
-     function allowDrop(ev) {
-         ev.preventDefault();
-     }
+            function allowDrop(ev) {
+                ev.preventDefault();
+            }
             function findPos(obj) {
                 var curleft = curtop = 0;
                 if (obj.offsetParent) {
@@ -491,10 +538,10 @@ g_scaleFactor=1;
                                             // sent in response to 'icons' request. 
                                             var icons = obj.list;
                                             for (var i = 0; i < icons.length; i++) {
-                                                var filename=icons[i];
-                                                var basename=filename.split(".")[0];
-                                                g_availableIcons[basename]=filename;
-console.log("adding to available icons : "+basename+" : "+filename);
+                                                var filename = icons[i];
+                                                var basename = filename.split(".")[0];
+                                                g_availableIcons[basename] = filename;
+                                                console.log("adding to available icons : " + basename + " : " + filename);
                                             }
                                         }
                                         if (obj.object == "BACKGROUNDS") {
@@ -512,7 +559,7 @@ console.log("adding to available icons : "+basename+" : "+filename);
                                         if (obj.object == "PROPERTY") {
 // sent as part of the response to the 'load' request. Lists the properties and if they are hidden
 // g_hiddenProperties was reset before so no action needed for visible properties
-                                            if (obj.hidden){
+                                            if (obj.hidden) {
                                                 g_hiddenProperties.add(obj.name);
                                                 applyHiddenProperties();
                                             }
@@ -532,9 +579,9 @@ console.log("adding to available icons : "+basename+" : "+filename);
 
                                         if ("key" in obj) {
 //console.log("checking if "+obj.key + "is in g_allElements");
-                            for (var kkk in g_allElements) {
-                                //console.log(" in: "+(g_allElements[kkk]).key);
-                            }
+                                            for (var kkk in g_allElements) {
+                                                //console.log(" in: "+(g_allElements[kkk]).key);
+                                            }
                                             if (!(obj.key in g_allElements)) {  // first time this object is sent by the server
 //console.log("first occurence of "+obj.key);
                                                 document.getElementById("messageDiv").innerHTML += "new element " + obj.key + "<br>";
@@ -579,17 +626,17 @@ console.log("adding to available icons : "+basename+" : "+filename);
                                                     // if the element has a visual, change it according to the new property value
                                                     // if the element has no visual yet, create one
                                                     // position the element in case display information (top,left,hidden) was added
-                                                        for (var key in obj) {
-                                                            if (existingElement[key] !== obj[key]) {
-                                                                existingElement[key] = obj[key];
-                                                                if ("visual" in existingElement)
-                                                                 updateObjectVisual(existingElement.visual, key, obj[key]);
-                                                                else
-alert("element "+obj.key+ " is updated but has no visual");
+                                                    for (var key in obj) {
+                                                        if (existingElement[key] !== obj[key]) {
+                                                            existingElement[key] = obj[key];
+                                                            if ("visual" in existingElement)
+                                                                updateObjectVisual(existingElement.visual, key, obj[key]);
+                                                            else
+                                                                alert("element " + obj.key + " is updated but has no visual");
 //                                                                 createObjectVisual(existingElement);
-                                                            }
                                                         }
-                                                        positionElement(existingElement);
+                                                    }
+                                                    redrawElement(existingElement);
                                                 }
                                                 if (obj.object == "PIO") {
                                                     var existingElement = g_allElements[obj.device];
@@ -673,6 +720,7 @@ alert("element "+obj.key+ " is updated but has no visual");
                     //console.log(cmd.Arg2);
 
                 }
+                message("drawing \"" + g_drawing + "\" is saved");
             };
 
             function loadSelectedDrawing() {
@@ -743,17 +791,17 @@ alert("element "+obj.key+ " is updated but has no visual");
                 g_propertyModal.style.display = "none";
 
                 // hide the properties in g_hiddenProperties
-/*
-                propRows = document.getElementsByClassName("propertyRow");
-                for (var i = 0, row; row = propRows[i]; i++) {
-                    var keycell = row.children[0];
-                    if (g_hiddenProperties.has(keycell.innerHTML)) {
-                        row.style.display = "none";
-                    } else {
-                        row.style.display = "";
-                    }
-                }
-*/
+                /*
+                 propRows = document.getElementsByClassName("propertyRow");
+                 for (var i = 0, row; row = propRows[i]; i++) {
+                 var keycell = row.children[0];
+                 if (g_hiddenProperties.has(keycell.innerHTML)) {
+                 row.style.display = "none";
+                 } else {
+                 row.style.display = "";
+                 }
+                 }
+                 */
                 applyHiddenProperties();
             }
 
