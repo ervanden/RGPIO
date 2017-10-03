@@ -113,12 +113,12 @@
                 "Low": "#b3ccff"
             };
 
-            g_deviceSelect = document.getElementById("deviceSelect");
-            g_deviceModal = document.getElementById('deviceModal');
+            var g_deviceSelect = document.getElementById("deviceSelect");
+            var g_deviceModal = document.getElementById('deviceModal');
 
-            g_propertySelect = document.getElementById("propertySelect");
-            g_propertyModal = document.getElementById('propertyModal');
-            g_messageModal = document.getElementById('messageModal');
+            var g_propertySelect = document.getElementById("propertySelect");
+            var g_propertyModal = document.getElementById('propertyModal');
+            var g_messageModal = document.getElementById('messageModal');
 
 
             function includes(arr, obj) {
@@ -136,7 +136,7 @@
 
 
             function elementIsHidden(element) {
-                if (element.visual.style.display == "none")
+                if (element.visual.style.display === "none")
                     return true;
                 else
                     return false;
@@ -189,8 +189,8 @@
                     element.visual.style.left = element.left;
                 if ("scale" in element)
                     element.visual.style.transform = "scale(" + element.scale + ")";
-                if (((element.object == "VIO") && ("members" in element) && (element.members < 1))
-                        || ((element.object == "PDEV") && ("status" in element) && (element.status === "NOTRESPONDING")))
+                if (((element.object === "VIO") && ("members" in element) && (element.members < 1))
+                        || ((element.object === "PDEV") && ("status" in element) && (element.status === "NOTRESPONDING")))
                 {
                     // give NOTRESPONDING elements a grey background and make all property table cells transparent so  the visual is evenly grey
                     element.visual.style.backgroundColor = "#e6e6e6";
@@ -211,7 +211,7 @@
                 objImage.onload = function (e) {
                     objImage.width = width;
                     objImage.height = width * (objImage.naturalHeight / objImage.naturalWidth);
-                }
+                };
                 objImage.onerror = function (e) {
                     if (objImage.src.endsWith(".jpg")) {
                         // loading a jpg file failed , trying png
@@ -221,7 +221,7 @@
                         objImage.src = objImage.src.replace(".png", ".gif");
                     }
 
-                }
+                };
                 objImage.src = name + '.jpg';
                 return objImage;
             }
@@ -231,7 +231,7 @@
                 objImage.onload = function (e) {
                     objImage.width = width;
                     objImage.height = width * (objImage.naturalHeight / objImage.naturalWidth);
-                }
+                };
                 objImage.src = name;
                 return objImage;
             }
@@ -288,7 +288,7 @@
 
 
             function createObjectVisual(obj) {
-//console.log("create object visual of  "+obj.key);
+
                 var table = document.createElement('table');
                 table.className = "objectVisual";
                 table.style.position = "absolute";
@@ -322,6 +322,7 @@
 
                 var objectVisual = table;
                 objectVisual.id = obj.key; // must have an id to make it draggable
+                objectVisual.element = obj;
                 g_dropzone.appendChild(objectVisual);
                 objectVisual.draggable = true;
                 objectVisual.ondragstart = drag;
@@ -329,24 +330,24 @@
                 objectVisual.style.display = "none"; // not displayed until a drawing is selected
                 obj.visual = objectVisual;
 
-// apply drawing information if available
+                // apply drawing information if available
 
                 redrawElement(obj);
 
             }
 
             function objectIconName(obj) {
-                if (obj.object == "VIO") {
+                if (obj.object === "VIO") {
                     if (obj.name in g_icons)
                         return g_icons[obj.name](obj);
                     return obj.name;
                 }
-                if (obj.object == "VDEV") {
+                if (obj.object === "VDEV") {
                     if (obj.name in g_icons)
                         return g_icons[obj.name](obj);
                     return obj.name;
                 }
-                if (obj.object == "PDEV") {
+                if (obj.object === "PDEV") {
                     if (obj.HWid in g_icons)
                         return g_icons[obj.HWid](obj);
                     if (obj.HWid in g_availableIcons)
@@ -362,14 +363,17 @@
 
             function visualToObject(visual) {
                 // lookup the object's key in the property table
-                proptable = visual.getElementsByClassName("propertyTable")[0];
-                for (var j = 0, row; row = proptable.rows[j]; j++) {
-                    var key;
-                    if (row.cells[0].innerHTML === "key") {
-                        key = row.cells[1].innerHTML;
-                    }
-                }
-                return g_allElements[key];
+                /*
+                 proptable = visual.getElementsByClassName("propertyTable")[0];
+                 for (var j = 0, row; row = proptable.rows[j]; j++) {
+                 var key;
+                 if (row.cells[0].innerHTML === "key") {
+                 key = row.cells[1].innerHTML;
+                 }
+                 }
+                 return g_allElements[key];
+                 */
+                return visual.element;
             }
 
 
@@ -532,9 +536,9 @@
                                         document.getElementById("messageDiv").innerHTML += event.data + "<br>";
 
                                     }
-                                    if (typeof obj != "undefined") {
+                                    if (typeof obj !== "undefined") {
 
-                                        if (obj.object == "ICONS") {
+                                        if (obj.object === "ICONS") {
                                             // sent in response to 'icons' request. 
                                             var icons = obj.list;
                                             for (var i = 0; i < icons.length; i++) {
@@ -544,7 +548,7 @@
                                                 console.log("adding to available icons : " + basename + " : " + filename);
                                             }
                                         }
-                                        if (obj.object == "BACKGROUNDS") {
+                                        if (obj.object === "BACKGROUNDS") {
                                             // sent in response to 'backgrounds' request. 
                                             // here we build the options list for the drawing select                                            
                                             var drawingSelector = document.getElementById("drawingSelector");
@@ -556,7 +560,7 @@
                                                 drawingSelector.appendChild(option);
                                             }
                                         }
-                                        if (obj.object == "PROPERTY") {
+                                        if (obj.object === "PROPERTY") {
 // sent as part of the response to the 'load' request. Lists the properties and if they are hidden
 // g_hiddenProperties was reset before so no action needed for visible properties
                                             if (obj.hidden) {
@@ -564,40 +568,37 @@
                                                 applyHiddenProperties();
                                             }
                                         }
-                                        if (obj.object == "PDEV") {
+                                        if (obj.object === "PDEV") {
                                             obj.key = obj.HWid;
                                         }
-                                        if (obj.object == "VDEV") {
+                                        if (obj.object === "VDEV") {
                                             obj.key = obj.name;
                                         }
-                                        if (obj.object == "VIO") {
+                                        if (obj.object === "VIO") {
                                             obj.key = obj.name;
                                         }
-                                        if (obj.object == "PIO") {
+                                        if (obj.object === "PIO") {
                                             obj.key = obj.device + "/" + obj.name;
                                         }
 
                                         if ("key" in obj) {
-//console.log("checking if "+obj.key + "is in g_allElements");
-                                            for (var kkk in g_allElements) {
-                                                //console.log(" in: "+(g_allElements[kkk]).key);
-                                            }
+
                                             if (!(obj.key in g_allElements)) {  // first time this object is sent by the server
 //console.log("first occurence of "+obj.key);
                                                 document.getElementById("messageDiv").innerHTML += "new element " + obj.key + "<br>";
 
-                                                if ((obj.object == "VDEV") || (obj.object == "PDEV") || (obj.object == "VIO")) {
+                                                if ((obj.object === "VDEV") || (obj.object === "PDEV") || (obj.object === "VIO")) {
                                                     // visual is an icon and a table with properties
-                                                    var objectVisual = createObjectVisual(obj);
+                                                    createObjectVisual(obj);
 
                                                 }
-                                                if (obj.object == "PIO") {
+                                                if (obj.object === "PIO") {
                                                     // create a property with the name of this PIO in the PDEV it belongs to
                                                     var pdev = g_allElements[obj.device];
                                                     pdev[obj.name] = obj.value;
                                                     // replace the device visual by an updated one
                                                     g_dropzone.removeChild(pdev.visual);
-                                                    var pdevVisual = createObjectVisual(pdev);
+                                                    createObjectVisual(pdev);
 
                                                     // PIO itself has no 'visual' property. It is visualized as an entry in the device property table
 
@@ -610,7 +611,7 @@
 
 // Create an option in the  device select element. PIO can not be selected, since its visual is an entry in the property table
 // that is controlled by g_hiddenProperties
-                                                if ((obj.object == "VDEV") || (obj.object == "PDEV") || (obj.object == "VIO")) {
+                                                if ((obj.object === "VDEV") || (obj.object === "PDEV") || (obj.object === "VIO")) {
                                                     var option = document.createElement("option");
                                                     option.value = obj.key;
                                                     option.text = obj.key;
@@ -620,7 +621,7 @@
                                             } else {   // not the first occurrence of this object =  update 
 //console.log("update of "+obj.key);
 
-                                                if ((obj.object == "VDEV") || (obj.object == "PDEV") || (obj.object == "VIO")) {
+                                                if ((obj.object === "VDEV") || (obj.object === "PDEV") || (obj.object === "VIO")) {
                                                     var existingElement = g_allElements[obj.key];
                                                     // copy all properties from the update object to the element
                                                     // if the element has a visual, change it according to the new property value
@@ -638,7 +639,7 @@
                                                     }
                                                     redrawElement(existingElement);
                                                 }
-                                                if (obj.object == "PIO") {
+                                                if (obj.object === "PIO") {
                                                     var existingElement = g_allElements[obj.device];
                                                     if (existingElement[obj.name] !== obj.value) {
                                                         existingElement[obj.name] = obj.value;
@@ -650,7 +651,7 @@
 
                                     }
                                 }
-                            }
+                            };
 
 
                         } else
@@ -665,7 +666,7 @@
 
             document.getElementById("saveDrawingButton").onclick = function () {
 
-                if (g_drawing != "none") {
+                if (g_drawing !== "none") {
                     var cmd = new Object();
                     cmd.Command = "store";
                     cmd.Arg1 = g_drawing;
@@ -679,24 +680,21 @@
                         var position = new Object();
                         position.object = obj.object;
                         // store HWid or name so that the element key can be reconstructed from the object
-                        if ((obj.object == "VDEV") || (obj.object == "VIO")) {
+                        if ((obj.object === "VDEV") || (obj.object === "VIO")) {
                             position.name = obj.name;
                         }
-                        if (obj.object == "PDEV") {
+                        if (obj.object === "PDEV") {
                             position.HWid = obj.HWid;
                         }
                         position.left = obj.left;
                         position.top = obj.top;
                         position.scale = obj.scale;
-                        if (visual.style.display == "")
+                        if (visual.style.display === "")
                             position.hidden = false;
-                        if (visual.style.display == "none")
+                        if (visual.style.display === "none")
                             position.hidden = true;
                         cmd.Arg2 = JSON.stringify(position);
                         g_ws.send(JSON.stringify(cmd));
-                        //console.log(cmd.Command);
-                        //console.log(cmd.Arg1);
-                        //console.log(cmd.Arg2);
                     }
 
                     // store the properties that are hidden for this drawing                   
@@ -708,19 +706,14 @@
                         p.hidden = true;
                         cmd.Arg2 = JSON.stringify(p);
                         g_ws.send(JSON.stringify(cmd));
-                        //console.log(cmd.Command);
-                        //console.log(cmd.Arg1);
-                        //console.log(cmd.Arg2);
                     });
 
                     cmd.Arg2 = ".";
                     g_ws.send(JSON.stringify(cmd));
-                    //console.log(cmd.Command);
-                    //console.log(cmd.Arg1);
-                    //console.log(cmd.Arg2);
 
+                    message("drawing \"" + g_drawing + "\" is saved");
                 }
-                message("drawing \"" + g_drawing + "\" is saved");
+
             };
 
             function loadSelectedDrawing() {
@@ -734,9 +727,9 @@
 
 // display the dropzone background image (replace existing one if any)
                             if (g_background !== "none")
-                                dropzone.removeChild(g_background);
+                                g_dropzone.removeChild(g_background);
                             g_background = loadImageByBasename("/RGPIO/backgrounds/" + g_drawing, 1600);
-                            dropzone.appendChild(g_background);
+                            g_dropzone.appendChild(g_background);
 
 // hide all elements by default
                             for (var key in g_allElements) {
@@ -775,7 +768,7 @@
                 g_propertySelect.size = options.length; // display all properties
 
                 g_propertyModal.style.display = "block";
-            }
+            };
 
 
             // when apply is clicked, the list g_hiddenProps is rebuilt with the selected properties
@@ -803,13 +796,13 @@
                  }
                  */
                 applyHiddenProperties();
-            }
+            };
 
 
             var propertyCancel = document.getElementById("propertyCancel");
             propertyCancel.onclick = function () {
                 g_propertyModal.style.display = "none";
-            }
+            };
 
 // device selection modal 
 
@@ -827,7 +820,7 @@
                 g_deviceSelect.size = options.length; // display all elements
 
                 g_deviceModal.style.display = "block";
-            }
+            };
 
             // when apply is clicked, select elements are hidden
 
@@ -846,24 +839,23 @@
 
                 g_deviceModal.style.display = "none";
 
-            }
+            };
 
 
             var deviceCancel = document.getElementById("deviceCancel");
             deviceCancel.onclick = function () {
                 g_deviceModal.style.display = "none";
-            }
-
+            };
 
 // When the user clicks anywhere outside of the modal, close it
             window.onclick = function (event) {
-                if (event.target == g_propertyModal) {
+                if (event.target === g_propertyModal) {
                     g_propertyModal.style.display = "none";
                 }
-                if (event.target == g_deviceModal) {
+                if (event.target === g_deviceModal) {
                     g_deviceModal.style.display = "none";
                 }
-            }
+            };
 
         </script>
 

@@ -1,9 +1,9 @@
 #! /bin/bash
 
+echo Compiling java files...
 /home/pi/git/RGPIO/run/compileRGPIO
 
 echo Creating jar file...
-sleep 1
 
 cd /home/pi/git/RGPIO
 jar cvfe RGPIO.jar main/RGPIOmain */*.class  > /dev/null
@@ -13,5 +13,3 @@ echo Jar file in /home/pi/git/RGPIO/lib
 echo
 ls -l /home/pi/git/RGPIO/lib/RGPIO.jar
 echo
-
-
