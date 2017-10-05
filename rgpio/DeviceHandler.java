@@ -52,9 +52,9 @@ public class DeviceHandler {
                     pdevice.addPOutput(pinType, pinName, HWid, model);
                 }
             }
-            // add 1 to the members field of all VIO that contain a pin of this pdevice
-            pdevice.updateVIOMembers(); 
 
+            pdevice.setActive();
+            
         } else if (command.equals("Event")) {
 
             String HWid = null;

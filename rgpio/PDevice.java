@@ -21,14 +21,7 @@ public class PDevice {
     public HashMap<String, PInput> inputs = new HashMap<>();
     public HashMap<String, POutput> outputs = new HashMap<>();
 
-    /*
-     public HashMap<String, PInput> digitalInputs = new HashMap<>(); // key is pin label
-     public HashMap<String, PInput> analogInputs = new HashMap<>(); // key is pin label
-     public HashMap<String, PInput> stringInputs = new HashMap<>(); // key is pin label
-     public HashMap<String, POutput> digitalOutputs = new HashMap<>(); // key is pin label
-     public HashMap<String, POutput> analogOutputs = new HashMap<>(); // key is pin label
-     public HashMap<String, POutput> stringOutputs = new HashMap<>(); // key is pin label
-     */
+    
     public String toJSON() {
         JSONString json = new JSONString();
         json.addProperty("object", "PDEV");
@@ -45,7 +38,6 @@ public class PDevice {
 
     public void setActive() {
         if (status != PDeviceStatus.ACTIVE) {
-            System.out.println("pdev " + HWid + " changed from " + status + " to ACTIVE ");
             status = PDeviceStatus.ACTIVE;
             RGPIO.webSocketServer.sendToAll(toJSON());
             if (vdevice != null) {

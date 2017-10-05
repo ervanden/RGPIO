@@ -16,7 +16,7 @@ public class SendGetCommandThread extends Thread {
     }
     
     public void run() {
-        ip.set_value(device.sendToDevice("Get/"+IOType.longToShort(ip.type)+":" + ip.name));
+        ip.setValue(device.sendToDevice("Get/"+IOType.longToShort(ip.type)+":" + ip.name));
     }
 }
 

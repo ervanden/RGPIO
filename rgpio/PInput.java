@@ -11,13 +11,13 @@ public class PInput {
     public IOType type;
     public VInput vinput;
 
-    public void set_value(String newValue) {
+    public void setValue(String newValue) {
         value = newValue;
         RGPIO.webSocketServer.sendToAll(toJSON());
         vinput.pinValueChange();
     }
 
-    public String get_value() {
+    public String getValue() {
         return value;
     }
 
@@ -50,7 +50,7 @@ public class PInput {
         } else if (type == IOType.stringInput) {
 
         }
-        set_value(value);
+        setValue(value);
     }
 
 }
