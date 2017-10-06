@@ -85,8 +85,9 @@ class DeviceProbeThread extends Thread {
                 // Check if a device has not responded within the last reportInterval.
                 long now = new TimeStamp().getTimeInMillis();
                 for (PDevice device : RGPIO.PDeviceMap.values()) {
-                    if ((now - device.lastContact.getTimeInMillis()) > reportInterval * 1000) {
-                        device.setNotResponding("device did not respond in last " + reportInterval + " sec");
+                    long inactive=now - device.lastContact.getTimeInMillis();
+                    if (inactive > reportInterval * 1000) {
+                        device.setNotResponding("device did not respond in last " + Math.round(inactive/1000) + " sec");
                     }
                 }
             } catch (Exception e) {

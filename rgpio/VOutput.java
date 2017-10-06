@@ -39,7 +39,6 @@ public class VOutput extends VSelector {
     }
     
     public void countMembers(){
-        System.out.println("counting members of VOutput "+name);
         int m=0;
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (POutput p : device.outputs.values()) {

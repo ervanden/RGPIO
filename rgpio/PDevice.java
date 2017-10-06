@@ -211,7 +211,7 @@ public class PDevice {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-            updatePOutput(poutput);
+ //           updatePOutput(poutput);
         }
     }
 
@@ -282,7 +282,7 @@ public class PDevice {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-            updatePInput(pinput);
+//            updatePInput(pinput);
         }
     }
 

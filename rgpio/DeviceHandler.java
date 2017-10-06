@@ -53,7 +53,8 @@ public class DeviceHandler {
                 }
             }
 
-            pdevice.setActive();
+            // re-count the members of the VIO that have a pin of this pdevice
+            pdevice.setActive(); //updateVIOMembers();
             
         } else if (command.equals("Event")) {
 
