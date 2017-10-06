@@ -28,9 +28,9 @@ public class VInput extends VSelector {
             json.addProperty("nrLow", nrLow().toString());
         }
         if (type == IOType.analogInput) {
-            json.addProperty("avg", avg().toString());
-            json.addProperty("min", min().toString());
-            json.addProperty("max", max().toString());
+            json.addProperty("avg", String.format("%.2f",avg()));
+            json.addProperty("min", String.format("%.2f",min()));
+            json.addProperty("max", String.format("%.2f",max()));
         }
         return json.asString();
     }
@@ -61,8 +61,8 @@ public class VInput extends VSelector {
             };
         }
         
-        //"... all GET threads finished")
-        // send change of value to updateFeed
+        //"... all GET threads finished"
+        // send change of values (avg,min,max) to web interface
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput ip : device.inputs.values()) {
                 if (ip.vinput == this) {

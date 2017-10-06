@@ -91,12 +91,12 @@ public class PDevice {
     }
 
     public void updateAllPins() {
-        System.out.println("*** update all pins of " + HWid + " get...");
+        System.out.println("*** updating all pins of " + HWid + " get...");
 
         for (PInput ip : inputs.values()) {
             updatePInput(ip);
         }
-        System.out.println("*** update all pins of " + HWid + " set...");
+        System.out.println("*** updating all pins of " + HWid + " set...");
 
         for (POutput op : outputs.values()) {
             updatePOutput(op);
@@ -211,7 +211,6 @@ public class PDevice {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
- //           updatePOutput(poutput);
         }
     }
 
@@ -282,7 +281,7 @@ public class PDevice {
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
-//            updatePInput(pinput);
+
         }
     }
 

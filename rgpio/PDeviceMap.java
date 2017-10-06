@@ -67,7 +67,6 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
         pdevice.lastContact = new TimeStamp();  //now
         pdevice.powerOn = new TimeStamp();
         pdevice.powerOn.add(Calendar.SECOND, -upTime);
-        pdevice.setActive();
         return pdevice;
     }
 
