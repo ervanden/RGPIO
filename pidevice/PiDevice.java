@@ -302,7 +302,7 @@ public class PiDevice {
                         }
                     }
                     if ((ipName != null)) {
-                        System.out.println("device received GET command for input " + ipName);
+//                       System.out.println("device received GET command for input " + ipName);
                         DeviceInput ip = null;
                         for (DeviceInput d : inputs) {
                             if (d.name.equals(ipName)) {
@@ -350,8 +350,7 @@ public class PiDevice {
                         }
                     }
                     if ((opName != null) && (opValue != null)) {
-                        System.out.println("device received command to set  output " + opName
-                                + " to " + opValue);
+//                        System.out.println("device received command to set  output " + opName+ " to " + opValue);
                         DeviceOutput op = null;
                         for (DeviceOutput d : outputs) {
                             if (d.name.equals(opName)) {

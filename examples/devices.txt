@@ -1,14 +1,14 @@
 {"Device":"allDevices", "Model":"RELAY"}
 {"Device":"allDevices", "Model":"RASPBERRY"}
 {"Device":"allDevices", "Model":"PIR"}
-{"DigitalInput":"button", "Model":"PIR", "Pin":"02"}
-{"DigitalInput":"button", "HWid":"1234567", "Pin":"03"}
 {"DigitalInput":"button", "Model":"RASPBERRY", "Pin":"button"}
-{"DigitalInput":"button", "HWid":"1625496", "Pin":"2"}
 {"DigitalOutput":"light", "Model":"PIR", "Pin":"00"}
-{"DigitalOutput":"light", "Model":"RASPBERRY", "Pin":"buzzer"}
-{"DigitalOutput":"light", "Model":"RELAY", "Pin":"00"}
+{"DigitalOutput":"light", "Model":"RELAY", "Pin":"0"}
 {"DigitalOutput":"light", "HWid":"1625496", "Pin":"0"}
-{"AnalogInput":"sensor", "Model":"RASPBERRY", "Pin":"sensor"}
-{"AnalogOutput":"timer", "Model":"RASPBERRY", "Pin":"timer"}
+{"DigitalOutput":"light", "HWid":"1622821", "Pin":"0"}
+{"DigitalOutput":"pump", "Model":"RASPBERRY", "Pin":"pump"}
+{"DigitalOutput":"heating", "Model":"RASPBERRY", "Pin":"heating"}
+{"DigitalOutput":"boiler", "Model":"RASPBERRY", "Pin":"boiler"}
+{"AnalogInput":"depth", "Model":"RASPBERRY", "Pin":"distance"}
+{"AnalogInput":"temp", "Model":"RASPBERRY", "Pin":"temp"}
 

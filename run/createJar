@@ -1,11 +1,13 @@
 #! /bin/bash
 
+cd /home/pi/git/RGPIO
+
 echo Compiling java files...
-/home/pi/git/RGPIO/run/compileRGPIO
+
+javac  -classpath /home/pi/git/RGPIO/lib/'*' */*.java
 
 echo Creating jar file...
 
-cd /home/pi/git/RGPIO
 jar cvfe RGPIO.jar main/RGPIOmain */*.class  > /dev/null
 mv RGPIO.jar /home/pi/git/RGPIO/lib
 

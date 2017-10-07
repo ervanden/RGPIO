@@ -27,12 +27,16 @@ public class PInput {
         json.addProperty("name", name);
         json.addProperty("type", type.name());
         json.addProperty("device", device.HWid);
-        String displayValue = value;
-        if (value == null) {
-            displayValue = "null";
-        }
+        
+        String displayValue;
         if (device.get_status() == PDeviceStatus.NOTRESPONDING) {
             displayValue = "NOTRESPONDING";
+        } else {
+            if (value == null) {
+                displayValue = "null";
+            } else {
+                displayValue = value;
+            }
         }
         json.addProperty("value", displayValue);
         return json.asString();
