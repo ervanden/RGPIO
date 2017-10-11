@@ -1,7 +1,7 @@
 {"Device":"allDevices", "Model":"RELAY"}
 {"Device":"allDevices", "Model":"RASPBERRY"}
 {"Device":"allDevices", "Model":"PIR"}
-{"DigitalInput":"button", "Model":"RASPBERRY", "Pin":"button"}
+{"DigitalInput":"button", "HWid":"dev1", "Pin":"button"}
 {"DigitalOutput":"light", "Model":"PIR", "Pin":"00"}
 {"DigitalOutput":"light", "Model":"RELAY", "Pin":"0"}
 {"DigitalOutput":"light", "HWid":"1625496", "Pin":"0"}
