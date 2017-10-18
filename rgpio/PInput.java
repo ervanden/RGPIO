@@ -14,7 +14,7 @@ public class PInput {
     public void setValue(String newValue) {
         value = newValue;
         RGPIO.webSocketServer.sendToAll(toJSON());
-        vinput.pinValueChange();
+        if (vinput!=null) vinput.pinValueChange();
     }
 
     public String getValue() {
