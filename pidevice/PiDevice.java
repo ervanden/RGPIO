@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Scanner;
+import rgpioutils.ServerMessage;
+import utils.JSON2Object;
 
 class MessagePrinter implements MessageListener {
 
@@ -64,12 +66,12 @@ class CommandListener extends Thread {
                 int devicePort = receivePacket.getPort();
                 String message = new String(receivePacket.getData());
                 message = message.substring(0, receivePacket.getLength());
- //               System.out.println("DEVICE RECEIVED: " + message);
+System.out.println("DEVICE RECEIVED: " + message);
 
                 String reply = PiDevice.handleServerMessage(message);
 
                 if (reply != null) {
- //                   System.out.println("DEVICE REPLIED : " + reply);
+                    //                   System.out.println("DEVICE REPLIED : " + reply);
                     sendData = reply.getBytes();
                     DatagramPacket sendPacket
                             = new DatagramPacket(sendData, sendData.length, serverInetAddress, devicePort);
@@ -222,9 +224,9 @@ public class PiDevice {
 
     static public void runDevice(int serverPort, int devicePort) {
 
-        PiDevice.serverPort=serverPort;
-        PiDevice.devicePort=devicePort;
-        
+        PiDevice.serverPort = serverPort;
+        PiDevice.devicePort = devicePort;
+
         MessagePrinter m = new MessagePrinter();
         RGPIO.addMessageListener(m);
 
@@ -255,129 +257,59 @@ public class PiDevice {
 
     public static String handleServerMessage(String message) {
 
-        /*      
-         This method executes an incoming command and 
-         returns the reply string to be returned to the server socket port
-       
-         Report    : Report is sent to the RGPIO.serverPort, no reply to the server socket port
-         Set/Pin:%s/Value:%p    OK is sent to the server socket port
-         Get/Pin:%s    %p
-         System/Command:%s/arg1:%s/arg2:%s…    ACK
-         */
-        if (message.equals("Report")) {
-            sendReport();
+        if (message.equals("OK")) {
+            // OK is sent by the server when it receives a Report
+            // only to let the device know the server IP address 
             return null;
-
         } else {
 
-            try {
-                String[] s = message.split("/");
-                String command = s[0];
-                String name;
-                String value;
-                if (command.equals("OK")) {
-                    // OK is sent by the server when it receives a Report
-                    // only to let the device know the server IP address 
-                    return null;
-                } else if (command.equals("Get")) {
-                    String ipName = null;
-                    IOType ipType = null;
+            ServerMessage cmd;
+            cmd = (ServerMessage) JSON2Object.jsonStringToObject(message, ServerMessage.class);
 
-                    for (int i = 1; i < s.length; i++) {
-                        String nameValue = s[i];
-                        String[] nv = nameValue.split(":");
-                        name = nv[0];
-                        value = nv[1];
-                        if (name.equals("Dip")) {
-                            ipName = value;
-                            ipType = IOType.digitalInput;
-                        }
-                        if (name.equals("Aip")) {
-                            ipName = value;
-                            ipType = IOType.analogInput;
-                        }
-                        if (name.equals("Sip")) {
-                            ipName = value;
-                            ipType = IOType.stringInput;
-                        }
+            String destination = cmd.destination;
+            String command = cmd.command;
+            String pin = cmd.pin;
+            String value = cmd.value;
+
+            if (command.equals("REPORT")) {
+                sendReport();
+                return null;
+            } else if (command.equals("GET")) {
+
+                DeviceInput ip = null;
+                for (DeviceInput d : inputs) {
+                    if (d.name.equals(pin)) {
+                        ip = d;
                     }
-                    if ((ipName != null)) {
-//                       System.out.println("device received GET command for input " + ipName);
-                        DeviceInput ip = null;
-                        for (DeviceInput d : inputs) {
-                            if (d.name.equals(ipName)) {
-                                ip = d;
-                            }
-                        }
-                        if (ip == null) {
-                            System.out.println("GET : unknown output " + ipName);
-                        } else if (ip.type != ipType) {
-                            System.out.println("GET : input of wrong iotype " + ipName + " " + ip.type);
-                        } else {
-                            return ip.getValue();
-                        }
-
-                    } else {
-                        System.out.println("GET : invalid syntax");
-                    }
-
-                    return "-- get failed --";
-
-                } else if (command.equals("Set")) {
-                    String opName = null;
-                    String opValue = null;
-                    IOType opType = null;
-
-                    for (int i = 1; i < s.length; i++) {
-                        String nameValue = s[i];
-                        String[] nv = nameValue.split(":");
-                        name = nv[0];
-                        value = nv[1];
-                        if (name.equals("Dop")) {
-                            opName = value;
-                            opType = IOType.digitalOutput;
-                        }
-                        if (name.equals("Aop")) {
-                            opName = value;
-                            opType = IOType.analogOutput;
-                        }
-                        if (name.equals("Sop")) {
-                            opName = value;
-                            opType = IOType.stringOutput;
-                        }
-                        if (name.equals("Value")) {
-                            opValue = value;
-                        }
-                    }
-                    if ((opName != null) && (opValue != null)) {
-//                        System.out.println("device received command to set  output " + opName+ " to " + opValue);
-                        DeviceOutput op = null;
-                        for (DeviceOutput d : outputs) {
-                            if (d.name.equals(opName)) {
-                                op = d;
-                            }
-                        }
-                        if (op == null) {
-                            System.out.println("SET : unknown output " + opName);
-                        } else if (op.type != opType) {
-                            System.out.println("SET : input of wrong iotype " + opName + " " + op.type);
-                        } else {
-                            op.setValue(opValue);
-                        }
-                    } else {
-                        System.out.println("device received SET command with invalid syntax");
-                    }
-
-                    return "OK";
-
+                }
+                if (ip == null) {
+                    System.out.println("GET : unknown output " + pin);
                 } else {
-                    System.out.println("Device received unknown command : " + command);
-                    return null;
+             System.out.println("RETURNING VALUE   " + value + " FOR "+pin);
+                    return ip.getValue();
+                }
+                return "GET : unknown output " + pin;
+
+            } else if (command.equals("SET")) {
+
+                DeviceOutput op = null;
+                for (DeviceOutput d : outputs) {
+                    if (d.name.equals(pin)) {
+                        op = d;
+                    }
+                }
+                if (op == null) {
+                    System.out.println("SET : unknown output " + pin);
+                } else {
+                                        System.out.println("SETTING  " + pin + " TO "+value);
+                    op.setValue(value);
                 }
 
-            } catch (Exception e) {
-                return "Device received invalid command : " + message;
+                return "OK";
+
             }
+            return null;
+
         }
 
     }
@@ -397,12 +329,14 @@ public class PiDevice {
             return null;
         }
     }
+
     static public Integer getUpTime() {
         long nowInMillis = (new TimeStamp()).getTimeInMillis();
-        Long delta=(nowInMillis-bootTimeInMillis);
-        return delta.intValue()/1000;
-    
+        Long delta = (nowInMillis - bootTimeInMillis);
+        return delta.intValue() / 1000;
+
     }
+
     static public Integer getSystemUpTime() {
 
         // Linux  read uptime from /proc
