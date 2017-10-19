@@ -1,21 +1,31 @@
 package udputils;
 
+import rgpio.IOType;
 import rgpio.PDevice;
+import rgpio.POutput;
+import utils.JSONString;
 
 public class SendSetCommandThread extends Thread {
 
     PDevice device;
-    String message;
+    POutput p;
 
-    public SendSetCommandThread(PDevice device, String message) {
+    public SendSetCommandThread(PDevice device,POutput p) {
         super();
         this.device=device;
-                this.message = message;
+        this.p = p;
+
     }
 
     public void run() {
-        device.sendToDevice(message);
         
+        JSONString json = new JSONString();
+        json.addProperty("destination", device.HWid);
+        json.addProperty("command", "SET");
+        json.addProperty("pin", p.name); 
+        json.addProperty("value", p.get_value());
+ 
+        device.sendToDevice(json.asString());   
         
     }
 }

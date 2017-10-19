@@ -31,7 +31,7 @@ public class VOutput extends VSelector {
             for (POutput p : device.outputs.values()) {
                 if (p.voutput == this) {
                     p.set_value(newValue);
-                    new SendSetCommandThread(device, "Set/" + IOType.longToShort(p.type) + ":" + p.name + "/Value:" + p.get_value()).start();
+                    new SendSetCommandThread(device, p).start();
 
                 }
             }

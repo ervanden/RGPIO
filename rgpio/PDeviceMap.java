@@ -74,7 +74,6 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
             String HWid,
             String pinLabel,
             String value) {
-        System.out.println("deviceReportedPinEvent() " + HWid + " " + pinLabel + " " + value);
         PDevice d = this.get(HWid);
         if (d == null) {
             MessageEvent e = new MessageEvent(MessageType.UnreportedDevice);

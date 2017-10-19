@@ -77,8 +77,7 @@ public class PDevice {
     public void updatePOutput(POutput op) {
         if (op.voutput != null) {
             if (op.voutput.value != null) {
-                new SendSetCommandThread(this, "Set/" + IOType.longToShort(op.type)
-                        + ":" + op.name + "/Value:" + op.voutput.value).start();
+                new SendSetCommandThread(this, op).start();
                 op.set_value(op.voutput.value); // includes web update
             }
         }
