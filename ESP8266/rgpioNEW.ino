@@ -8,10 +8,11 @@ String deviceType = "BUTTON";
 
 /*
 
-  The first line of this sketch identifies the device that this sketch should implement.
-  To add a new type of device "MIXER" to this sketch, write the following functions (add at the end of the sketch)
-  Also add the functions to the wrappes that are actually called in the code.
-  The wrapper functions are called initDEVICE, setDEVICE, getDEVICE, eventDEVICE.
+  The first line of this sketch identifies the device to be implemented.
+  To add a new type of device "MIXER" to this sketch, write the following functions (add at the end of the sketch):
+   initMIXER, setMIXER, getMIXER, eventMIXER, and add these functions to the wrapper functions that are actually
+  called in the code.
+  The wrapper functions are  initDEVICE, setDEVICE, getDEVICE, eventDEVICE.
   Not all functions need to exist (a device XYZ without output pin has no setXYZ() function as it will never receive a Set command.
   If there are state variables that must be accessible to different methods, declare them with the functions. See example BUTTON.
 
