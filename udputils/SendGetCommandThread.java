@@ -17,7 +17,6 @@ public class SendGetCommandThread extends Thread {
     }
     
     public void run() {
- //       ip.setValue(device.sendToDevice("Get/"+IOType.longToShort(ip.type)+":" + ip.name));
         
         JSONString json = new JSONString();
         json.addProperty("destination", device.HWid);

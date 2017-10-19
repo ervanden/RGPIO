@@ -14,6 +14,7 @@ import rgpioutils.ConfigurationFileEntry;
 import rgpioutils.DeviceFileEntry;
 import tcputils.WSServer;
 import utils.JSON2Object;
+import utils.JSONString;
 
 class DeviceMonitorThread extends Thread {
 
@@ -69,16 +70,23 @@ class DeviceMonitorThread extends Thread {
 class DeviceProbeThread extends Thread {
 
     int reportInterval;
+    String broadcastReport;
+
 
     public DeviceProbeThread(int reportInterval) {
         super();
         this.reportInterval = reportInterval;
+        
+        JSONString json= new JSONString();
+        json.addProperty("destination", "ALL");
+        json.addProperty("command", "REPORT");
+        broadcastReport=json.asString();
     }
 
     public void run() {
         while (true) {
             try {
-                UDPSender.send("Report", "255.255.255.255", null, RGPIO.devicePort, 0, 1);
+                UDPSender.send(broadcastReport, "255.255.255.255", null, RGPIO.devicePort, 0, 1);
                 //timeout==0  no use to wait for a reply here, it is sent to the listener
                 //retries==1  send only once now, the broadcast is repeated anyway
                 Thread.sleep(reportInterval * 1000);
