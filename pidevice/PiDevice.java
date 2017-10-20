@@ -66,7 +66,7 @@ class CommandListener extends Thread {
                 int devicePort = receivePacket.getPort();
                 String message = new String(receivePacket.getData());
                 message = message.substring(0, receivePacket.getLength());
-System.out.println("DEVICE RECEIVED: " + message);
+                System.out.println("DEVICE RECEIVED: " + message);
 
                 String reply = PiDevice.handleServerMessage(message);
 
@@ -285,7 +285,7 @@ public class PiDevice {
                 if (ip == null) {
                     System.out.println("GET : unknown output " + pin);
                 } else {
-             System.out.println("RETURNING VALUE   " + value + " FOR "+pin);
+                    System.out.println("RETURNING VALUE   " + ip.getValue() + " FOR " + pin);
                     return ip.getValue();
                 }
                 return "GET : unknown output " + pin;
@@ -301,7 +301,7 @@ public class PiDevice {
                 if (op == null) {
                     System.out.println("SET : unknown output " + pin);
                 } else {
-                                        System.out.println("SETTING  " + pin + " TO "+value);
+                    System.out.println("SETTING  " + pin + " TO " + value);
                     op.setValue(value);
                 }
 
