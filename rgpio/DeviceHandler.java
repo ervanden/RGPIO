@@ -1,5 +1,8 @@
 package rgpio;
 
+import rgpioutils.DeviceMessage;
+import utils.JSON2Object;
+
 public class DeviceHandler {
 
     public static boolean handleDeviceMessage(String deviceIPAddress, String message) {
@@ -9,79 +12,38 @@ public class DeviceHandler {
         e.ipAddress = deviceIPAddress;
         RGPIO.message(e);
 
-        String[] s = message.split("/");
-        String command = s[0];
-        String name;
-        String value;
+        DeviceMessage msg;
+        msg = (DeviceMessage) JSON2Object.jsonStringToObject(message, DeviceMessage.class);
 
-        if (command.equals("Report")) {
-            String HWid = null;
-            String model = null;
-            Integer upTime = null;
-            String pinName;
-            String pinType;
+        if (msg.command.equals("Report")) {
+            String HWid = msg.hwid;
+            String model = msg.model;
+            Integer upTime = Integer.parseInt(msg.uptime);
+
             PDevice pdevice = null;
+            pdevice = RGPIO.PDeviceMap.addPDevice(HWid, model, deviceIPAddress, upTime);
 
-            for (int i = 1; i < s.length; i++) {
-                String nameValue = s[i];
-                String[] nv = nameValue.split(":");
-                name = nv[0];
-                value = nv[1];
-                if (name.equals("HWid")) {
-                    HWid = value;
-                }
-                if (name.equals("Model")) {
-                    model = value;
-                }
-                if (name.equals("Uptime")) {
-                    upTime = Integer.parseInt(value);
-                    pdevice = RGPIO.PDeviceMap.addPDevice(HWid, model, deviceIPAddress, upTime);
-                }
-                if ((name.equals("Dip"))
-                        || (name.equals("Aip"))
-                        || (name.equals("Sip"))) {
-                    pinType = name;
-                    pinName = value;
-                    pdevice.addPInput(pinType, pinName, HWid, model);
-                }
-                if ((name.equals("Dop"))
-                        || (name.equals("Aop"))
-                        || (name.equals("Sop"))) {
-                    pinType = name;
-                    pinName = value;
-                    pdevice.addPOutput(pinType, pinName, HWid, model);
-                }
+            for (String pinName : msg.dips) {
+                pdevice.addPInput("Dip", pinName, HWid, model);
             }
-
-            // re-count the members of the VIO that have a pin of this pdevice
-            pdevice.setActive(); //updateVIOMembers();
+            for (String pinName : msg.dops) {
+                pdevice.addPOutput("Dop", pinName, HWid, model);
+            }
+            for (String pinName : msg.aips) {
+                pdevice.addPInput("Aip", pinName, HWid, model);
+            }
+            for (String pinName : msg.aops) {
+                pdevice.addPOutput("Aop", pinName, HWid, model);
+            }
             
-        } else if (command.equals("Event")) {
+            pdevice.setActive(); 
 
-            String HWid = null;
-            String model = null;
-            String pinLabel = null;
-            String pinValue = null;
+        } else if (msg.command.equals("Event")) {
+            String HWid = msg.hwid;
+            String pin = msg.pin;
+            String value = msg.value;
 
-            for (int i = 1; i < s.length; i++) {
-                String nameValue = s[i];
-                String[] nv = nameValue.split(":");
-                name = nv[0];
-                value = nv[1];
-                if (name.equals("HWid")) {
-                    HWid = value;
-                }
-                if (name.equals("Model")) {
-                    model = value;
-                }
-                if ((name.equals("Dip")) || (name.equals("Aip")) || (name.equals("Sip"))) {
-                    pinLabel = value;
-                }
-                if (name.equals("Value")) {
-                    pinValue = value;
-                }
-            }
-            RGPIO.PDeviceMap.deviceReportedPinEvent(HWid, pinLabel, pinValue);
+            RGPIO.PDeviceMap.deviceReportedPinEvent(HWid, pin, value);
 
         } else {
             e = new MessageEvent(MessageType.InvalidMessage);
