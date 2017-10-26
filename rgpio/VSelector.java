@@ -67,22 +67,22 @@ public class VSelector {
     }
 
     public boolean matchesDevice(String model, String HWid) {
-//       System.out.println(" device matching to Model/HWid " + model + "/" + HWid);
+ //      System.out.println(" device matching to Model/HWid " + model + "/" + HWid);
 
         for (SelectSpec s : selectSpecList) {
 
             if (s.type.equals("Model")) {
-                //                   System.out.println("  TEST IF Model " + model + " matches " + selector.regEx);
+ //                  System.out.println("  TEST IF Model " + model + " matches " + s.regEx);
                 if (model.matches(s.regEx)) {
-                    //                       System.out.println("  Model " + model + " matches " + selector.regEx);
+ //                      System.out.println("  Model " + model + " matches " + s.regEx);
                     return true;
                 }
             }
 
             if (s.type.equals("HWid")) {
-                //                   System.out.println("  TRY IF HWid " + HWid + " matches " + selector.regEx);
+ //                  System.out.println("  TRY IF HWid " + HWid + " matches " + s.regEx);
                 if (HWid.matches(s.regEx)) {
-                    //                       System.out.println("  HWid " + HWid + " matches " + selector.regEx);
+//                      System.out.println("  HWid " + HWid + " matches " + s.regEx);
                     return true;
                 }
             }
