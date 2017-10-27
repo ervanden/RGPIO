@@ -230,30 +230,30 @@ int stringToState(String state) {
 
 // functions addDip(), addDop(), addAip(), addAop() to be used in initDEVICE()
 
-  String dips="";
-  String dipsSeparator="";
-  String dops="";
-  String dopsSeparator="";
-  String aips="";
-  String aipsSeparator="";
-  String aops="";
-  String aopsSeparator="";
+String dips = "";
+String dipsSeparator = "";
+String dops = "";
+String dopsSeparator = "";
+String aips = "";
+String aipsSeparator = "";
+String aops = "";
+String aopsSeparator = "";
 
-void addDip(String name){
-dips=dips+dipsSeparator+"\""+name+"\"";
-dipsSeparator=",";
+void addDip(String name) {
+  dips = dips + dipsSeparator + "\"" + name + "\"";
+  dipsSeparator = ",";
 }
-void addDop(String name){
-dops=dops+dopsSeparator+"\""+name+"\"";
-dopsSeparator=",";
+void addDop(String name) {
+  dops = dops + dopsSeparator + "\"" + name + "\"";
+  dopsSeparator = ",";
 }
-void addAip(String name){
-aips=aips+aipsSeparator+"\""+name+"\"";
-aipsSeparator=",";
+void addAip(String name) {
+  aips = aips + aipsSeparator + "\"" + name + "\"";
+  aipsSeparator = ",";
 }
-void addAop(String name){
-aops=aops+aopsSeparator+"\""+name+"\"";
-aopsSeparator=",";
+void addAop(String name) {
+  aops = aops + aopsSeparator + "\"" + name + "\"";
+  aopsSeparator = ",";
 }
 
 // function to construct a JSON string (used to create Report and Event messages)
@@ -262,57 +262,57 @@ aopsSeparator=",";
 String jsonString;
 String propertySeparator;
 
-void startJson(){
- jsonString="{";
- propertySeparator="";
+void startJson() {
+  jsonString = "{";
+  propertySeparator = "";
 }
-void addToJson(String name, String value){
- jsonString=jsonString+propertySeparator+"\""+name+"\":\""+value+"\"";
- propertySeparator=",";
+void addToJson(String name, String value) {
+  jsonString = jsonString + propertySeparator + "\"" + name + "\":\"" + value + "\"";
+  propertySeparator = ",";
 }
-void addArrayToJson(String name, String value){
- jsonString=jsonString+propertySeparator+"\""+name+"\":["+value+"]";
- propertySeparator=",";
+void addArrayToJson(String name, String value) {
+  jsonString = jsonString + propertySeparator + "\"" + name + "\":[" + value + "]";
+  propertySeparator = ",";
 }
-String endJson(){
-  jsonString=jsonString+"}";
+String endJson() {
+  jsonString = jsonString + "}";
 }
 
-// construct a Report message and send to the server port on this IPAddress 
-    
+// construct a Report message and send to the server port on this IPAddress
+
 void sendReport(IPAddress ip) {
   String upTimeStr = String(millis() / 1000);
-  
+
   startJson();
-  addToJson("command","REPORT");
-  addToJson("hwid",String(ESP.getChipId()));
-  addToJson("model",deviceType);
-  addToJson("uptime",upTimeStr);
-  if (dips!="") addArrayToJson("dips",dips); 
-    if (dops!="") addArrayToJson("dops",dops);
-      if (aips!="") addArrayToJson("aips",aips);
-        if (aops!="") addArrayToJson("aops",aops);
+  addToJson("command", "REPORT");
+  addToJson("hwid", String(ESP.getChipId()));
+  addToJson("model", deviceType);
+  addToJson("uptime", upTimeStr);
+  if (dips != "") addArrayToJson("dips", dips);
+  if (dops != "") addArrayToJson("dops", dops);
+  if (aips != "") addArrayToJson("aips", aips);
+  if (aops != "") addArrayToJson("aops", aops);
   endJson();
-  Serial.println("json="+jsonString);
+  Serial.println("json=" + jsonString);
   UdpSendString(otherPort, ip, jsonString);
 }
 
-// construct an Event message and send to the server port on this IPAddress 
-    
+// construct an Event message and send to the server port on this IPAddress
+
 void sendEvent(String pinName, String pinValue) {
-  
+
   startJson();
-  addToJson("command","EVENT");
-  addToJson("hwid",String(ESP.getChipId()));
-  addToJson("model",deviceType);
+  addToJson("command", "EVENT");
+  addToJson("hwid", String(ESP.getChipId()));
+  addToJson("model", deviceType);
   addToJson("pin", pinName);
-  addToJson("value",pinValue);
+  addToJson("value", pinValue);
   endJson();
-  Serial.println("json="+jsonString);
+  Serial.println("json=" + jsonString);
   UdpSendString(otherPort, serverIP, jsonString);
 }
 
-    
+
 // DEVICE methods
 
 // initDEVICE must be implemented for all devices (since the device pins are defined here)
@@ -328,12 +328,14 @@ void initLEVEL() {
   addAip("level");
 }
 
-int buttonPrevious;  // keeps state of button so we can detect a change
+int buttonPrevious0;  // keeps state of button so we can detect a change
 int buttonPrevious2;
 void initBUTTON() {
+  pinMode(0, INPUT);
   pinMode(2, INPUT);
-  buttonPrevious = digitalRead(2);
-  addDip("on");
+  buttonPrevious0 = digitalRead(0);
+  buttonPrevious2 = digitalRead(2);
+  addDip("on0");
   addDip("on2");
 }
 
@@ -358,13 +360,13 @@ void setRELAY(String pinName, String state) {
 String getBUTTON(String pinName) {
   Serial.print("getBUTTON pinName=");
   Serial.print(pinName);
-  if (pinName == "on") {
-    Serial.println("getBUTTON reading pin 2");
-    return stateToString(digitalRead(2));
-  }
-    if (pinName == "on2") {
+  if (pinName == "on0") {
     Serial.println("getBUTTON reading pin 0");
     return stateToString(digitalRead(0));
+  }
+  if (pinName == "on2") {
+    Serial.println("getBUTTON reading pin 2");
+    return stateToString(digitalRead(2));
   }
   // if dipName is wrong we return LOW
   return "Low";
@@ -395,14 +397,14 @@ String getLEVEL(String pinName) {
 // eventDEVICE must be implemented by all devices that can generate an event ( i.e. if they have Dip pins)
 
 void eventBUTTON() {
-  int buttonNow = digitalRead(2);
-  if (buttonNow != buttonPrevious) {
-    sendEvent("on",stateToString(buttonNow));
-    buttonPrevious = buttonNow;
+  int buttonNow = digitalRead(0);
+  if (buttonNow != buttonPrevious0) {
+    sendEvent("on0", stateToString(buttonNow));
+    buttonPrevious0 = buttonNow;
   }
   buttonNow = digitalRead(2);
   if (buttonNow != buttonPrevious2) {
-    sendEvent("on2",stateToString(buttonNow));
+    sendEvent("on2", stateToString(buttonNow));
     buttonPrevious2 = buttonNow;
   }
 }
