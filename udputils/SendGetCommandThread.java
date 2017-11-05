@@ -1,6 +1,5 @@
 package udputils;
 
-import rgpio.IOType;
 import rgpio.PInput;
 import rgpio.PDevice;
 import utils.JSONString;

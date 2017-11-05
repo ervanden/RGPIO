@@ -1,18 +1,17 @@
 package udputils;
 
 import rgpio.PDevice;
-import rgpio.POutput;
 import utils.JSONString;
 
-public class SendSetCommandThread extends Thread {
+public class SendSleepCommandThread extends Thread {
 
     PDevice device;
-    POutput p;
+    Integer sleepTime;
 
-    public SendSetCommandThread(PDevice device,POutput p) {
+    public SendSleepCommandThread(PDevice device,int sleepTime) {
         super();
         this.device=device;
-        this.p = p;
+        this.sleepTime=sleepTime;
 
     }
 
@@ -20,9 +19,8 @@ public class SendSetCommandThread extends Thread {
         
         JSONString json = new JSONString();
         json.addProperty("destination", device.HWid);
-        json.addProperty("command", "SET");
-        json.addProperty("pin", p.name); 
-        json.addProperty("value", p.get_value());
+        json.addProperty("command", "SLEEP");
+        json.addProperty("sleeptime", sleepTime.toString());
  
         device.sendToDevice(json.asString());   
         
