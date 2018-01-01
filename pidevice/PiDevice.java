@@ -218,6 +218,9 @@ public class PiDevice {
         if (separator.equals(",")) {
             report = report + "," + ioString;
         }
+        
+        report=report+"}";
+        
 
         /*    
 
