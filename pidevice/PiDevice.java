@@ -155,31 +155,84 @@ public class PiDevice {
     }
 
     static void sendReport() {
-        String report = "Report/HWid:" + getHWid() + "/Model:" + deviceModel;
-        report = report + "/Uptime:" + getUpTime();
+
+        /*
+         {"command":"REPORT","hwid":"1625496","model":"BUTTON","uptime":"7","dips":["on0","on2"]}
+         */
+        String report = "{\"command\":\"REPORT\","
+                + "\"hwid\":\"" + getHWid() + "\","
+                + "\"model\":\"" + deviceModel + "\","
+                + "\"uptime\":\"" + getUpTime() + "\"";
+
+        String ioString;
+        String separator;
+
+        ioString = "\"dips\":[";
+        separator = "";
         for (DeviceInput ip : inputs) {
             if (ip.type == IOType.digitalInput) {
-                report = report + "/Dip:" + ip.name;
-            }
-            if (ip.type == IOType.analogInput) {
-                report = report + "/Aip:" + ip.name;
-            }
-            if (ip.type == IOType.stringInput) {
-                report = report + "/Sip:" + ip.name;
+                ioString = ioString + separator + "\"" + ip.name + "\"";
+                separator = ",";
             }
         }
-        for (DeviceOutput op : outputs) {
-            if (op.type == IOType.digitalOutput) {
-                report = report + "/Dop:" + op.name;
-            }
-            if (op.type == IOType.analogOutput) {
-                report = report + "/Aop:" + op.name;
-            }
-            if (op.type == IOType.stringOutput) {
-                report = report + "/Sop:" + op.name;
-            }
+        ioString = ioString + "]";
+        if (separator.equals(",")) {
+            report = report + "," + ioString;
         }
 
+        ioString = "\"aips\":[";
+        separator = "";
+        for (DeviceInput ip : inputs) {
+            if (ip.type == IOType.analogInput) {
+                ioString = ioString + separator + "\"" + ip.name + "\"";
+                separator = ",";
+            }
+        }
+        ioString = ioString + "]";
+        if (separator.equals(",")) {
+            report = report + "," + ioString;
+        }
+
+        ioString = "\"dops\":[";
+        separator = "";
+        for (DeviceOutput op : outputs) {
+            if (op.type == IOType.digitalOutput) {
+                ioString = ioString + separator + "\"" + op.name + "\"";
+                separator = ",";
+            }
+        }
+        ioString = ioString + "]";
+        if (separator.equals(",")) {
+            report = report + "," + ioString;
+        }
+
+        ioString = "\"aops\":[";
+        separator = "";
+        for (DeviceOutput op : outputs) {
+            if (op.type == IOType.analogOutput) {
+                ioString = ioString + separator + "\"" + op.name + "\"";
+                separator = ",";
+            }
+        }
+        ioString = ioString + "]";
+        if (separator.equals(",")) {
+            report = report + "," + ioString;
+        }
+
+        /*    
+
+         for (DeviceOutput op : outputs) {
+         if (op.type == IOType.digitalOutput) {
+         report = report + "/Dop:" + op.name;
+         }
+         if (op.type == IOType.analogOutput) {
+         report = report + "/Aop:" + op.name;
+         }
+         if (op.type == IOType.stringOutput) {
+         report = report + "/Sop:" + op.name;
+         }
+         }
+         */
         if (serverIPAddress != null) {
             UDPSender.send(report, serverIPAddress, null, PiDevice.serverPort, 0, 1);
         } else {
