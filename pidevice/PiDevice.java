@@ -221,21 +221,6 @@ public class PiDevice {
         
         report=report+"}";
         
-
-        /*    
-
-         for (DeviceOutput op : outputs) {
-         if (op.type == IOType.digitalOutput) {
-         report = report + "/Dop:" + op.name;
-         }
-         if (op.type == IOType.analogOutput) {
-         report = report + "/Aop:" + op.name;
-         }
-         if (op.type == IOType.stringOutput) {
-         report = report + "/Sop:" + op.name;
-         }
-         }
-         */
         if (serverIPAddress != null) {
             UDPSender.send(report, serverIPAddress, null, PiDevice.serverPort, 0, 1);
         } else {
