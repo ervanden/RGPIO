@@ -1,5 +1,6 @@
 package rgpio;
 
+import java.awt.Color;
 import utils.TimeStamp;
 
 import udputils.UDPSender;
@@ -9,9 +10,11 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import rgpioutils.ConfigurationFileEntry;
 import rgpioutils.DeviceFileEntry;
+import rrd.RRDGenerator;
 import tcputils.WSServer;
 import utils.JSON2Object;
 import utils.JSONString;
@@ -72,15 +75,14 @@ class DeviceProbeThread extends Thread {
     int reportInterval;
     String broadcastReport;
 
-
     public DeviceProbeThread(int reportInterval) {
         super();
         this.reportInterval = reportInterval;
-        
-        JSONString json= new JSONString();
+
+        JSONString json = new JSONString();
         json.addProperty("destination", "ALL");
         json.addProperty("command", "REPORT");
-        broadcastReport=json.asString();
+        broadcastReport = json.asString();
     }
 
     public void run() {
@@ -93,9 +95,9 @@ class DeviceProbeThread extends Thread {
                 // Check if a device has not responded within the last reportInterval.
                 long now = new TimeStamp().getTimeInMillis();
                 for (PDevice device : RGPIO.PDeviceMap.values()) {
-                    long inactive=now - device.lastContact.getTimeInMillis();
+                    long inactive = now - device.lastContact.getTimeInMillis();
                     if (inactive > reportInterval * 1000) {
-                        device.setNotResponding("device did not respond in last " + Math.round(inactive/1000) + " sec");
+                        device.setNotResponding("device did not respond in last " + Math.round(inactive / 1000) + " sec");
                     }
                 }
             } catch (Exception e) {
@@ -143,7 +145,7 @@ public class RGPIO {
     public static int webSocketPort;
     public static int reportInterval; // server sends report request every reportInterval sec.
     public static String htmlDirectory;
-    
+
     public static void initialize(String configurationDir) {
 
         VDeviceMap = new VDeviceMap();
@@ -169,6 +171,29 @@ public class RGPIO {
         webSocketServer = new WSServer(webSocketPort);
         webSocketServer.addListener(clientHandler);
         webSocketServer.start();
+    }
+
+    public static void createRDD() {
+
+        ArrayList<String> SENSORS = new ArrayList<>();
+        ArrayList<Color> ALLCOLORS = new ArrayList<>();
+        HashMap<String, Color> COLORS = new HashMap<>();
+
+        ALLCOLORS.add(Color.red);
+        ALLCOLORS.add(Color.blue);
+        ALLCOLORS.add(Color.cyan);
+        ALLCOLORS.add(Color.black);
+
+        int colorIndex = 0;
+        for (VInput vinput : VAnalogInputMap.values()) {
+            System.out.println("RDD entry: " + vinput.name);
+            SENSORS.add(vinput.name);
+            COLORS.put(vinput.name, ALLCOLORS.get(colorIndex));
+            colorIndex = (colorIndex + 1) % ALLCOLORS.size();
+        }
+
+        String rrdPath = RRDGenerator.createRRD("sensors", SENSORS, COLORS);
+        System.out.println("Created "+rrdPath);
     }
 
     public static VDevice VDevice(String name) {
@@ -292,11 +317,11 @@ public class RGPIO {
         if (l.size() != 1) {
             System.out.println("Expected 1 JSON object in RGPIO configuration file, found : " + l.size());
             System.out.println("Using defaults...");
-            RGPIOConfiguration=new ConfigurationFileEntry();
-            if (l.size()==0){  // create the RGPIO.txt file with the defaults
+            RGPIOConfiguration = new ConfigurationFileEntry();
+            if (l.size() == 0) {  // create the RGPIO.txt file with the defaults
                 ArrayList<Object> lw = new ArrayList<>();
                 lw.add(RGPIOConfiguration);
-                JSON2Object.writeJSONFile(fileName,lw);
+                JSON2Object.writeJSONFile(fileName, lw);
             }
         } else {
             Object o = l.get(0);

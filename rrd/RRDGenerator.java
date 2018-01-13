@@ -22,13 +22,17 @@ public class RRDGenerator {
     static String RRDDIRECTORY = "C:\\Users\\erikv\\Documents\\RRD\\";
     static ArrayList<String> SENSORS = new ArrayList<>();
     static HashMap<String, Color> COLORS = new HashMap<>();
-
+    /*
      static void init(ArrayList<String> sensors, HashMap<String, Color> colors) {
+     SENSORS = sensors;
+     COLORS = colors;
+     }
+     */
+
+    public static String createRRD(String RRDName, ArrayList<String> sensors, HashMap<String, Color> colors) {
+
         SENSORS = sensors;
         COLORS = colors;
-    }
-
-     static String createRRD(String RRDName) {
 
         String rrdPath = RRDDIRECTORY + RRDName + ".rrd";
         println("== Creating RRD file " + rrdPath);
@@ -62,7 +66,7 @@ public class RRDGenerator {
         return rrdPath;
     }
 
-     static RrdDb openRRD(String rrdPath) {
+    static RrdDb openRRD(String rrdPath) {
         /* sets SAMPLE for subsequent updates to the RRDB */
         try {
             RrdDb RRDB = new RrdDb(rrdPath);
@@ -73,7 +77,7 @@ public class RRDGenerator {
         return null;
     }
 
-     static String createGraph(String rrdPath, long start, long end) {
+    static String createGraph(String rrdPath, long start, long end) {
         int IMG_WIDTH = 900;
         int IMG_HEIGHT = 500;
         String imgPath = rrdPath.replaceAll(".rrd", ".png");
@@ -120,8 +124,6 @@ public class RRDGenerator {
     static void print(String msg) {
         System.out.print(msg);
     }
-
-
 
     static class CustomTimeLabelFormat implements TimeLabelFormat {
 

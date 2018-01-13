@@ -10,7 +10,7 @@ import org.rrd4j.core.RrdSafeFileBackend;
 import org.rrd4j.core.Sample;
 import org.rrd4j.core.Util;
 
-public class RRDGeneratorMain {
+public class RRDrgpio {
 
     static ArrayList<String> SENSORS = new ArrayList<>();
     static HashMap<String, Color> COLORS = new HashMap<>();
@@ -23,13 +23,12 @@ public class RRDGeneratorMain {
         System.out.print(msg);
     }
 
+    
+
+    
+    
     public static void main(String[] args) throws IOException {
         System.setProperty("java.awt.headless", "true");
-
-        if (args.length > 0) {
-            println("Setting default backend factory to " + args[0]);
-            RrdDb.setDefaultFactory(args[0]);
-        }
 
         SENSORS.add("R1front");
         SENSORS.add("R2front");
@@ -40,8 +39,7 @@ public class RRDGeneratorMain {
         COLORS.put("R3front", Color.cyan);
         COLORS.put("R4front", Color.black);
 
-//        RRDGenerator.init(SENSORS, COLORS);
-        String rrdPath = RRDGenerator.createRRD("sensors",SENSORS,COLORS);
+        String rrdPath = RRDGenerator.createRRD("sensors",SENSORS, COLORS);
         RrdDb rrddb = RRDGenerator.openRRD(rrdPath);
 
         // can now update database

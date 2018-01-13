@@ -9,8 +9,6 @@ import tcputils.TCPClient;
 
 /*
  main program that can be used
- - to run on Raspberry PI so that it acts as remote device for RGPIO
- - to run on any system to run the ExampleServer application
  - to send a UDP datagram and wait for the reply (for testing)
  - to listen for UDP datagrams (for testing)
  */
@@ -18,8 +16,6 @@ public class RGPIOmain {
 
     private static void usage() {
         System.out.println("Usage");
-        System.out.println("  RGPIOmain server");
-        System.out.println("  RGPIOmain device");
         System.out.println("  RGPIOmain udpsend command ipAddress port [timeout]");
         System.out.println("  RGPIOmain udpreceive port");
         System.out.println("  RGPIOmain tcpclient server port command");

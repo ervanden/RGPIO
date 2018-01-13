@@ -159,7 +159,7 @@ public class VInput extends VSelector {
         if (n > 0) {
             return sum / n;
         } else {
-            return 0f;
+            return Float.NaN;
         }
     }
 
