@@ -40,8 +40,10 @@ public class RRDGeneratorMain {
         COLORS.put("R3front", Color.cyan);
         COLORS.put("R4front", Color.black);
 
-//        RRDGenerator.init(SENSORS, COLORS);
-        String rrdPath = RRDGenerator.createRRD("sensors",SENSORS,COLORS);
+        String RRDDIRECTORY = "C:\\Users\\erikv\\Documents\\RRD\\";
+        String RRDNAME = "datastore";
+        String rrdPath = RRDDIRECTORY + RRDNAME + ".rrd";
+        RRDGenerator.createRRD(rrdPath,SENSORS,COLORS,300);
         RrdDb rrddb = RRDGenerator.openRRD(rrdPath);
 
         // can now update database

@@ -19,7 +19,6 @@ import org.rrd4j.graph.TimeLabelFormat;
 
 public class RRDGenerator {
 
-    static String RRDDIRECTORY = "C:\\Users\\erikv\\Documents\\RRD\\";
     static ArrayList<String> SENSORS = new ArrayList<>();
     static HashMap<String, Color> COLORS = new HashMap<>();
     /*
@@ -29,45 +28,43 @@ public class RRDGenerator {
      }
      */
 
-    public static String createRRD(String RRDName, ArrayList<String> sensors, HashMap<String, Color> colors) {
+    public static void createRRD(String rrdPath, 
+            ArrayList<String> sensors, 
+            HashMap<String, Color> colors, 
+            int step) {
 
         SENSORS = sensors;
         COLORS = colors;
 
-        String rrdPath = RRDDIRECTORY + RRDName + ".rrd";
         println("== Creating RRD file " + rrdPath);
-        RrdDef rrdDef = new RrdDef(rrdPath, Util.getTimestamp() - 1, 300);
+        RrdDef rrdDef = new RrdDef(rrdPath, Util.getTimestamp() - 1, step);
         rrdDef.setVersion(2);
         for (String sensor : SENSORS) {
             System.out.println("addDataSource for " + sensor);
-            rrdDef.addDatasource(sensor, GAUGE, 600, 0, Double.NaN);
+            rrdDef.addDatasource(sensor, GAUGE, 2*step, 0, Double.NaN);
         }
 
-        rrdDef.addArchive(AVERAGE, 0.5, 1, 288 * 60);  // (288*5min = 1 day)
-        rrdDef.addArchive(AVERAGE, 0.5, 6 * 12, 24 * 30 * 2);  // 12 * 5 min = 1 hour  (keep 10 days)
-        //       rrdDef.addArchive(AVERAGE, 0.5, 288, 60);  // 288 * 5 min = 1 day  (keep 30 days)
+        rrdDef.addArchive(AVERAGE, 0.5, 1, 3600/step);  // 1 hour
+        rrdDef.addArchive(AVERAGE, 0.5, 3600/step, 24);  // 1 day
+        rrdDef.addArchive(AVERAGE, 0.5, 30*3600/step, 30);  // 1 month
 
         println(rrdDef.dump());
 
         println("Estimated file size: " + rrdDef.getEstimatedSize());
         try (RrdDb rrdDb = new RrdDb(rrdDef)) {
-            println("== RRD file created.");
             if (rrdDb.getRrdDef().equals(rrdDef)) {
                 println("Checking RRD file structure... OK");
             } else {
                 println("Invalid RRD file created. This is a serious bug, bailing out");
-                return "";
+                return;
             }
         } catch (IOException ioe) {
         };
+        println("== RRD file created.");
 
-        println("== RRD file closed.");
-
-        return rrdPath;
     }
 
-    static RrdDb openRRD(String rrdPath) {
-        /* sets SAMPLE for subsequent updates to the RRDB */
+    static public RrdDb openRRD(String rrdPath) {
         try {
             RrdDb RRDB = new RrdDb(rrdPath);
             return RRDB;

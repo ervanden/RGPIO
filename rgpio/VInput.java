@@ -9,35 +9,38 @@ public class VInput extends VSelector {
 
     public String name;
     public IOType type;
-    public String value;
-    public Integer members=0;
+    public Integer members = 0;
     public Integer minMembers = null;
 
-    public String get_value() {
-        return value;
+    private String integerToString(Integer i) {
+        if (i == null) {
+            return "NaN";
+        } else {
+            return i.toString();
+        }
     }
 
     public String toJSON() {
         JSONString json = new JSONString();
         json.addProperty("object", "VIO");
         json.addProperty("name", name);
-                json.addProperty("members", members.toString());
+        json.addProperty("members", members.toString());
         json.addProperty("type", type.name());
         if (type == IOType.digitalInput) {
             json.addProperty("nrHigh", nrHigh().toString());
             json.addProperty("nrLow", nrLow().toString());
         }
         if (type == IOType.analogInput) {
-            json.addProperty("avg", String.format("%.2f",avg()));
-            json.addProperty("min", String.format("%.2f",min()));
-            json.addProperty("max", String.format("%.2f",max()));
+            json.addProperty("avg", integerToString(avg()));
+            json.addProperty("min", integerToString(min()));
+            json.addProperty("max", integerToString(max()));
         }
         return json.asString();
     }
 
     public void get() {
         // send a GET command to the devices
-        // this will update the value of the digital input of each device
+        // this will update the value of the input pin of each device
         // Start all the GET commands in parallel and wait until all threads finished
 
         ArrayList<SendGetCommandThread> threads = new ArrayList<>();
@@ -60,7 +63,7 @@ public class VInput extends VSelector {
             } catch (InterruptedException ie) {
             };
         }
-        
+
         //"... all GET threads finished"
         // send change of values (avg,min,max) to web interface
         for (PDevice device : RGPIO.PDeviceMap.values()) {
@@ -94,22 +97,25 @@ public class VInput extends VSelector {
         }
     }
 
-    public void countMembers(){
-        int m=0;
+    public void countMembers() {
+        int m = 0;
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput p : device.inputs.values()) {
                 if (p.vinput == this) {
-                    if (device.get_status()==PDeviceStatus.ACTIVE) m++;
+                    if (device.get_status() == PDeviceStatus.ACTIVE) {
+                        m++;
+                    }
                 }
             }
         }
-        if (members!=m){
-            members=m;
+        if (members != m) {
+            members = m;
             RGPIO.webSocketServer.sendToAll(toJSON());
         }
     }
-    
-    
+
+    // when a SET or GET time out, the value of the pin is set to null (return value of sendToDevice())
+    // so pins on non-responding devices are not taken into account in all the functions below
     public Integer nrHigh() {
         int nrHigh = 0;
         for (PDevice device : RGPIO.PDeviceMap.values()) {
@@ -142,59 +148,69 @@ public class VInput extends VSelector {
         return nrLow;
     }
 
-    public Float avg() {
+    // for avg(), min(), max()   Integer.MIN_VALUE or MAXVALUE mean : NaN
+    public Integer avg() {
         float sum = 0;
         int n = 0;
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
                     if (dip.value != null) { // is null before first GET or EVENT
-                            float f = Float.parseFloat(dip.value);
-                            sum = sum + f;
-                            n = n + 1;
+                        float f = Float.parseFloat(dip.value);
+                        sum = sum + f;
+                        n = n + 1;
                     }
                 }
             }
         }
         if (n > 0) {
-            return sum / n;
+            return Math.round(sum / n);
         } else {
-            return Float.NaN;
+            return null;
         }
     }
 
-    public Float min() {
-        float result = Float.MAX_VALUE;
+    public Integer min() {
+        Integer result = Integer.MAX_VALUE;
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
                     if (dip.value != null) { // is null before first GET or EVENT
-                            float f = Float.parseFloat(dip.value);
-                            if (f < result) {
-                                result = f;
+                        int f = Integer.parseInt(dip.value);
+                        if (f < result) {
+                            result = f;
                         }
                     }
                 }
             }
         }
-        return result;
+        if (result < Integer.MAX_VALUE) {
+            return result;
+        } else {
+            return null;
+        }
+
     }
 
-    public Float max() {
-        float result = Float.MIN_VALUE;
+    public Integer max() {
+        Integer result = Integer.MIN_VALUE;
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
                     if (dip.value != null) { // is null before first GET or EVENT
-                            float f = Float.parseFloat(dip.value);
-                            if (f > result) {
-                                result = f;
- //                           }
+                        int f = Integer.parseInt(dip.value);
+                        if (f > result) {
+                            result = f;
                         }
                     }
                 }
             }
         }
-        return result;
+        if (result > Integer.MIN_VALUE) {
+            return result;
+        } else {
+            return null;
+        }
     }
+
 }

@@ -29,28 +29,5 @@ public class VInputMap extends HashMap<String, VInput> {
         }
         return vinput;
     }
-
-    public void print() {
-        String formatString = "%12s %1s\n";
-        System.out.printf(formatString, "DigitalInput", "device.pin");
-        for (VInput d : this.values()) {
-            String name = d.name;
-
-            String state = d.get_value();
-
-            String separator = "";
-            String devicePins = "<";
-            for (PDevice device : RGPIO.PDeviceMap.values()) {
-                for (PInput pin : device.inputs.values()) {
-                    if (pin.vinput == d) {
-                        devicePins = devicePins + separator + device.HWid + "." + pin.name;
-                        separator = ",";
-                    }
-                }
-            }
-            devicePins = devicePins + ">";
-            System.out.printf(formatString, name, devicePins);
-        }
-    }
     
 }

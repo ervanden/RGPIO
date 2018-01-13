@@ -12,6 +12,10 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.rrd4j.core.RrdDb;
+import org.rrd4j.core.Sample;
+import org.rrd4j.core.Util;
+import static rgpio.RGPIO.RRDSAMPLE;
 import rgpioutils.ConfigurationFileEntry;
 import rgpioutils.DeviceFileEntry;
 import rrd.RRDGenerator;
@@ -35,7 +39,7 @@ class DeviceMonitorThread extends Thread {
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 serverSocket.receive(receivePacket);
                 InetAddress deviceIPAddress = receivePacket.getAddress();
-                //               int devicePort = receivePacket.getPort();
+                //  int devicePort = receivePacket.getPort();
                 String message = new String(receivePacket.getData());
                 message = message.substring(0, receivePacket.getLength());
 
@@ -125,6 +129,78 @@ class DeviceProbeThread extends Thread {
     }
 }
 
+/*
+ RrdDb rrddb = RRDGenerator.openRRD(rrdPath);
+
+ // can now update database
+ ArrayList<GaugeSource> gaugeSources = new ArrayList<>();
+ int s = 0;
+ for (String sensor : SENSORS) {
+ gaugeSources.add(new GaugeSource(1909752002L + (s++), 20));
+ }
+
+
+ long SEED = 1909752002L;
+ Random RANDOM = new Random(SEED);
+ long START = Util.getTimestamp();
+ long END = Util.getTimestamp() + 2 * 30 * 24 * 60 * 60;
+ int MAX_STEP = 599;
+
+ Sample sample = rrddb.createSample();
+ long t = START;
+ int n = 0;
+ while (t <= END + 172800L) {
+ sample.setTime(t);
+ int i = 0;
+ for (String sensor : SENSORS) {
+ sample.setValue(sensor, gaugeSources.get(i).getValue());
+ i++;
+ }
+ sample.update();
+ t += RANDOM.nextDouble() * MAX_STEP + 1;
+ }
+
+ println("");
+ println("== Finished. RRD file updated " + n + " times");
+ */
+class UpdateRRDThread extends Thread {
+
+    int step;
+
+    public UpdateRRDThread(int step) {
+        super();
+        this.step = step;
+    }
+
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(step * 1000);
+
+                RGPIO.RRDSAMPLE.setTime(Util.getTimestamp());
+                int updates = 0;
+                for (VInput vinput : RGPIO.RRDVINPUTS) {
+                    if (vinput.type == IOType.analogInput) {
+                        Integer value=vinput.avg();
+                        if (value!=null){
+                        System.out.println("updating RRD with " + vinput.name + " = " + vinput.avg());
+                        RGPIO.RRDSAMPLE.setValue(vinput.name, vinput.avg());
+                        updates++;
+                        }
+                    }
+                }
+                if (updates > 0) {
+                    try {
+                        RGPIO.RRDSAMPLE.update();
+                    } catch (IOException ioe) {
+                    };
+                }
+            } catch (InterruptedException ie) {
+            }
+        }
+    }
+}
+
 public class RGPIO {
 
     public static PDeviceMap PDeviceMap;
@@ -145,6 +221,9 @@ public class RGPIO {
     public static int webSocketPort;
     public static int reportInterval; // server sends report request every reportInterval sec.
     public static String htmlDirectory;
+
+    static RrdDb RRDDB;
+    static Sample RRDSAMPLE;
 
     public static void initialize(String configurationDir) {
 
@@ -173,27 +252,44 @@ public class RGPIO {
         webSocketServer.start();
     }
 
-    public static void createRDD() {
+    // createRRD is to be called by the main application after creating Vinputs
+    // It will initialize the RRD database and start the thread that updates the database
+    // every 2 seconds
+    public static ArrayList<VInput> RRDVINPUTS = new ArrayList<>();
 
-        ArrayList<String> SENSORS = new ArrayList<>();
-        ArrayList<Color> ALLCOLORS = new ArrayList<>();
-        HashMap<String, Color> COLORS = new HashMap<>();
+    public static void createRRD(String RRDDIRECTORY, int RRDSTEP) {
 
-        ALLCOLORS.add(Color.red);
-        ALLCOLORS.add(Color.blue);
-        ALLCOLORS.add(Color.cyan);
-        ALLCOLORS.add(Color.black);
+        ArrayList<String> vinputNames = new ArrayList<>();
+        ArrayList<Color> allColors = new ArrayList<>();
+        HashMap<String, Color> colors = new HashMap<>();
+
+        allColors.add(Color.red);
+        allColors.add(Color.blue);
+        allColors.add(Color.cyan);
+        allColors.add(Color.black);
 
         int colorIndex = 0;
         for (VInput vinput : VAnalogInputMap.values()) {
             System.out.println("RDD entry: " + vinput.name);
-            SENSORS.add(vinput.name);
-            COLORS.put(vinput.name, ALLCOLORS.get(colorIndex));
-            colorIndex = (colorIndex + 1) % ALLCOLORS.size();
+            RRDVINPUTS.add(vinput);
+            vinputNames.add(vinput.name);
+            colors.put(vinput.name, allColors.get(colorIndex));
+            colorIndex = (colorIndex + 1) % allColors.size();
         }
+        
+        // create a RRD database with an entry every STEP seconds
+        String RRDPATH = RRDDIRECTORY + "datastore.rrd";
+        RRDGenerator.createRRD(RRDPATH, vinputNames, colors,RRDSTEP);
+        System.out.println("Created " + RRDPATH);
+        RRDDB = RRDGenerator.openRRD(RRDPATH);
+        try {
+            RRDSAMPLE = RRDDB.createSample();
+        } catch (IOException ioe) {
+        };
 
-        String rrdPath = RRDGenerator.createRRD("sensors", SENSORS, COLORS);
-        System.out.println("Created "+rrdPath);
+        // Start updating the RDD database every RRDSTEP seconds with the values of all RRDVINPUTS
+        
+        new UpdateRRDThread(RRDSTEP).start();
     }
 
     public static VDevice VDevice(String name) {
@@ -296,19 +392,6 @@ public class RGPIO {
             } catch (Exception ex) {
             };
         }
-    }
-
-    public static void printMaps(String title) {
-//        System.out.println("===== maps after " + title + " =======");
-//        System.out.println("\nDevice vdevice map\n");
-        VDeviceMap.print();
-//        System.out.println("\nDigital input map\n");
-        VDigitalInputMap.print();
-//        System.out.println("\nDigital output map\n");
-        VDigitalOutputMap.print();
-//        System.out.println();
-//        System.out.println("\nPhysical devices\n");
-        PDeviceMap.print();
     }
 
     public static void readConfigurationFile(String fileName) {
