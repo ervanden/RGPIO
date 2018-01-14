@@ -15,7 +15,6 @@ import java.util.List;
 import org.rrd4j.core.RrdDb;
 import org.rrd4j.core.Sample;
 import org.rrd4j.core.Util;
-import static rgpio.RGPIO.RRDSAMPLE;
 import rgpioutils.ConfigurationFileEntry;
 import rgpioutils.DeviceFileEntry;
 import rrd.RRDGenerator;
@@ -129,40 +128,6 @@ class DeviceProbeThread extends Thread {
     }
 }
 
-/*
- RrdDb rrddb = RRDGenerator.openRRD(rrdPath);
-
- // can now update database
- ArrayList<GaugeSource> gaugeSources = new ArrayList<>();
- int s = 0;
- for (String sensor : SENSORS) {
- gaugeSources.add(new GaugeSource(1909752002L + (s++), 20));
- }
-
-
- long SEED = 1909752002L;
- Random RANDOM = new Random(SEED);
- long START = Util.getTimestamp();
- long END = Util.getTimestamp() + 2 * 30 * 24 * 60 * 60;
- int MAX_STEP = 599;
-
- Sample sample = rrddb.createSample();
- long t = START;
- int n = 0;
- while (t <= END + 172800L) {
- sample.setTime(t);
- int i = 0;
- for (String sensor : SENSORS) {
- sample.setValue(sensor, gaugeSources.get(i).getValue());
- i++;
- }
- sample.update();
- t += RANDOM.nextDouble() * MAX_STEP + 1;
- }
-
- println("");
- println("== Finished. RRD file updated " + n + " times");
- */
 class UpdateRRDThread extends Thread {
 
     int step;
@@ -176,16 +141,16 @@ class UpdateRRDThread extends Thread {
         while (true) {
             try {
                 Thread.sleep(step * 1000);
-
-                RGPIO.RRDSAMPLE.setTime(Util.getTimestamp());
+                long time = Util.getTimestamp();
+                RGPIO.RRDSAMPLE.setTime(time);  //time=1515897843
                 int updates = 0;
                 for (VInput vinput : RGPIO.RRDVINPUTS) {
                     if (vinput.type == IOType.analogInput) {
-                        Integer value=vinput.avg();
-                        if (value!=null){
-                        System.out.println("updating RRD with " + vinput.name + " = " + vinput.avg());
-                        RGPIO.RRDSAMPLE.setValue(vinput.name, vinput.avg());
-                        updates++;
+                        Integer value = vinput.avg();
+                        if (value != null) {
+                            System.out.println("updating RRD with " + vinput.name + " = " + vinput.avg() + " (time=" + time + ")");
+                            RGPIO.RRDSAMPLE.setValue(vinput.name, vinput.avg());
+                            updates++;
                         }
                     }
                 }
@@ -260,26 +225,19 @@ public class RGPIO {
     public static void createRRD(String RRDDIRECTORY, int RRDSTEP) {
 
         ArrayList<String> vinputNames = new ArrayList<>();
-        ArrayList<Color> allColors = new ArrayList<>();
-        HashMap<String, Color> colors = new HashMap<>();
 
-        allColors.add(Color.red);
-        allColors.add(Color.blue);
-        allColors.add(Color.cyan);
-        allColors.add(Color.black);
-
-        int colorIndex = 0;
+        // create the list of data source names for the graph.
+        // For now it is only the analog inputs
+        
         for (VInput vinput : VAnalogInputMap.values()) {
             System.out.println("RDD entry: " + vinput.name);
             RRDVINPUTS.add(vinput);
             vinputNames.add(vinput.name);
-            colors.put(vinput.name, allColors.get(colorIndex));
-            colorIndex = (colorIndex + 1) % allColors.size();
         }
-        
+
         // create a RRD database with an entry every STEP seconds
         String RRDPATH = RRDDIRECTORY + "datastore.rrd";
-        RRDGenerator.createRRD(RRDPATH, vinputNames, colors,RRDSTEP);
+        RRDGenerator.createRRD(RRDPATH, vinputNames, RRDSTEP);
         System.out.println("Created " + RRDPATH);
         RRDDB = RRDGenerator.openRRD(RRDPATH);
         try {
@@ -288,7 +246,6 @@ public class RGPIO {
         };
 
         // Start updating the RDD database every RRDSTEP seconds with the values of all RRDVINPUTS
-        
         new UpdateRRDThread(RRDSTEP).start();
     }
 
