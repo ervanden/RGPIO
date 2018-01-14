@@ -25,7 +25,6 @@ import org.rrd4j.core.Util;
 public class RRDGenerator {
 
     static ArrayList<String> dataSources = new ArrayList<>();
-    static HashMap<String, Color> COLORS = new HashMap<>();
 
     public static void createRRD(String rrdPath,
             ArrayList<String> dataSources,
@@ -47,7 +46,6 @@ public class RRDGenerator {
             rrdDef.addArchive(AVERAGE, 0.5, 1, 24*stepsPerHour);   // 1 day 
             rrdDef.addArchive(AVERAGE, 0.5, stepsPerHour, 365 * 24);  // 1 year hourly averages
 
-        //println(rrdDef.dump());
             println("Estimated file size: " + rrdDef.getEstimatedSize());
             try (RrdDb rrdDb = new RrdDb(rrdDef)) {
                 if (rrdDb.getRrdDef().equals(rrdDef)) {
@@ -73,7 +71,6 @@ public class RRDGenerator {
     }
 
     static void println(String msg) {
-        //System.out.println(msg + " " + Util.getLapTime());
         System.out.println(msg);
     }
 
