@@ -1,8 +1,7 @@
 package rgpio;
 
-import java.awt.Color;
-import utils.TimeStamp;
 
+import utils.TimeStamp;
 import udputils.UDPSender;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -10,7 +9,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import org.rrd4j.core.RrdDb;
 import org.rrd4j.core.Sample;

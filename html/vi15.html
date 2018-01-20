@@ -43,13 +43,14 @@
 
         <form>
             RGPIO Server:
-            <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://192.168.0.5:2603">
+            <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://172.68.10.118:2603">
             <button type="button" id="connectButton">Connect</button>
             <select id="drawingSelector" onchange="loadSelectedDrawing();">
                 <option value="none"> Select a drawing </option>
             </select>
             <button type="button" id="editDrawingButton">Edit Drawing</button>
             <button type="button" id="saveDrawingButton">Save Drawing</button>
+            <button type="button" id="GraphButton">Graph</button>
         </form>
         <br>
 
@@ -76,6 +77,25 @@
             </div>
         </div>
 
+        <!-- createGraph modal box, hidden by default-->
+        <div id="createGraphModal" class="modal">
+            <div class="modal-content">
+                <form id="devicemodalform">
+                  <button type="button" onclick="createGraph();" >Show Graph</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- showGraph modal box, hidden by default-->
+        <div id="showGraphModal" class="modal">
+            <div class="modal-content">
+                <form id="devicemodalform">
+                  <button type="button" onclick="exitShowGraph();" >exit</button>
+                </form>
+<img src="/RGPIO/graphs/latest.png" alt="Girl in a jacket" >
+            </div>
+        </div>
+
 
         <!-- modal box to show message, hidden by default-->
 
@@ -89,7 +109,7 @@
 
 
         <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
-        <script src="icons.js"></script>
+        <script src="icons-new.js"></script>
 
         <script>
 
@@ -119,6 +139,8 @@
             var g_propertyModal = document.getElementById('propertyModal');
             var g_messageModal = document.getElementById('messageModal');
             var g_editModal = document.getElementById('editModal');
+            var g_createGraphModal = document.getElementById('createGraphModal');
+            var g_showGraphModal = document.getElementById('showGraphModal');
 
 
             function includes(arr, obj) {
@@ -444,17 +466,24 @@
                 g_iconScale = true;
                 g_iconPosition = false;
                 g_scaleFactor = f;
-                    g_editModal.style.display = "none";
+                g_editModal.style.display = "none";
             }
             function setIconPosition() {
                 g_iconPosition = true;
                 g_iconScale = false;
-                    g_editModal.style.display = "none";
+                g_editModal.style.display = "none";
             }
             function setIconNoAction() {
                 g_iconScale = false;
                 g_iconPosition = false;
-                    g_editModal.style.display = "none";
+                g_editModal.style.display = "none";
+            }
+            function createGraph() {
+                g_showGraphModal.style.display = "block";
+                g_createGraphModal.style.display = "none";
+            }
+            function exitShowGraph() {
+                g_showGraphModal.style.display = "none";
             }
 
             function iconOnClick() {
@@ -817,7 +846,7 @@ if (img.id != "backgroundDrawing") {
 // display the dropzone background image (replace existing one if any)
                             if (g_background !== "none")
                                 g_dropzone.removeChild(g_background);
-                            g_background = loadImageByBasename("/RGPIO/backgrounds/" + g_drawing, 1600);
+                            g_background = loadImageByBasename("/RGPIO/backgrounds/" + g_drawing, 1200);
                 g_background.id = "backgroundDrawing"; // id needed to be draggable
                 g_background.draggable = true;
                 g_background.ondragstart = drag;
@@ -886,6 +915,12 @@ if (img.id != "backgroundDrawing") {
                 }
             }
 
+            document.getElementById("GraphButton").onclick = function () {
+                // show the modal
+                g_createGraphModal.style.display = "block";
+            }
+
+
             // function behind the buttons in the edit modal
 
 
@@ -921,6 +956,12 @@ if (img.id != "backgroundDrawing") {
             window.onclick = function (event) {
                 if (event.target === g_editModal) {
                     g_editModal.style.display = "none";
+                }
+                if (event.target === g_createGraphModal) {
+                    g_createGraphModal.style.display = "none";
+                }
+                if (event.target === g_showGraphModal) {
+                    g_showGraphModal.style.display = "none";
                 }
             };
 
