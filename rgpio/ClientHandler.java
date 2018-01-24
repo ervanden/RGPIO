@@ -186,8 +186,8 @@ public class ClientHandler implements WSServerListener {
             } catch (Exception e) {
                 System.out.println("ERROR : could not execute command");
             }
-
-            String jsonReply = "{ \"graph\":\"/RGPIO/graphs/latest.png\"}";
+            
+            String jsonReply = "{ \"object\":\"GRAPH\", \"filename\":\"/RGPIO/graphs/latest.png\"}";
             reply.add(jsonReply);
 
         } else {
