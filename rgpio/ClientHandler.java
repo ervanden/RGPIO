@@ -153,7 +153,7 @@ public class ClientHandler implements WSServerListener {
 
         } else if (cmd.Command.equals("icons")) {
             /*
-              the full file names of all available icons are returned to the client
+             the full file names of all available icons are returned to the client
              */
 
             String dir;
@@ -170,6 +170,24 @@ public class ClientHandler implements WSServerListener {
                 }
             }
             jsonReply = jsonReply + "] }";
+            reply.add(jsonReply);
+
+        } else if (cmd.Command.equals("graph")) {
+            /*
+             create graph and send file name back to client
+             */
+
+            Process p;
+            try {
+
+                p = Runtime.getRuntime().exec("/home/pi/git/run RGPIOGraph " + cmd.Arg1);
+                p.waitFor();
+
+            } catch (Exception e) {
+                System.out.println("ERROR : could not execute command");
+            }
+
+            String jsonReply = "{ \"graph\":\"/RGPIO/graphs/latest.png\"}";
             reply.add(jsonReply);
 
         } else {

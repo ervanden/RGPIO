@@ -90,7 +90,7 @@
                     <input type="number" id="graphHours" name="hours" class="white" max="999" value="0">
                     minutes
                     <input type="number" id="graphMinutes" name="minutes" class="white" max="999"  value="0">
-                    <button type="button" onclick="createGraph();" >Show Graph</button>
+                    <button type="button" id="createGraphButton"  >Show Graph</button>
                     <br>
                 </form>
             </div>
@@ -493,33 +493,6 @@
                           g_iconScale = false;
                           g_iconPosition = false;
                           g_editModal.style.display = "none";
-                      }
-
-
-                      function createGraph() {
-                          // make create graph modal invisible
-                          g_createGraphModal.style.display = "none";
-                          // Delete any previous graph
-                          var prevgraph = document.getElementById("rrdgraph");
-                          if (prevgraph)
-                              g_dropzone.removeChild(prevgraph);
-
-                          // read the input values from the createGraphModal
-                          console.log(" graph Days " + document.getElementById("graphDays").value);
-                          console.log(" graph Hours " + document.getElementById("graphHours").value);
-                          console.log(" graph Minutes " + document.getElementById("graphMinutes").value);
-                          // read the colors for the vios in g_graphData
-
-                          for (var vio in g_graphData) {
-                              if (g_graphData.hasOwnProperty(vio)) {
-                                  console.log(" graph data : " + vio);
-                              }
-                          }
-
-                          var objImage = loadImageByFilename('/RGPIO/graphs/latest.png', g_graphSize);
-                          objImage.id = "rrdgraph";
-                          objImage.draggable = false;
-                          g_dropzone.appendChild(objImage);
                       }
 
                       function iconOnClick() {
@@ -1011,7 +984,32 @@
                           colorselect.appendChild(coloroption);
                           return colorselect;
                       }
+                      
+                     document.getElementById("createGraphButton").onclick = function () {
+                          // make create graph modal invisible
+                          g_createGraphModal.style.display = "none";
+                          // Delete any previous graph
+                          var prevgraph = document.getElementById("rrdgraph");
+                          if (prevgraph)
+                              g_dropzone.removeChild(prevgraph);
 
+                          // read the input values from the createGraphModal
+                          console.log(" graph Days " + document.getElementById("graphDays").value);
+                          console.log(" graph Hours " + document.getElementById("graphHours").value);
+                          console.log(" graph Minutes " + document.getElementById("graphMinutes").value);
+                          // read the colors for the vios in g_graphData
+
+                          for (var vio in g_graphData) {
+                              if (g_graphData.hasOwnProperty(vio)) {
+                                  console.log(" graph data : " + vio);
+                              }
+                          }
+
+                          var objImage = loadImageByFilename('/RGPIO/graphs/latest.png', g_graphSize);
+                          objImage.id = "rrdgraph";
+                          objImage.draggable = false;
+                          g_dropzone.appendChild(objImage);
+                      }
 
                       // function behind the buttons in the edit modal
 
