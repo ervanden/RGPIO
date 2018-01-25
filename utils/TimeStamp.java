@@ -94,6 +94,15 @@ public class TimeStamp extends GregorianCalendar {
                 + ":" +second();
 
     }
+
+        public String asColonSeparatedString() {
+        return  day()
+                + ":" + month()
+                + ":" + hour()
+                + ":" + minute()
+                + ":" +second();
+
+    }
         
     static public TimeStamp stringToTimeValue(String s) {
         String[] tokens = s.split(" ");

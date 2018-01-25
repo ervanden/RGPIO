@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import rgpioutils.WebClientCommand;
 import tcputils.*;
 import utils.JSON2Object;
+import utils.TimeStamp;
 
 public class ClientHandler implements WSServerListener {
 
@@ -187,7 +188,9 @@ public class ClientHandler implements WSServerListener {
                 System.out.println("ERROR : could not execute command");
             }
             
-            String jsonReply = "{ \"object\":\"GRAPH\", \"filename\":\"/RGPIO/graphs/latest.png\"}";
+            TimeStamp now = new TimeStamp();
+            String fileName="/RGPIO/graphs/"+now+".png";
+            String jsonReply = "{ \"object\":\"GRAPH\", \"filename\":\""+fileName+"\"}";
             reply.add(jsonReply);
 
         } else {
