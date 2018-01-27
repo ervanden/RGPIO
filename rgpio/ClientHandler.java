@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import rgpioutils.WebClientCommand;
 import tcputils.*;
 import utils.JSON2Object;
-import utils.TimeStamp;
 
 public class ClientHandler implements WSServerListener {
 
@@ -177,20 +176,36 @@ public class ClientHandler implements WSServerListener {
             /*
              create graph and send file name back to client
              */
-
+            String command = "";
+            String graphFileName = "";
             Process p;
             try {
 
-                p = Runtime.getRuntime().exec("/home/pi/git/run RGPIOGraph " + cmd.Arg1);
+                if (System.getProperty("file.separator").equals("/")) {
+                    command = "/home/pi/git/run RGPIOGraph " + cmd.Arg1;
+                } else {
+                    command = "java -jar C:\\Users\\erikv\\Documents\\NetBeansProjects\\RGPIOGraph\\dist\\RGPIOGraph.jar " + cmd.Arg1;
+                }
+                System.out.println("excuting "+command);
+                p = Runtime.getRuntime().exec(command);
                 p.waitFor();
 
-            } catch (Exception e) {
-                System.out.println("ERROR : could not execute command");
+                // RGPIOGraph outputs the file name of the graph 
+                // The directory is /home/pi/RGPIO/graphs, hard coded in RGPIOGraph and in the web client
+                BufferedReader reader
+                        = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+                graphFileName = reader.readLine();
+                System.out.println(" Graph file name returned by RGPIOGraph = " + graphFileName);
+
+            } catch (InterruptedException e) {
+                System.out.println("ERROR : could not execute command " + command);
+            } catch (IOException e) {
+                System.out.println("ERROR : could not read RGPIOGraph output");
             }
-            
-            TimeStamp now = new TimeStamp();
-            String fileName="/RGPIO/graphs/"+now+".png";
-            String jsonReply = "{ \"object\":\"GRAPH\", \"filename\":\""+fileName+"\"}";
+
+            String fileName = "/RGPIO/graphs/" + graphFileName;
+            String jsonReply = "{ \"object\":\"GRAPH\", \"filename\":\"" + fileName + "\"}";
             reply.add(jsonReply);
 
         } else {
