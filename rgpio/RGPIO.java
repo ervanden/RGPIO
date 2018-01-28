@@ -1,6 +1,5 @@
 package rgpio;
 
-
 import utils.TimeStamp;
 import udputils.UDPSender;
 import java.io.IOException;
@@ -10,6 +9,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import mail.MailGenerator;
 import org.rrd4j.core.RrdDb;
 import org.rrd4j.core.Sample;
 import org.rrd4j.core.Util;
@@ -89,7 +89,7 @@ class DeviceProbeThread extends Thread {
     public void run() {
         while (true) {
             try {
-                UDPSender.send(broadcastReport, "255.255.255.255", null, RGPIO.devicePort, 0, 1);
+                UDPSender.send(broadcastReport, RGPIO.broadcastAddress, null, RGPIO.devicePort, 0, 1);
                 //timeout==0  no use to wait for a reply here, it is sent to the listener
                 //retries==1  send only once now, the broadcast is repeated anyway
                 Thread.sleep(reportInterval * 1000);
@@ -181,6 +181,7 @@ public class RGPIO {
 
     public static int serverPort;  // server listens on this port for commands from devices
     public static int devicePort;  // devices listen on this port for server commands
+    public static String broadcastAddress;
     public static int webSocketPort;
     public static int reportInterval; // server sends report request every reportInterval sec.
     public static String htmlDirectory;
@@ -215,9 +216,13 @@ public class RGPIO {
         webSocketServer.start();
     }
 
+    public static void sendMail(String to, String subject, String content) {
+        MailGenerator.sendMail(to, subject, content);
+    }
+
     // createRRD is to be called by the main application after creating Vinputs
     // It will initialize the RRD database and start the thread that updates the database
-    // every 2 seconds
+    // every RRDSTEP seconds
     public static ArrayList<VInput> RRDVINPUTS = new ArrayList<>();
 
     public static void createRRD(String RRDDIRECTORY, int RRDSTEP) {
@@ -226,7 +231,6 @@ public class RGPIO {
 
         // create the list of data source names for the graph.
         // For now it is only the analog inputs
-        
         for (VInput vinput : VAnalogInputMap.values()) {
             System.out.println("RDD entry: " + vinput.name);
             RRDVINPUTS.add(vinput);
@@ -371,6 +375,7 @@ public class RGPIO {
         webSocketPort = RGPIOConfiguration.webSocketPort;
         reportInterval = RGPIOConfiguration.reportInterval;
         htmlDirectory = RGPIOConfiguration.htmlDirectory;
+        broadcastAddress = RGPIOConfiguration.broadcastAddress;
 
     }
 

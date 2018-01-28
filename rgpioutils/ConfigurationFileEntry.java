@@ -7,6 +7,7 @@ public class ConfigurationFileEntry {
     public Integer webSocketPort = 2603;  // websocket port
     public Integer reportInterval = 20; // server sends report requests every reportInterval sec.
     public String htmlDirectory = "/home/pi/html";
+    public String broadcastAddress = "255.255.255.255";
 
     public String toString() {
         String s = "";

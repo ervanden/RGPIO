@@ -224,7 +224,7 @@ public class PiDevice {
         if (serverIPAddress != null) {
             UDPSender.send(report, serverIPAddress, null, PiDevice.serverPort, 0, 1);
         } else {
-            UDPSender.send(report, "255.255.255.255", null, PiDevice.serverPort, 0, 1);
+            UDPSender.send(report, RGPIO.broadcastAddress, null, PiDevice.serverPort, 0, 1);
         }
     }
 
