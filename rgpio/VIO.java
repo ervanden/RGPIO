@@ -2,7 +2,10 @@ package rgpio;
 
 import java.util.ArrayList;
 
-public class VSelector {
+public class VIO {
+
+        public String name;
+    public IOType type;
     
     /* common methods for RGPIODevice and RGPIODigitalIn/Output groups
       A selector stores a regular expression based on which a device pin (Dip or Dop) is

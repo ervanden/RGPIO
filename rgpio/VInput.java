@@ -5,10 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import udputils.SendGetCommandThread;
 
-public class VInput extends VSelector {
+public class VInput extends VIO {
 
-    public String name;
-    public IOType type;
     public Integer members = 0;
     public Integer minMembers = null;
 

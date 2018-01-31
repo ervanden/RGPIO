@@ -3,11 +3,9 @@ package rgpio;
 import utils.JSONString;
 import udputils.SendSetCommandThread;
 
-public class VOutput extends VSelector {
+public class VOutput extends VIO {
 
-    public String name;
     public String value;
-    public IOType type;
     public Integer members = 0;
     public Integer minMembers = null;
 

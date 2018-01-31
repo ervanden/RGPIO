@@ -140,21 +140,22 @@ class UpdateRRDThread extends Thread {
             try {
                 Thread.sleep(step * 1000);
                 long time = Util.getTimestamp();
-                RGPIO.RRDSAMPLE.setTime(time);  //time=1515897843
+                RGPIO.RRDSample.setTime(time);
                 int updates = 0;
-                for (VInput vinput : RGPIO.RRDVINPUTS) {
-                    if (vinput.type == IOType.analogInput) {
+                for (VIO vio : RGPIO.RRDVIO) {
+                    if (vio.type == IOType.analogInput) {
+                        VInput vinput = (VInput) vio;
                         Integer value = vinput.avg();
                         if (value != null) {
                             System.out.println("updating RRD with " + vinput.name + " = " + vinput.avg() + " (time=" + time + ")");
-                            RGPIO.RRDSAMPLE.setValue(vinput.name, vinput.avg());
+                            RGPIO.RRDSample.setValue(vinput.name, vinput.avg());
                             updates++;
                         }
                     }
                 }
                 if (updates > 0) {
                     try {
-                        RGPIO.RRDSAMPLE.update();
+                        RGPIO.RRDSample.update();
                     } catch (IOException ioe) {
                     };
                 }
@@ -175,10 +176,9 @@ public class RGPIO {
     public static VOutputMap VAnalogOutputMap;
     public static VOutputMap VStringOutputMap;
 
-    static ConfigurationFileEntry RGPIOConfiguration;
-
     public static WSServer webSocketServer;
 
+    // parameters configurable from the RGPIO.txt configuration file
     public static int serverPort;  // server listens on this port for commands from devices
     public static int devicePort;  // devices listen on this port for server commands
     public static String broadcastAddress;
@@ -186,10 +186,14 @@ public class RGPIO {
     public static int reportInterval; // server sends report request every reportInterval sec.
     public static String htmlDirectory;
 
-    static RrdDb RRDDB;
-    static Sample RRDSAMPLE;
+    // global variables hard coded here
+    public static String RGPIODirectory = null;
+    public static String RRDDirectory = null;
 
-    public static void initialize(String configurationDir) {
+    static RrdDb RRDDB;
+    static Sample RRDSample;
+
+    public static void initialize() {
 
         VDeviceMap = new VDeviceMap();
         PDeviceMap = new PDeviceMap();
@@ -200,8 +204,17 @@ public class RGPIO {
         VAnalogOutputMap = new VOutputMap(IOType.analogOutput);
         VStringOutputMap = new VOutputMap(IOType.stringOutput);
 
-        readConfigurationFile(configurationDir + "RGPIO.txt");
-        readDevicesFile(configurationDir + "devices.txt");
+        if (System.getProperty("file.separator").equals("/")) {
+            RGPIODirectory = "/home/pi/RGPIO/";
+            RRDDirectory = RGPIODirectory + "dataStore/";
+            readConfigurationFile(RGPIODirectory + "RGPIO.json");
+            readDevicesFile(RGPIODirectory + "devices.json");
+        } else {  // for windows, .txt is easier
+            RGPIODirectory = "C:\\Users\\erikv\\Documents\\RGPIO\\";
+            RRDDirectory = "C:\\Users\\erikv\\Documents\\RRD\\";
+            readConfigurationFile(RGPIODirectory + "RGPIO.txt");
+            readDevicesFile(RGPIODirectory + "devices.txt");
+        }
 
         // Start listening to messages from devices
         new DeviceMonitorThread().start();
@@ -222,10 +235,10 @@ public class RGPIO {
 
     // createRRD is to be called by the main application after creating Vinputs
     // It will initialize the RRD database and start the thread that updates the database
-    // every RRDSTEP seconds
-    public static ArrayList<VInput> RRDVINPUTS = new ArrayList<>();
+    // every RRDStep seconds
+    public static ArrayList<VIO> RRDVIO = new ArrayList<>();
 
-    public static void createRRD(String RRDDIRECTORY, int RRDSTEP) {
+    public static void createRRD(int RRDStep) {
 
         ArrayList<String> vinputNames = new ArrayList<>();
 
@@ -233,29 +246,29 @@ public class RGPIO {
         // For now it is only the analog inputs
         for (VInput vinput : VAnalogInputMap.values()) {
             System.out.println("RDD entry: " + vinput.name);
-            RRDVINPUTS.add(vinput);
+            RRDVIO.add(vinput);
             vinputNames.add(vinput.name);
         }
 
-        // create a RRD database with an entry every STEP seconds
-        String RRDPATH = RRDDIRECTORY + "datastore.rrd";
-        RRDGenerator.createRRD(RRDPATH, vinputNames, RRDSTEP);
-        System.out.println("Created " + RRDPATH);
-        RRDDB = RRDGenerator.openRRD(RRDPATH);
+        // create a RRD database with an entry every Step seconds
+        String RRDPath = RGPIO.RRDDirectory + "datastore.rrd";
+        RRDGenerator.createRRD(RRDPath, vinputNames, RRDStep);
+        System.out.println("Created " + RRDPath);
+        RRDDB = RRDGenerator.openRRD(RRDPath);
         try {
-            RRDSAMPLE = RRDDB.createSample();
+            RRDSample = RRDDB.createSample();
         } catch (IOException ioe) {
         };
 
-        // Start updating the RDD database every RRDSTEP seconds with the values of all RRDVINPUTS
-        new UpdateRRDThread(RRDSTEP).start();
+        // Start updating the RDD database every RRDStep seconds with the values of all RRDVINPUTS
+        new UpdateRRDThread(RRDStep).start();
     }
 
     public static VDevice VDevice(String name) {
         VDevice vdev = VDeviceMap.get(name);
         if (vdev == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "VDevice is not defined in devices.txt ";
+            e.description = "VDevice is not defined in devices.json ";
             e.vdevice = name;
             message(e);
         }
@@ -266,7 +279,7 @@ public class RGPIO {
         VInput vin = VDigitalInputMap.get(name);
         if (vin == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "VDigitalInput is not defined in devices.txt ";
+            e.description = "VDigitalInput is not defined in devices.json ";
             e.vinput = name;
             message(e);
         }
@@ -277,7 +290,7 @@ public class RGPIO {
         VOutput vout = VDigitalOutputMap.get(name);
         if (vout == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "VDigitalOutput is not defined in devices.txt ";
+            e.description = "VDigitalOutput is not defined in devices.json ";
             e.voutput = name;
             message(e);
         }
@@ -288,7 +301,7 @@ public class RGPIO {
         VInput vin = VAnalogInputMap.get(name);
         if (vin == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "VAnalogInput is not defined in devices.txt ";
+            e.description = "VAnalogInput is not defined in devices.json ";
             e.vinput = name;
             message(e);
         }
@@ -299,7 +312,7 @@ public class RGPIO {
         VOutput vout = VAnalogOutputMap.get(name);
         if (vout == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "VAnalogOutput is not defined in devices.txt ";
+            e.description = "VAnalogOutput is not defined in devices.json ";
             e.voutput = name;
             message(e);
         }
@@ -310,7 +323,7 @@ public class RGPIO {
         VInput vin = VStringInputMap.get(name);
         if (vin == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "VStringInput is not defined in devices.txt ";
+            e.description = "VStringInput is not defined in devices.json ";
             e.vinput = name;
             message(e);
         }
@@ -321,7 +334,7 @@ public class RGPIO {
         VOutput vout = VStringOutputMap.get(name);
         if (vout == null) {
             MessageEvent e = new MessageEvent(MessageType.Info);
-            e.description = "VStringOutput is not defined in devices.txt ";
+            e.description = "VStringOutput is not defined in devices.json ";
             e.voutput = name;
             message(e);
         }
@@ -354,13 +367,16 @@ public class RGPIO {
     }
 
     public static void readConfigurationFile(String fileName) {
+
+        ConfigurationFileEntry RGPIOConfiguration;
+
         ArrayList<Object> l;
         l = JSON2Object.readJSONFile(fileName, ConfigurationFileEntry.class);
         if (l.size() != 1) {
             System.out.println("Expected 1 JSON object in RGPIO configuration file, found : " + l.size());
             System.out.println("Using defaults...");
             RGPIOConfiguration = new ConfigurationFileEntry();
-            if (l.size() == 0) {  // create the RGPIO.txt file with the defaults
+            if (l.size() == 0) {  // create the RGPIO.config file with the defaults
                 ArrayList<Object> lw = new ArrayList<>();
                 lw.add(RGPIOConfiguration);
                 JSON2Object.writeJSONFile(fileName, lw);

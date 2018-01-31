@@ -4,8 +4,8 @@ import rgpio.IOType;
 
 public class DeviceInput {
 
-    String name;
-    IOType type;
+    public String name;
+    public IOType type;
 
     public GetCommandListener getCommandListener = null;
 

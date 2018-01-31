@@ -3,7 +3,7 @@ package rgpio;
 import udputils.SendSleepCommandThread;
 import utils.JSONString;
 
-public class VDevice extends VSelector {
+public class VDevice extends VIO {
 
     public String name = null;
     public Integer activeMembers = 0;
