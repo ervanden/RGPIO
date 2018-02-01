@@ -124,12 +124,12 @@ public class ClientHandler implements WSServerListener {
 
         } else if (cmd.Command.equals("backgrounds")) {
             /*
-             backgrounds  -- the names of all files in  /home/pi/git/RGPIO/html/backgrounds are returned to the client
+             backgrounds  -- the names of all files in  /home/pi/html/backgrounds are returned to the client
              */
 
             String dir;
             dir = "C:\\Users\\ervanden\\Documents\\java\\RGPIO\\html\\backgrounds";
-            dir = RGPIO.htmlDirectory + "/RGPIO/backgrounds";
+            dir = RGPIO.htmlDirectory + "/backgrounds";
 
             String jsonReply = "{ \"object\":\"BACKGROUNDS\", \"list\": [";
             String separator = "";
@@ -157,7 +157,7 @@ public class ClientHandler implements WSServerListener {
              */
 
             String dir;
-            dir = RGPIO.htmlDirectory + "/RGPIO/icons";
+            dir = RGPIO.htmlDirectory + "/icons";
 
             String jsonReply = "{ \"object\":\"ICONS\", \"list\": [";
             String separator = "";
@@ -191,7 +191,7 @@ public class ClientHandler implements WSServerListener {
                 p.waitFor();
 
                 // RGPIOGraph outputs the file name of the graph 
-                // The directory is /home/pi/RGPIO/graphs, hard coded in RGPIOGraph and in the web client
+                // The directory is /home/pi/html/graphs, hard coded in RGPIOGraph and in the web client
                 BufferedReader reader
                         = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
@@ -204,7 +204,7 @@ public class ClientHandler implements WSServerListener {
                 System.out.println("ERROR : could not read RGPIOGraph output");
             }
 
-            String fileName = "/RGPIO/graphs/" + graphFileName;
+            String fileName = "/graphs/" + graphFileName;
             String jsonReply = "{ \"object\":\"GRAPH\", \"filename\":\"" + fileName + "\"}";
             reply.add(jsonReply);
 
