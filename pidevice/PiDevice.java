@@ -66,12 +66,12 @@ class CommandListener extends Thread {
                 int devicePort = receivePacket.getPort();
                 String message = new String(receivePacket.getData());
                 message = message.substring(0, receivePacket.getLength());
-                System.out.println("DEVICE RECEIVED: " + message);
+                // System.out.println("DEVICE RECEIVED: " + message);
 
                 String reply = PiDevice.handleServerMessage(message);
 
                 if (reply != null) {
-                    //                   System.out.println("DEVICE REPLIED : " + reply);
+                    //System.out.println("DEVICE REPLIED : " + reply);
                     sendData = reply.getBytes();
                     DatagramPacket sendPacket
                             = new DatagramPacket(sendData, sendData.length, serverInetAddress, devicePort);
@@ -326,7 +326,7 @@ public class PiDevice {
                 if (ip == null) {
                     System.out.println("GET : unknown output " + pin);
                 } else {
-                    System.out.println("RETURNING VALUE   " + ip.getValue() + " FOR " + pin);
+                    //System.out.println("RETURNING VALUE   " + ip.getValue() + " FOR " + pin);
                     return ip.getValue();
                 }
                 return "GET : unknown output " + pin;
