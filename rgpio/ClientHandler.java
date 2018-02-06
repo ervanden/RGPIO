@@ -157,7 +157,7 @@ public class ClientHandler implements WSServerListener {
              */
 
             String dir;
-            dir = RGPIO.htmlDirectory + "/icons";
+            dir = RGPIO.htmlDirectory + "/allicons";
 
             String jsonReply = "{ \"object\":\"ICONS\", \"list\": [";
             String separator = "";
