@@ -172,6 +172,22 @@ public class ClientHandler implements WSServerListener {
             jsonReply = jsonReply + "] }";
             reply.add(jsonReply);
 
+        } else if (cmd.Command.equals("rrdentries")) {
+            /*
+             the names of all the rrd entries are returned to the client
+             */
+
+            String jsonReply = "{ \"object\":\"RRDENTRIES\", \"list\": [";
+            String separator = "";
+
+            for (VIO vio : RGPIO.RRDVIO) {
+                jsonReply = jsonReply + separator + "\"" + vio.name + "\"";
+                separator = ", ";
+            }
+
+            jsonReply = jsonReply + "] }";
+            reply.add(jsonReply);
+
         } else if (cmd.Command.equals("graph")) {
             /*
              create graph and send file name back to client
@@ -186,7 +202,7 @@ public class ClientHandler implements WSServerListener {
                 } else {
                     command = "java -jar C:\\Users\\erikv\\Documents\\NetBeansProjects\\RGPIOGraph\\dist\\RGPIOGraph.jar " + cmd.Arg1;
                 }
-                System.out.println("excuting "+command);
+                System.out.println("excuting " + command);
                 p = Runtime.getRuntime().exec(command);
                 p.waitFor();
 

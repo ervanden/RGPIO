@@ -147,7 +147,7 @@ class UpdateRRDThread extends Thread {
                         VInput vinput = (VInput) vio;
                         Integer value = vinput.avg();
                         if (value != null) {
-                            System.out.println("updating RRD with " + vinput.name + " = " + vinput.avg() + " (time=" + time + ")");
+//                            System.out.println("updating RRD with " + vinput.name + " = " + vinput.avg() + " (time=" + time + ")");
                             RGPIO.RRDSample.setValue(vinput.name, vinput.avg());
                             updates++;
                         }
@@ -260,7 +260,7 @@ public class RGPIO {
         } catch (IOException ioe) {
         };
 
-        // Start updating the RDD database every RRDStep seconds with the values of all RRDVINPUTS
+        // Start updating the RDD database every RRDStep seconds with the values of all RRDVIO
         new UpdateRRDThread(RRDStep).start();
     }
 
