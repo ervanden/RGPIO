@@ -60,6 +60,11 @@ public class ClientHandler implements WSServerListener {
             for (VOutput op : RGPIO.VStringOutputMap.values()) {
                 reply.add(op.toJSON());
             }
+            
+            String jsonReply = "{ \"object\":\"STATUSCOMPLETE\"}";
+            reply.add(jsonReply);
+            
+            
         } else if (cmd.Command.equals("store")) {
             /*
              store basename data1   -- file /home/pi/RGPIO/storage/basename.txt   is opened for writing
