@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html>
+    <body onload="wsconnect();" > 
+
+        <!--
+        -->
+
+        <style type="text/css">
+            * {font-family:Arial, sans-serif;font-size:12px}
+            table  {border-collapse:collapse;border-spacing:0;padding:5px 2px;border-style:none}
+            table  {overflow:hidden;word-break:normal;}
+            input.white {background-color:white}
+            input.green {background-color:green}
+            input.grey {background-color:grey}
+            input.red {background-color:red}
+
+            .modal {
+                position: fixed; /* Stay in place */
+                display: none; /* Hidden by default */
+                z-index: 1; /* Sit on top */
+                padding-top: 100px; /* Location of the box */
+                left: 0;
+                top: 0;
+                width: 100%; /* Full width */
+                height: 100%; /* Full height */
+                overflow: auto; /* Enable scroll if needed */
+                background-color: rgb(0,0,0); /* Fallback color */
+                background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            }
+            .modal-content {
+                background-color: #fefefe;
+                margin: auto;
+                padding: 20px;
+                border: 1px solid #888;
+                width: 80%;
+            }
+            .backgroundmodal{
+                position: absolute; 
+                left: 0;
+                top: 0;
+                z-index: -1; /* Sit behind */
+                margin: auto;
+                width: 100%;
+                height: 100%;
+            }
+            .editiconmodal{
+                display: none; /* Hidden by default */
+                position: absolute; 
+                left: 0;
+                top: 200px;
+                z-index: 2; /* Sit on top */
+                margin: auto;
+                border: 1px solid #888;
+                width: 10%;
+                background-color: rgba(255,255,255,0.4); /* Black w/ opacity */
+            }
+            .editSelect {
+                height: 400px;
+            }
+            .rrdgraph {
+                position: fixed; /* Stay in place */
+                z-index: 10; /* Sit on top */
+                left: 0;
+                top: 0;
+            }
+
+            .numberInput {
+                width: 3em;
+            }
+
+
+        </style>
+
+        <form>
+            RGPIO Server:
+            <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://X.X.X.X:2603">
+            <select id="drawingSelector" onchange="loadSelectedDrawing();">
+                <option value="none"> Select a drawing </option>
+            </select>
+            <button type="button" id="GraphButton">Graph</button>
+            <button type="button" id="EditDrawingButton">Edit Drawing</button>
+
+        </form>
+        <br>
+
+
+        <div id="dropzone"  ondrop="drop(event)" ondragover="allowDrop(event)" >
+
+            <!-- icon edit modal box, hidden by default-->
+            <div id="editIconModal" class="editiconmodal">
+                <form action="">
+                    <input type="radio" name="iconEdit" id="iconPlusButton" value="iplus" >Icon+<br>
+                    <input type="radio" name="iconEdit" id="iconMinusButton"  value="imin">Icon-<br>
+                    <input type="radio" name="iconEdit" id="iconEqualButton"  value="iequal">Icon=<br>
+                    <input type="radio" name="iconEdit" id="iconPositionButton" value="ipos" >Icon@<br>
+                    <input type="radio" name="iconEdit" id="iconHideButton" value="ihide">(Un)hide<br>
+                    <button type="button" id="iconCancelButton">Cancel</button><br>
+                    <button type="button" id="saveDrawingButton">Save</button>
+                    <!--
+                    -->
+                </form>
+            </div>
+
+
+        </div>
+
+        <!-- drawing edit modal box, hidden by default-->
+        <div id="editDrawingModal" class="modal">
+            <div class="modal-content">
+                <form>
+                    <select id="pdeviceSelect" class="editSelect" multiple></select>
+                    <select id="vdeviceSelect" class="editSelect" multiple></select>
+                    <select id="propertySelect" class="editSelect" multiple></select>
+                    <br>
+                    <button type="button" id="selectApply">Apply</button>
+                    <button type="button" id="selectCancel">Cancel</button>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- createGraph modal box, hidden by default-->
+        <div id="createGraphModal" class="modal">
+            <div class="modal-content">
+                <form id="graphmodalform">
+                    Range:
+                    <input type="number" id="graphRange" name="range" class="numberInput" max="999" value="1">
+                    <select id="graphScale">
+                        <option value="m">minutes</option>
+                        <option value="h">hours</option>
+                        <option value="d" selected>days</option>
+                    </select>
+                    <button type="button" id="showGraphButton"  >Show Graph</button>
+                    <br>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- modal box to show message, hidden by default-->
+
+        <div id="messageModal" class="modal">
+            <div class="modal-content">
+                <p id="messageParagraph" style="font-size:25px">  Boodschap in een fles
+                </p>
+            </div>
+        </div>
+
+
+
+        <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="icons.js"></script>
+
+        <script>
+            console.log(window.location.host);
+            console.log(window.location.host.split(":", 1));
+            console.log(window.location.host.split(":", 1)[0]);
+            var d = new Date();
+            console.log(d.toString());
+            console.log(d.toISOString());
+            console.log(d.toDateString());
+            console.log(d.toTimeString());
+
+            // trying to figure out ip address or host name of the RGPIO server
+
+            var g_serverAddress = window.location.host.split(":", 1)[0];
+            g_serverAddress = "ws://" + g_serverAddress + ":2603";
+            console.log("g_serverAddress=" + g_serverAddress);
+            document.getElementById("serverAddress").value = g_serverAddress;
+
+            var g_ws;
+            var g_dropzone = document.getElementById("dropzone");
+            var g_drawing = "none";
+            var g_background = "none";
+            var g_availableIcons = {};
+            var g_allElements = new Object();
+            var g_allProperties = new Set();
+            var g_hiddenElements = new Set();
+            var g_hiddenProperties = new Set();
+            resetHiddenProperties(); // sets the list to the properties that should always be hidden
+
+            g_cellColors = {
+                "ACTIVE": "#00ff00",
+                "NOTRESPONDING": "#e6e6e6",
+                "High": "#ff4d4d",
+                "Low": "#b3ccff"
+            };
+
+            // g_graphData Set contains 
+            //    - the name of the vdevices that will appear on the graph
+
+            g_graphSize = 1000;
+            g_graphData = new Set();
+
+            var g_pdeviceSelect = document.getElementById("pdeviceSelect");
+            var g_vdeviceSelect = document.getElementById("vdeviceSelect");
+            var g_deviceModal = document.getElementById('deviceModal');
+
+            var g_propertySelect = document.getElementById("propertySelect");
+            var g_propertyModal = document.getElementById('propertyModal');
+            var g_messageModal = document.getElementById('messageModal');
+            var g_editDrawingModal = document.getElementById('editDrawingModal');
+            var g_editIconModal = document.getElementById('editIconModal');
+            var g_createGraphModal = document.getElementById('createGraphModal');
+
+
+            function includes(arr, obj) {
+                return (arr.indexOf(obj) !== -1);
+            }
+
+            function isEmpty(obj) {
+                for (var key in obj) {
+                    if (obj.hasOwnProperty(key))
+                        return false;
+                }
+                return true;
+            }
+
+            function message(text) {
+                var p = document.getElementById("messageParagraph");
+                p.innerHTML = text;
+                g_messageModal.style.display = "block";
+                setTimeout(function () {
+                    g_messageModal.style.display = "none";
+                }, 1000);
+            }
+
+
+            function elementIsHidden(element) {
+                if (element.visual.style.display === "none")
+                    return true;
+                else
+                    return false;
+            }
+            function hideElement(element) {
+                if ("visual" in element) {
+                }
+            }
+            function unhideElement(element) {
+                if ("visual" in element) {
+                    element.visual.style.display = "";
+                }
+            }
+
+            function resetHiddenElements() {
+                g_hiddenElements.clear();
+            }
+            function resetHiddenProperties() {
+                g_hiddenProperties.clear();
+                g_hiddenProperties.add("key");
+                g_hiddenProperties.add("visual");
+                g_hiddenProperties.add("left");
+                g_hiddenProperties.add("top");
+                g_hiddenProperties.add("hidden");
+            }
+
+            function applyHiddenElements() { // hide/unhide all elements according to g_hiddenElements
+                for (var key in g_allElements) {
+                    element = g_allElements[key];
+                    if ("visual" in element) {
+                        if (g_hiddenElements.has(key)) {
+                            element.visual.style.display = "none";
+                        } else {
+                            element.visual.style.display = "";
+                        }
+                    }
+                }
+            }
+
+            function applyHiddenProperties() { // hide/unhide all properties according to g_hiddenProperties
+                propRows = document.getElementsByClassName("propertyRow");
+                for (var i = 0, row; row = propRows[i]; i++) {
+                    var keycell = row.children[0];
+                    if (g_hiddenProperties.has(keycell.innerHTML)) {
+                        row.style.display = "none";
+                    } else {
+                        row.style.display = "";
+                    }
+                }
+            }
+
+
+            function redrawElement(element) {
+                if (g_hiddenElements.has(element.key)) {
+                    element.visual.style.display = "none";
+                } else {
+                    element.visual.style.display = "";
+                }
+                if ("top" in element)
+                    element.visual.style.top = element.top;
+                if ("left" in element)
+                    element.visual.style.left = element.left;
+                if ("scale" in element)
+                    element.visual.style.transform = "scale(" + element.scale + ")";
+                if (
+                        ((element.object === "VIO") && ("members" in element) && (element.members < 1))
+                        || ((element.object === "PDEV") && ("status" in element) && (element.status === "NOTRESPONDING"))
+                        || ((element.object === "PDEV") && !("status" in element)) // nothing received from RGPIO, device did  not report
+                        )
+                {
+                    // give NOTRESPONDING elements a grey background and make all property table cells transparent so  the visual is evenly grey
+                    element.visual.style.backgroundColor = "#e6e6e6";
+
+                    var proptable = element.visual.getElementsByClassName("propertyTable")[0];
+                    for (var i = 0, row; row = proptable.rows[i]; i++) {
+                        row.cells[0].style.backgroundColor = "transparent";
+                        row.cells[1].style.backgroundColor = "transparent";
+                    }
+                }
+                else
+                    element.visual.style.backgroundColor = "white";
+            }
+
+
+            function loadImageByBasename(name, width) {
+                var objImage = new Image();
+                objImage.onload = function (e) {
+                    objImage.width = width;
+                    objImage.height = width * (objImage.naturalHeight / objImage.naturalWidth);
+                };
+                objImage.onerror = function (e) {
+                    if (objImage.src.endsWith(".jpg")) {
+                        // loading a jpg file failed , trying png
+                        objImage.src = objImage.src.replace(".jpg", ".png");
+                    } else if (objImage.src.endsWith(".png")) {
+                        // loading a png file failed , trying gif
+                        objImage.src = objImage.src.replace(".png", ".gif");
+                    }
+
+                };
+                objImage.src = name + '.jpg';
+                return objImage;
+            }
+
+            function loadImageByFilename(name, width) {
+                var objImage = new Image();
+                objImage.onload = function (e) {
+                    objImage.width = width;
+                    objImage.height = width * (objImage.naturalHeight / objImage.naturalWidth);
+                };
+                console.log("loadImageByFilename " + name);
+                objImage.src = name;
+                return objImage;
+            }
+
+
+            function createObjectPropertyTable(obj) {
+                var proptable = document.createElement('table');
+                proptable.className = "propertyTable";
+                for (var key in obj) {
+                    var value = obj[key];
+                    //console.log('adding '+key+' ' +obj[key]);
+                    var row = document.createElement('tr');
+                    row.className = "propertyRow";
+                    proptable.appendChild(row);
+
+                    var namecell = document.createElement('td');
+                    namecell.style.fontFamily = "Arial, sans-serif";
+                    namecell.style.fontSize = "14px";
+                    namecell.style.padding = "5px 2px";
+                    namecell.style.borderStyle = "none";
+                    namecell.innerHTML = key;
+                    row.appendChild(namecell);
+
+                    var valuecell = document.createElement('td');
+                    valuecell.style.fontFamily = "Arial, sans-serif";
+                    valuecell.style.fontSize = "14px";
+                    valuecell.style.padding = "5px 2px";
+                    valuecell.style.borderStyle = "none";
+                    valuecell.innerHTML = value;
+                    if (value in g_cellColors)
+                        valuecell.style.backgroundColor = g_cellColors[value];
+                    else
+                        valuecell.style.backgroundColor = "white";
+
+                    row.appendChild(valuecell);
+
+                    // if the property is encountered for the first time, add to g_allProperties and
+                    // create an option in the select element
+
+                    if (!g_allProperties.has(key)) {
+                        g_allProperties.add(key);
+
+                        var option = document.createElement("option");
+                        option.value = key;
+                        option.text = key;
+                        g_propertySelect.appendChild(option);
+                    }
+                    if (g_hiddenProperties.has(key)) {
+                        row.style.display = "none";
+                    }
+                }
+                return proptable;
+            }
+
+
+            function createObjectVisual(obj) {
+
+                var table = document.createElement('table');
+                table.className = "objectVisual";
+                table.style.position = "absolute";
+                table.style.zIndex = "1";  // all visuals must stay on top of the background image
+
+                table.style.backgroundColor = "white";
+                var firstrow = document.createElement('tr');
+                var secondrow = document.createElement('tr');
+                var iconCell = document.createElement('td');
+                var propCell = document.createElement('td');
+                firstrow.className = "firstrow";
+                secondrow.className = "secondrow";
+                iconCell.className = "iconCell";
+                propCell.className = "propCell";
+                table.appendChild(firstrow);
+                table.appendChild(secondrow);
+
+                obj.iconPosition = "left"; // arbitrary default at creation
+                addCellsToVisual("left", firstrow, secondrow, iconCell, propCell);
+
+
+// cell with image
+                iconCell.style.fontFamily = "Arial, sans-serif";
+                iconCell.style.fontSize = "14px";
+                iconCell.style.padding = "5px 2px";
+                iconCell.style.borderStyle = "none";
+                var iconName = objectIconName(obj);
+                iconCell.currentIcon = iconName;
+                var objImage = loadImageByFilename('/allicons/' + g_availableIcons[iconName], 50);
+                objImage.draggable = false;
+                iconCell.appendChild(objImage);
+// cell with properties
+                propCell.style.fontFamily = "Arial, sans-serif";
+                propCell.style.fontSize = "14px";
+                propCell.style.padding = "5px 2px";
+                propCell.style.borderStyle = "none";
+                var proptable = createObjectPropertyTable(obj);
+                propCell.appendChild(proptable);
+
+                var objectVisual = table;
+                objectVisual.id = obj.key; // must have an id to make it draggable
+                objectVisual.element = obj;
+                g_dropzone.appendChild(objectVisual);
+                objectVisual.draggable = true;
+                objectVisual.ondragstart = drag;
+                objectVisual.onclick = iconOnClick;
+                obj.visual = objectVisual;
+
+
+                // apply drawing information if available
+
+                redrawElement(obj);
+
+            }
+
+            function addCellsToVisual(iconPosition, firstrow, secondrow, iconCell, propCell) {
+                if (iconPosition === "left") {
+                    firstrow.appendChild(iconCell);
+                    firstrow.appendChild(propCell);
+                }
+                if (iconPosition === "right") {
+                    firstrow.appendChild(propCell);
+                    firstrow.appendChild(iconCell);
+                }
+                if (iconPosition === "top") {
+                    firstrow.appendChild(iconCell);
+                    secondrow.appendChild(propCell);
+                }
+                if (iconPosition === "bottom") {
+                    firstrow.appendChild(propCell);
+                    secondrow.appendChild(iconCell);
+                }
+            }
+
+            function objectIconName(obj) {
+                if (obj.object === "VIO") {
+                    if (obj.name in g_icons)
+                        return g_icons[obj.name](obj);
+                    return obj.name;
+                }
+                if (obj.object === "VDEV") {
+                    if (obj.name in g_icons)
+                        return g_icons[obj.name](obj);
+                    return obj.name;
+                }
+                if (obj.object === "PDEV") {
+                    if (obj.HWid in g_icons)
+                        return g_icons[obj.HWid](obj);
+                    if (obj.HWid in g_availableIcons)
+                        return obj.HWid;
+                    if (obj.model in g_icons)
+                        return g_icons[obj.model](obj);
+                    if (obj.model in g_availableIcons)
+                        return obj.model;
+                }
+            }
+
+
+
+            function visualToObject(visual) {
+                return visual.element;
+            }
+
+
+            function updateObjectVisual(visual, key, value) {
+
+                var proptable = visual.getElementsByClassName("propertyTable")[0];
+                for (var i = 0, row; row = proptable.rows[i]; i++) {
+                    if (row.cells[0].innerHTML === key) {
+                        row.cells[1].innerHTML = value;
+                        if (value in g_cellColors)
+                            row.cells[1].style.backgroundColor = g_cellColors[value];
+                        else
+                            row.cells[1].style.backgroundColor = "white";
+                    }
+                }
+
+
+                var iconCell = visual.getElementsByClassName("iconCell")[0];
+                var iconName = objectIconName(visualToObject(visual));
+                if (iconCell.currentIcon !== iconName) {
+                    var objImage = loadImageByFilename('/icons/' + g_availableIcons[iconName], 50);
+                    objImage.draggable = false;
+                    iconCell.removeChild(iconCell.childNodes[0]);  // remove the current icon
+                    iconCell.appendChild(objImage);
+                    iconCell.currentIcon = iconName;
+                }
+
+            }
+
+// action when clicking on an icon
+
+            g_iconScale = false;    // if true, the icons is scaled when clicking on it
+            g_iconEqual = false;    // if true, all icons are made equal to the clicked one
+            g_iconPosition = false;   // if true, the icon position relative to the property table is changed
+            g_scaleFactor = 1;
+
+            function setIconNoAction() {
+                g_iconScale = false;
+                g_iconPosition = false;
+                g_iconEqual = false;
+            }
+
+            function iconOnClick() {
+                var visual = this;
+                var element = visualToObject(this);
+
+                if (g_iconScale) {
+                    if (!("scale" in element))
+                        element.scale = 1;
+                    element.scale = element.scale * g_scaleFactor;
+                }
+
+                if (g_iconEqual) { //verik
+
+                    for (var key in g_allElements) {
+                        var e = g_allElements[key];
+                        if ("visual" in e) {
+                            e.scale = element.scale;
+                        }
+                    }
+                }
+
+
+                if (g_iconPosition) {
+
+                    if (element.iconPosition === "left") {
+                        element.iconPosition = "top"
+                    }
+                    else if (element.iconPosition === "top") {
+                        element.iconPosition = "right"
+                    }
+                    else if (element.iconPosition === "right") {
+                        element.iconPosition = "bottom"
+                    }
+                    else if (element.iconPosition === "bottom") {
+                        element.iconPosition = "left"
+                    }
+
+                    // not really needed but otherwise the displayed value is always the initial one
+                    updateObjectVisual(element.visual, "iconPosition", element.iconPosition);
+
+                    var iconCell = visual.getElementsByClassName("iconCell")[0];
+                    var propCell = visual.getElementsByClassName("propCell")[0];
+                    var firstrow = visual.getElementsByClassName("firstrow")[0];
+                    var secondrow = visual.getElementsByClassName("secondrow")[0];
+
+                    // remove all 'td' cells from the visual table
+                    if (firstrow.firstChild) {
+                        firstrow.removeChild(firstrow.firstChild);
+                    }
+                    if (secondrow.firstChild) {
+                        secondrow.removeChild(secondrow.firstChild);
+                    }
+
+                    // add them back according to the new icon position
+                    addCellsToVisual(element.iconPosition, firstrow, secondrow, iconCell, propCell);
+                }
+
+                redrawElement(element);
+            }
+
+// drag and drop
+
+            function findPos(obj) {
+                var curleft = curtop = 0;
+                if (obj.offsetParent) {
+                    do {
+                        curleft += obj.offsetLeft;
+                        curtop += obj.offsetTop;
+                    } while (obj = obj.offsetParent);
+                    return [curleft, curtop];
+                }
+            }
+
+            function allowDrop(ev) {
+                ev.preventDefault();
+            }
+
+            function drag(ev) {
+                /* 
+                 console.log("drag " + ev.target.id + " clientX,clientY " + ev.clientX + " " + ev.clientY);
+                 console.log("drag " + ev.target.id + " target offset from parent " + ev.target.offsetLeft + " " + ev.target.offsetTop);
+                 console.log("drag parentElement " + ev.target.parentElement.id);
+                 console.log("drag offsetParent " + ev.target.offsetParent.id);
+                 */
+                // find position of dropzone origin
+                var pos = findPos(g_dropzone);
+                var parentX = pos[0];
+                var parentY = pos[1];
+                //console.log("drag parent position " + parentX + " " + parentY);
+                // cursor click position on the drag element, relative to the drag element origin
+                var relX = ev.clientX - parentX - ev.target.offsetLeft;
+                var relY = ev.clientY - parentY - ev.target.offsetTop;
+                ev.dataTransfer.setData("objID", ev.target.id);
+                ev.dataTransfer.setData("relX", relX);
+                ev.dataTransfer.setData("relY", relY);
+            }
+
+            function drop(ev) {
+                ev.preventDefault();
+                var data = ev.dataTransfer.getData("objID");
+                var relX = Number(ev.dataTransfer.getData("relX"));
+                var relY = Number(ev.dataTransfer.getData("relY"));
+                /* 
+                 console.log("drop : "+data);
+                 console.log("drop : "+relX);
+                 console.log("drop : "+relY);
+                 */
+                var img = document.getElementById(data);
+                // user clicked on (clientX,clientY)
+                // calculate position relative to dropzone 
+                // and shift the image so that relative mouse position on the element is the same as for drag
+                var canvasX = ev.clientX - g_dropzone.offsetLeft - relX;
+                var canvasY = ev.clientY - g_dropzone.offsetTop - relY;
+
+                img.style.top = canvasY + "px";
+                img.style.left = canvasX + "px";
+
+                if (img.id != "backgroundDrawing") {
+                    var obj = visualToObject(img);
+                    obj.top = canvasY + "px";
+                    obj.left = canvasX + "px";
+                }
+            }
+
+
+
+            function wsconnect() {
+
+                if ("WebSocket" in window)
+                {
+                    var serverAddress = document.getElementById('serverAddress').value;
+                    g_ws = new WebSocket(serverAddress);
+
+                    g_ws.onopen = function ()
+                    {
+                        document.getElementById("serverAddress").className = "green";
+                        var cmd = new Object();
+                        cmd.Command = "icons";
+                        g_ws.send(JSON.stringify(cmd));
+                        cmd.Command = "backgrounds";
+                        g_ws.send(JSON.stringify(cmd));
+                        cmd.Command = "status";
+                        g_ws.send(JSON.stringify(cmd));
+                    };
+
+                    g_ws.onclose = function (evt)
+                    {
+                        document.getElementById("serverAddress").className = "red";
+                    };
+
+                    g_ws.onerror = function ()
+                    {
+                        document.getElementById("serverAddress").className = "red";
+                    };
+
+                    g_ws.onmessage = function (event)
+                    {
+                        if (event.data.length > 0) {
+                            try {
+                                var obj = JSON.parse(event.data);
+                            } catch (e) {
+                                console.log("JSON.parse failed on : " + event.data);
+
+                            }
+                            if (typeof obj !== "undefined") {
+
+                                if (obj.object === "STATUSCOMPLETE") {
+                                    console.log(event.data);
+                                }
+                                if (obj.object === "ICONS") {
+                                    // sent in response to 'icons' request. 
+                                    var icons = obj.list;
+                                    for (var i = 0; i < icons.length; i++) {
+                                        var filename = icons[i];
+                                        var basename = filename.split(".")[0];
+                                        g_availableIcons[basename] = filename;
+                                    }
+                                }
+                                if (obj.object === "BACKGROUNDS") {
+                                    // sent in response to 'backgrounds' request. 
+                                    // here we build the options list for the drawing select                                            
+                                    var drawingSelector = document.getElementById("drawingSelector");
+                                    var drawings = obj.list;
+                                    for (var i = 0; i < drawings.length; i++) {
+                                        var option = document.createElement("option");
+                                        option.value = drawings[i];
+                                        option.text = drawings[i];
+                                        drawingSelector.appendChild(option);
+                                        drawingSelector.selectedIndex = i;
+                                    }
+                                }
+                                if (obj.object === "GRAPH") {
+                                    // sent in response to 'graph' request. 
+                                    // we get the file name of the .png file, relative to the html directory
+                                    console.log("receiving file name " + obj.filename);
+                                    var objImage = loadImageByFilename(obj.filename, g_graphSize);
+                                    objImage.id = "rrdgraph";
+                                    objImage.draggable = false;
+                                    objImage.className = "rrdgraph";
+                                    g_dropzone.appendChild(objImage);
+                                }
+                                if (obj.object === "PROPERTY") {
+// sent as part of the response to the 'load' request. Lists the properties and if they are hidden
+// g_hiddenProperties was reset when sending the 'load' request
+                                    if (obj.hidden) {
+                                        g_hiddenProperties.add(obj.name);
+                                        applyHiddenProperties();
+                                    }
+                                }
+                                if (obj.object === "PDEV") {
+                                    obj.key = obj.HWid;
+                                }
+                                if (obj.object === "VDEV") {
+                                    obj.key = obj.name;
+                                }
+                                if (obj.object === "VIO") {
+                                    obj.key = obj.name;
+                                }
+                                if (obj.object === "PIO") {
+                                    obj.key = obj.device + "/" + obj.name;
+                                }
+
+                                if ("key" in obj) {
+// obj is containing information about an element that is represented on the drawing.
+// It may be only graphical information from a previously saved drawing
+// Or it is a status update sent by RGPIO.
+// In either case, the element properties are replaced or added if they did not yet exist.
+// If it is the first occurence of this element, its visual representation is created.
+
+
+                                    if (!(obj.key in g_allElements)) {  // first time this object is sent by the server
+                                        console.log("first occurence of " + obj.key);
+
+                                        if ((obj.object === "VDEV") || (obj.object === "PDEV") || (obj.object === "VIO")) {
+                                            if ("hidden" in obj) {
+                                                if (obj.hidden) {
+                                                    g_hiddenElements.add(obj.key);
+                                                }
+                                            } else
+                                                g_hiddenElements.add(obj.key);
+
+                                            // visual is an icon and a table with properties
+                                            createObjectVisual(obj);
+                                        }
+                                        if (obj.object === "PIO") {
+                                            // create a property with the name of this PIO in the PDEV it belongs to
+                                            var pdev = g_allElements[obj.device];
+                                            pdev[obj.name] = obj.value;
+                                            // replace the device visual by an updated one
+                                            g_dropzone.removeChild(pdev.visual);
+                                            createObjectVisual(pdev);
+
+                                            // PIO itself has no 'visual' property. It is visualized as an entry in the device property table
+
+                                        }
+
+// Put the object in g_allElements, so that next messages are treated as update
+
+                                        g_allElements[obj.key] = obj;
+
+// Create an option in the  device select element. PIO can not be selected, since its visual is an entry in the property table
+// that is controlled by g_hiddenProperties
+                                        if ((obj.object === "VDEV") || (obj.object === "PDEV") || (obj.object === "VIO")) {
+                                            var option = document.createElement("option");
+                                            option.value = obj.key;
+                                            option.text = obj.key;
+                                            if ((obj.object === "PDEV"))
+                                                g_pdeviceSelect.appendChild(option);
+                                            if ((obj.object === "VDEV") || (obj.object === "VIO"))
+                                                g_vdeviceSelect.appendChild(option);
+                                        }
+
+                                    } else {   // not the first occurrence of this object =  update 
+//console.log("update of "+obj.key);
+
+                                        if ((obj.object === "VDEV") || (obj.object === "PDEV") || (obj.object === "VIO")) {
+
+                                            if ("hidden" in obj) {
+                                                if (obj.hidden) {
+                                                    g_hiddenElements.add(obj.key);
+                                                }
+                                            }
+
+                                            var existingElement = g_allElements[obj.key];
+                                            // copy all properties from the update object to the element
+                                            // if the element has a visual, change it according to the new property value
+                                            // redraw the element in case display information (top,left,hidden) was added
+                                            for (var key in obj) {
+                                                if (existingElement[key] !== obj[key]) {
+                                                    existingElement[key] = obj[key];
+                                                    if ("visual" in existingElement)
+                                                        updateObjectVisual(existingElement.visual, key, obj[key]);
+                                                    else
+                                                        alert("element " + obj.key + " is updated but has no visual");
+//                                                                 createObjectVisual(existingElement);
+                                                }
+                                            }
+
+                                            redrawElement(existingElement);
+                                        }
+                                        if (obj.object === "PIO") {
+                                            var existingElement = g_allElements[obj.device];
+                                            if (existingElement[obj.name] !== obj.value) {
+                                                existingElement[obj.name] = obj.value;
+                                            }
+                                            updateObjectVisual(existingElement.visual, obj.name, obj.value);
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    };
+
+
+                } else
+                {
+
+                    alert("WebSocket NOT supported by your Browser!");
+                }
+            }
+
+
+
+
+            document.getElementById("saveDrawingButton").onclick = function () {
+
+                if (g_drawing !== "none") {
+                    var cmd = new Object();
+                    cmd.Command = "store";
+                    cmd.Arg1 = g_drawing;
+
+// Store top,left,scale,hidden,iconPosition of all elements
+// The property "hidden" is an exception because it is not stored on the element but in the set g_hiddenElements
+// When loading drawing information it comes back as a property 
+// obj still has this property but it may no longer correspond to g_hiddenElements
+
+                    visuals = g_dropzone.getElementsByClassName("objectVisual");
+                    for (var i = 0, visual; visual = visuals[i]; i++) {
+                        var obj = visualToObject(visual);
+                        //console.log(" visual   object.key=" + obj.key+"   x="+visual.style.left+" y="+visual.style.top);
+                        var position = new Object();
+                        position.object = obj.object;
+                        // store HWid or name so that the element key can be reconstructed from the object
+                        if ((obj.object === "VDEV") || (obj.object === "VIO")) {
+                            position.name = obj.name;
+                        }
+                        if (obj.object === "PDEV") {
+                            position.HWid = obj.HWid;
+                        }
+                        position.left = obj.left;
+                        position.top = obj.top;
+                        position.scale = obj.scale;
+                        position.iconPosition = obj.iconPosition;
+                        position.hidden = g_hiddenElements.has(obj.key);
+                        cmd.Arg2 = JSON.stringify(position);
+                        g_ws.send(JSON.stringify(cmd));
+                    }
+
+                    // store the properties that are hidden for this drawing                   
+                    var hiddenProperties = Array.from(g_hiddenProperties);
+                    hiddenProperties.forEach(function (property) {
+                        var p = new Object();
+                        p.object = "PROPERTY";
+                        p.name = property;
+                        p.hidden = true;
+                        cmd.Arg2 = JSON.stringify(p);
+                        g_ws.send(JSON.stringify(cmd));
+                    });
+
+                    cmd.Arg2 = ".";
+                    g_ws.send(JSON.stringify(cmd));
+
+                    message("drawing \"" + g_drawing + "\" is saved");
+                }
+
+            };
+
+            function loadSelectedDrawing() {
+                var drawingSelector = document.getElementById("drawingSelector");
+                var options = Array.from(drawingSelector.childNodes);
+                options.forEach(function (option) {
+                    if (option.selected) {
+
+                        if (option.value !== "none") {
+                            g_drawing = option.value;
+
+// display the dropzone background image (replace existing one if any)
+                            if (g_background !== "none")
+                                g_dropzone.removeChild(g_background);
+                            g_background = loadImageByBasename("/backgrounds/" + g_drawing, 1200);
+                            g_background.className = "backgroundmodal";
+                            g_dropzone.appendChild(g_background);
+
+// hide all elements by default
+
+                            resetHiddenElements();
+                            applyHiddenElements();
+
+// unhide all properties by default
+
+                            resetHiddenProperties();
+                            applyHiddenProperties();
+
+// ask the server to send the position and hidden status of all the elements
+                            var cmd = new Object();
+                            cmd.Command = "load";
+                            cmd.Arg1 = g_drawing;
+                            g_ws.send(JSON.stringify(cmd));
+                        }
+                    }
+                });
+
+            }
+
+
+
+            function initializeSelectors() {
+                // set the hidden devices to 'selected'
+                var poptions = Array.from(g_pdeviceSelect.childNodes);
+                var voptions = Array.from(g_vdeviceSelect.childNodes);
+                poptions.concat(voptions).forEach(function (option) {
+                    if (g_hiddenElements.has(option.value)) {
+                        option.selected = true;
+                    } else {
+                        option.selected = false;
+                    }
+                });
+//                g_pdeviceSelect.size = poptions.length; // display all elements
+//                g_vdeviceSelect.size = voptions.length; // display all elements
+
+                // set the hidden properties to 'selected'
+                var options = Array.from(g_propertySelect.childNodes);
+                options.forEach(function (option) {
+                    if (g_hiddenProperties.has(option.value)) {
+                        option.selected = true;
+                    } else {
+                        option.selected = false;
+                    }
+                });
+//                g_propertySelect.size = options.length; // display all properties
+//                g_propertySelect.size = 16;  // otherwise the apply button is unreachable
+            }
+
+
+
+            var iconPlusButton = document.getElementById("iconPlusButton");
+            var iconMinusButton = document.getElementById("iconMinusButton");
+            var iconPositionButton = document.getElementById("iconPositionButton");
+            var iconCancelButton = document.getElementById("iconCancelButton");
+
+            iconPlusButton.onclick = function () {
+                g_iconScale = true;
+                g_iconPosition = false;
+                g_iconEqual = false;
+                g_scaleFactor = 1.1;
+            }
+            iconMinusButton.onclick = function () {
+                g_iconScale = true;
+                g_iconPosition = false;
+                g_iconEqual = false;
+                g_scaleFactor = 0.9;
+            }
+            iconEqualButton.onclick = function () {
+                g_iconScale = false;
+                g_iconPosition = false;
+                g_iconEqual = true;
+            }
+            iconPositionButton.onclick = function () {
+                g_iconPosition = true;
+                g_iconEqual = false;
+                g_iconScale = false;
+            }
+            iconCancelButton.onclick = function () {
+                g_iconPosition = false;
+                g_iconScale = false;
+                g_iconEqual = false;
+                g_editIconModal.style.display = "none";
+            }
+
+
+            document.getElementById("iconHideButton").onclick = function () {
+                if (g_drawing !== "none") {
+                    // deselect hidden device and properties
+                    initializeSelectors();
+                    // show the modal
+                    g_editDrawingModal.style.display = "block";
+                }
+            }
+
+            document.getElementById("EditDrawingButton").onclick = function () {
+                g_editIconModal.style.display = "block";
+
+            }
+
+            document.getElementById("GraphButton").onclick = function () {
+                // clicking on this button makes the graph modal appear
+                // First create the list of vio that can appear on the graph
+                if (g_drawing !== "none") {
+
+                    // The first time this function is called, build the modal
+                    // The vio that can be graphed are stored in g_graphData
+
+                    if (g_graphData.size == 0) {
+
+                        var graphmodalform = document.getElementById("graphmodalform");
+
+
+                        var table = document.createElement('table');
+                        table.className = "graphDataTable";
+                        graphmodalform.appendChild(table);
+
+
+                        var voptions = Array.from(g_vdeviceSelect.childNodes);
+                        voptions.forEach(function (option) {
+
+                            var vio = g_allElements[option.value];
+                            g_graphData.add(vio.key);
+
+                            var row = document.createElement('tr');
+                            table.appendChild(row);
+
+                            var vioCell = document.createElement('td');
+                            vioCell.innerHTML = vio.key; //   erikv
+                            row.appendChild(vioCell);
+
+
+                            // create a color choser for this vio
+                            vio.colorChoser = createColorChoser(vio.key);
+
+                            var colorCell = document.createElement('td');
+                            colorCell.appendChild(vio.colorChoser);
+                            row.appendChild(colorCell);
+
+                        });
+                    }
+                    // show the modal
+                    g_createGraphModal.style.display = "block";
+                }
+            }
+
+            function createColorChoser(id) {
+                var colorselect = document.createElement('select');
+                colorselect.id = id;
+                var coloroption;
+                var allColors = [
+                    "any",
+                    "none",
+                    "black",
+                    "blue",
+                    "yellow",
+                    "red",
+                    "pink",
+                    "orange",
+                    "magenta",
+                    "green",
+                    "gray",
+                    "cyan"]
+
+                var len = allColors.length;
+                for (i = 0; i < len; i++) {
+                    coloroption = document.createElement('option');
+                    coloroption.value = coloroption.text = allColors[i];
+                    colorselect.appendChild(coloroption);
+                }
+                return colorselect;
+            }
+
+
+            document.getElementById("showGraphButton").onclick = function () {
+                // make create graph modal invisible
+                g_createGraphModal.style.display = "none";
+
+                // Delete any previous graph
+                var prevgraph = document.getElementById("rrdgraph");
+                if (prevgraph)
+                    g_dropzone.removeChild(prevgraph);
+
+                // read the input values from the createGraphModal selects
+
+                var e = document.getElementById("graphScale");
+                var graphScale = e.options[e.selectedIndex].value;
+                var graphRange = document.getElementById("graphRange").value;
+                console.log(" graph range: " + graphRange + " graph scale: " + graphScale);
+
+                graphArgs = " range=" + graphRange + graphScale;
+
+                // read the colors for the colorChosers of the vios in g_graphData
+
+                for (var key in g_allElements) {
+                    if (g_graphData.has(key)) {
+                        var vio = g_allElements[key];
+                        var chosenColor = vio.colorChoser.value;
+                        if (chosenColor != "none") {
+                            console.log(" graph data : " + key + chosenColor);
+                            graphArgs = graphArgs + " " + key;
+                            if (chosenColor != "any") {
+                                graphArgs = graphArgs + "=" + chosenColor;
+                            }
+                        }
+                    }
+                }
+                ;
+
+// ask the server to generate a graph and return the file name of the graph:1
+                var cmd = new Object();
+                cmd.Command = "graph";
+                cmd.Arg1 = graphArgs;
+                g_ws.send(JSON.stringify(cmd));
+                /*
+                 */
+            }
+
+            // function behind the buttons in the edit modal
+
+
+            var selectCancel = document.getElementById("selectCancel");
+            selectCancel.onclick = function () {
+                g_editDrawingModal.style.display = "none";
+            };
+
+
+            var selectApply = document.getElementById("selectApply");
+            selectApply.onclick = function () {
+                resetHiddenElements();
+                var poptions = Array.from(g_pdeviceSelect.childNodes);
+                var voptions = Array.from(g_vdeviceSelect.childNodes);
+                poptions.concat(voptions).forEach(function (option) {
+                    if (option.selected)
+                        g_hiddenElements.add(option.innerHTML);
+                });
+                applyHiddenElements();
+
+                resetHiddenProperties();
+                var options = Array.from(g_propertySelect.childNodes);
+                options.forEach(function (option) {
+                    if (option.selected)
+                        g_hiddenProperties.add(option.innerHTML);
+                });
+                applyHiddenProperties();
+
+                g_editDrawingModal.style.display = "none";
+            };
+
+// When the user clicks anywhere outside of the modal, close it
+            window.onclick = function (event) {
+                if (event.target === g_createGraphModal) {
+                    g_createGraphModal.style.display = "none";
+                }
+                var prevgraph = document.getElementById("rrdgraph");
+                if (prevgraph) {
+                    if (event.target === prevgraph) {
+                        g_dropzone.removeChild(prevgraph);
+                    }
+                }
+            };
+
+        </script>
+
+    </body>
+</html>
+
+

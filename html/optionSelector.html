@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <body>
+
+        <!--
+        -->
+
+
+
+        <form>
+
+            <input type="text" id="newOption"  value="new option">
+            <button type="button" id="createOption">create option</button>
+            <select id="optionSelector" onchange=";">
+                <option value="none"> Select an option </option>
+            </select>
+
+        </form>
+        <br>
+
+        <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+
+        <script>
+
+                document.getElementById("createOption").onclick = function () {
+
+                    var newOptionField = document.getElementById("newOption");
+
+                    var options = Array.from(optionSelector.childNodes);
+                    var createNewOption = true;
+                    options.forEach(function (option) {
+                        if (option.value === newOptionField.value) {
+                            alert("\"" + option.value + "\" already exists");
+                            createNewOption = false;
+                        }
+                    });
+
+                    if (createNewOption) {
+                        var option = document.createElement("option");
+                        option.value = newOptionField.value;
+                        option.text = newOptionField.value;
+                        optionSelector.appendChild(option);
+                        option.selected = true;
+                    }
+
+                }
+
+
+
+        </script>
+
+    </body>
+</html>
+
+
