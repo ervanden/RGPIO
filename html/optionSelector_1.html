@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <body>
+
+        <!--
+        -->
+
+
+
+        <form>
+
+            <input type="text" id="newDataSet"  value="new dataSet">
+            <button type="button" id="createDataSet">create dataSet</button>
+            <select id="dataSetSelector" >
+                <option value="none"> Select an dataSet </option>
+            </select>
+
+        </form>
+        <br>
+
+        <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+
+        <script>
+            
+               document.getElementById("dataSetSelector").onchange = function () {
+                   var dataSetSelector = document.getElementById("dataSetSelector");
+                   console.log("selected "+dataSetSelector.options[dataSetSelector.selectedIndex].value);
+               }
+                document.getElementById("createDataSet").onclick = function () {
+
+                    var dataSetSelector = document.getElementById("dataSetSelector");
+                    var newDataSetField = document.getElementById("newDataSet");
+
+                    var dataSets = Array.from(dataSetSelector.childNodes);
+                    console.log(" dataSets "+dataSets.keys.length)
+                    var createNewDataSet = true;
+                    dataSets.forEach(function (dataSet) {
+                        if (dataSet.value === newDataSetField.value) {
+                            alert("\"" + dataSet.value + "\" already exists");
+                            createNewDataSet = false;
+                        }
+                    });
+
+                    if (createNewDataSet) {
+                        var dataSet = document.createElement("option");
+                        dataSet.value = newDataSetField.value;
+                        dataSet.text = newDataSetField.value;
+                        dataSetSelector.appendChild(dataSet);
+                        dataSet.selected = true;
+                    }
+
+                }
+
+
+
+        </script>
+
+    </body>
+</html>
+
+
