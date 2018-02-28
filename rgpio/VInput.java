@@ -42,7 +42,6 @@ public class VInput extends VIO {
         // Start all the GET commands in parallel and wait until all threads finished
 
         ArrayList<SendGetCommandThread> threads = new ArrayList<>();
-
         // "creating GET threads..."
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput ip : device.inputs.values()) {
