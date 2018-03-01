@@ -326,7 +326,7 @@ public class PiDevice {
                 if (ip == null) {
                     System.out.println("GET : unknown output " + pin);
                 } else {
-System.out.println("RETURNING VALUE   " + ip.getValue() + " FOR " + pin);
+// System.out.println("RETURNING VALUE   " + ip.getValue() + " FOR " + pin);
                     return ip.getValue();
                 }
                 return "GET : unknown output " + pin;
