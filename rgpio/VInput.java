@@ -33,6 +33,7 @@ public class VInput extends VIO {
             json.addProperty("min", integerToString(min()));
             json.addProperty("max", integerToString(max()));
         }
+
         return json.asString();
     }
 
@@ -153,14 +154,14 @@ public class VInput extends VIO {
             for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
                     if (dip.value != null) { // is null before first GET or EVENT
-
-                        try {
-                            float f = Float.parseFloat(dip.value);
-                            sum = sum + f;
-                            n = n + 1;
-                        } catch (NumberFormatException nfe) {
+                        if (!dip.value.equals("NaN")) { // the string "NaN" does not throw exception !
+                            try {
+                                float f = Float.parseFloat(dip.value);
+                                sum = sum + f;
+                                n = n + 1;
+                            } catch (NumberFormatException nfe) {
+                            }
                         }
-
                     }
                 }
             }
@@ -178,12 +179,14 @@ public class VInput extends VIO {
             for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
                     if (dip.value != null) { // is null before first GET or EVENT
-                        try {
-                            int f = Integer.parseInt(dip.value);
-                            if (f < result) {
-                                result = f;
+                        if (!dip.value.equals("NaN")) { // the string "NaN" does not throw exception ?
+                            try {
+                                int f = Integer.parseInt(dip.value);
+                                if (f < result) {
+                                    result = f;
+                                }
+                            } catch (NumberFormatException nfe) {
                             }
-                        } catch (NumberFormatException nfe) {
                         }
                     }
                 }
@@ -203,14 +206,15 @@ public class VInput extends VIO {
             for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
                     if (dip.value != null) { // is null before first GET or EVENT
-                        try {
-                            int f = Integer.parseInt(dip.value);
-                            if (f > result) {
-                                result = f;
+                        if (!dip.value.equals("NaN")) { // the string "NaN" does not throw exception ?
+                            try {
+                                int f = Integer.parseInt(dip.value);
+                                if (f > result) {
+                                    result = f;
+                                }
+                            } catch (NumberFormatException nfe) {
                             }
-                        } catch (NumberFormatException nfe) {
                         }
-                        int f = Integer.parseInt(dip.value);
                     }
                 }
             }
