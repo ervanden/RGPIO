@@ -153,9 +153,14 @@ public class VInput extends VIO {
             for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
                     if (dip.value != null) { // is null before first GET or EVENT
-                        float f = Float.parseFloat(dip.value);
-                        sum = sum + f;
-                        n = n + 1;
+
+                        try {
+                            float f = Float.parseFloat(dip.value);
+                            sum = sum + f;
+                            n = n + 1;
+                        } catch (NumberFormatException nfe) {
+                        }
+
                     }
                 }
             }
@@ -173,9 +178,12 @@ public class VInput extends VIO {
             for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
                     if (dip.value != null) { // is null before first GET or EVENT
-                        int f = Integer.parseInt(dip.value);
-                        if (f < result) {
-                            result = f;
+                        try {
+                            int f = Integer.parseInt(dip.value);
+                            if (f < result) {
+                                result = f;
+                            }
+                        } catch (NumberFormatException nfe) {
                         }
                     }
                 }
@@ -195,10 +203,14 @@ public class VInput extends VIO {
             for (PInput dip : device.inputs.values()) {
                 if (dip.vinput == this) {
                     if (dip.value != null) { // is null before first GET or EVENT
-                        int f = Integer.parseInt(dip.value);
-                        if (f > result) {
-                            result = f;
+                        try {
+                            int f = Integer.parseInt(dip.value);
+                            if (f > result) {
+                                result = f;
+                            }
+                        } catch (NumberFormatException nfe) {
                         }
+                        int f = Integer.parseInt(dip.value);
                     }
                 }
             }
