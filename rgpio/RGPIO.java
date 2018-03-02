@@ -8,6 +8,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import mail.MailGenerator;
 import org.rrd4j.core.RrdDb;
@@ -249,6 +250,8 @@ public class RGPIO {
             RRDVIO.add(vinput);
             vinputNames.add(vinput.name);
         }
+        
+        Collections.sort(vinputNames);
 
         // create a RRD database with an entry every Step seconds
         String RRDPath = RGPIO.RRDDirectory + "datastore.rrd";
