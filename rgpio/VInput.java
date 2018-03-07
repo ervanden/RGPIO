@@ -10,6 +10,19 @@ public class VInput extends VIO {
     public Integer members = 0;
     public Integer minMembers = null;
 
+    
+    /* 
+       physical devices return a string in response to GET of an analog pin
+       This string is stored in the Pinput object.
+       Exernally the value of an analog input is used via the functions avg, min, max
+       The string is converted to integer in these functions.
+       Any string that can not be converted to a number is ignored. If none of the physical pins
+       have a numerical value, avg,min,max return null. 
+       null is converted to "NaN" in the JSON representation that is sent to the web interface
+    
+       So a device should not send 0 or 999 if it has no value. It should send "NaN" or any other string
+       that does not have the number format
+    */
     private String integerToString(Integer i) {
         if (i == null) {
             return "NaN";

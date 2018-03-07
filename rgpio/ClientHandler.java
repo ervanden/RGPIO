@@ -60,11 +60,10 @@ public class ClientHandler implements WSServerListener {
             for (VOutput op : RGPIO.VStringOutputMap.values()) {
                 reply.add(op.toJSON());
             }
-            
+
             String jsonReply = "{ \"object\":\"STATUSCOMPLETE\"}";
             reply.add(jsonReply);
-            
-            
+
         } else if (cmd.Command.equals("store")) {
             /*
              store basename data1   -- file /home/pi/RGPIO/storage/basename.txt   is opened for writing
@@ -207,6 +206,7 @@ public class ClientHandler implements WSServerListener {
                 } else {
                     command = "java -jar C:\\Users\\erikv\\Documents\\NetBeansProjects\\RGPIOGraph\\dist\\RGPIOGraph.jar " + cmd.Arg1;
                 }
+
                 System.out.println("excuting " + command);
                 p = Runtime.getRuntime().exec(command);
                 p.waitFor();

@@ -250,13 +250,10 @@ public class RGPIO {
             RRDVIO.add(vinput);
             vinputNames.add(vinput.name);
         }
-        
-        Collections.sort(vinputNames);
 
         // create a RRD database with an entry every Step seconds
         String RRDPath = RGPIO.RRDDirectory + "datastore.rrd";
         RRDGenerator.createRRD(RRDPath, vinputNames, RRDStep);
-        System.out.println("Created " + RRDPath);
         RRDDB = RRDGenerator.openRRD(RRDPath);
         try {
             RRDSample = RRDDB.createSample();
