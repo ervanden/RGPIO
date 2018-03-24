@@ -258,11 +258,13 @@ public class RGPIO {
             System.out.println("No RRDB. Exiting...");
             System.exit(0);
         }
+        
         try {
             RRDSample = RRDDB.createSample();
         } catch (IOException ioe) {
-        };
+        }
 
+        System.out.println("Starting RRDB update thread");
         // Start updating the RDD database every RRDStep seconds with the values of all RRDVIO
         new UpdateRRDThread(RRDStep).start();
     }
