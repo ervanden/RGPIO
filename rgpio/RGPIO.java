@@ -253,8 +253,11 @@ public class RGPIO {
 
         // create a RRD database with an entry every Step seconds
         String RRDPath = RGPIO.RRDDirectory + "datastore.rrd";
-        RRDGenerator.createRRD(RRDPath, vinputNames, RRDStep);
-        RRDDB = RRDGenerator.openRRD(RRDPath);
+        RRDDB=RRDGenerator.createRRD(RRDPath, vinputNames, RRDStep);
+        if (RRDDB==null){
+            System.out.println("No RRDB. Exiting...");
+            System.exit(0);
+        }
         try {
             RRDSample = RRDDB.createSample();
         } catch (IOException ioe) {

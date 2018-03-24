@@ -16,7 +16,7 @@ public class RGPIOmain {
 
     private static void usage() {
         System.out.println("Usage");
-        System.out.println("  RGPIOmain udpsend command ipAddress port [timeout]");
+        System.out.println("  RGPIOmain udpsend command server port [timeout]");
         System.out.println("  RGPIOmain udpreceive port");
         System.out.println("  RGPIOmain tcpclient server port command");
         System.out.println("   send command, wait for reply, print reply, exit");
@@ -36,7 +36,7 @@ public class RGPIOmain {
         try {
 
             mode = args[0];
-            
+  System.out.println("mode="+mode);          
             // remaining args must all be name=value
 
             for (int arg = 2; arg <= args.length; arg++) {
