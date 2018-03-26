@@ -66,7 +66,7 @@ public class ClientHandler implements WSServerListener {
 
         } else if (cmd.Command.equals("store")) {
             /*
-             store basename data1   -- file /home/pi/RGPIO/storage/basename.txt   is opened for writing
+             store basename data1   -- file /home/pi/<application>/storage/basename.txt   is opened for writing
              -- data1 is written
              store basename data2   -- data2 is written
              store basename data3   -- data3 is written
@@ -74,7 +74,7 @@ public class ClientHandler implements WSServerListener {
              */
             if (storeFile == null) {
                 try {
-                    String fileName = "/home/pi/RGPIO/storage/" + cmd.Arg1 + ".txt";
+                    String fileName = RGPIO.RGPIODirectory+"storage/" + cmd.Arg1 + ".txt";
                     reply.add("opening file : " + fileName);
                     File file = new File(fileName);
                     OutputStream is = new FileOutputStream(file);
@@ -104,11 +104,11 @@ public class ClientHandler implements WSServerListener {
             }
         } else if (cmd.Command.equals("load")) {
             /*
-             load basename   -- file /home/pi/RGPIO/storage/basename.txt   is read and its content sent to the client
+             load basename   -- file /home/pi/<application>/storage/basename.txt   is read and its content sent to the client
              */
 
             try {
-                String fileName = "/home/pi/RGPIO/storage/" + cmd.Arg1 + ".txt";
+                String fileName = RGPIO.RGPIODirectory+"storage/" + cmd.Arg1 + ".txt";
                 reply.add("opening file : " + fileName);
                 File file = new File(fileName);
                 InputStream is = new FileInputStream(file);

@@ -74,7 +74,6 @@
         <form>
             <input type="text" id="serverAddress" name="serverAddress" class="white" value="ws://X.X.X.X:2603">
             <select id="drawingSelector" onchange="loadSelectedDrawing();">
-                <option value="none"> Select a drawing </option>
             </select>
             <button type="button" id="GraphButton">Graph</button>
             <button type="button" id="EditDrawingButton">Edit Drawing</button>
@@ -122,6 +121,11 @@
         <div id="createGraphModal" class="modal">
             <div class="modal-content">
                 <form id="graphmodalform">
+
+                    Data Set:
+                    <select id="dataSetSelector" >
+                    </select>
+
                     Range:
                     <input type="number" id="graphRange" name="range" class="numberInput" max="999" value="1">
                     <select id="graphScale">
@@ -130,6 +134,13 @@
                         <option value="d" selected>days</option>
                     </select>
                     <button type="button" id="showGraphButton"  >Show Graph</button>
+                    <div id="graphDataTableDiv"></div>
+                    Save as new data set:
+                    <input type="text" id="newDataSet"  value="data set name">
+                    <input type="text" id="newDataSetLabel"  value="Y axis label">
+                    <button type="button" id="createDataSet">save</button>
+                    <br>
+                    <button type="button" id="deleteDataSet">delete this data set</button>
                     <br>
                 </form>
             </div>
@@ -167,6 +178,10 @@
             var g_allProperties = new Set();
             var g_hiddenElements = new Set();
             var g_hiddenProperties = new Set();
+            var g_dataSets = new Object();
+            var g_dataSetLabels = new Object();
+            var g_sortedRRDEntries = null;
+
             resetHiddenProperties(); // sets the list to the properties that should always be hidden
 
             g_cellColors = {
@@ -175,6 +190,12 @@
                 "High": "#ff4d4d",
                 "Low": "#b3ccff"
             };
+            /*
+             g_dataSetLabels = { "PDUs" : "Watt",
+             "temperatures" : "degrees_Celsius",
+             "humidity" : "percentage" }
+             */
+
 
             g_graphSize = 1000;
             g_rrdentries = new Set();
@@ -398,8 +419,9 @@
                 table.appendChild(firstrow);
                 table.appendChild(secondrow);
 
-                obj.iconPosition = "left"; // arbitrary default at creation
-                addCellsToVisual("left", firstrow, secondrow, iconCell, propCell);
+                if (!("iconPosition" in obj))
+                    obj.iconPosition = "left";
+                addCellsToVisual(obj.iconPosition, firstrow, secondrow, iconCell, propCell);
 
 
 // cell with image
@@ -668,6 +690,10 @@
                         g_ws.send(JSON.stringify(cmd));
                         cmd.Command = "status";
                         g_ws.send(JSON.stringify(cmd));
+// ask the server to send the data sets for graphing
+                        cmd.Command = "load";
+                        cmd.Arg1 = "dataSets";
+                        g_ws.send(JSON.stringify(cmd));
                     };
 
                     g_ws.onclose = function (evt)
@@ -690,10 +716,13 @@
 
                             }
                             if (typeof obj !== "undefined") {
-
                                 if (obj.object === "STATUSCOMPLETE") {
                                     // marks the moment where we have all the elements loaded, now it is safe to display a drawing
                                     loadSelectedDrawing();
+                                    sortRRDEntries();
+                                    for (var i = 0; i < g_sortedRRDEntries.length; i = i + 1) {
+                                        console.log("sorted RRD " + g_sortedRRDEntries[i]);
+                                    }
                                 }
                                 if (obj.object === "ICONS") {
                                     // sent in response to 'icons' request. 
@@ -703,6 +732,12 @@
                                         var basename = filename.split(".")[0];
                                         g_availableIcons[basename] = filename;
                                     }
+                                }
+                                if (obj.object === "DATASET") {
+                                    g_dataSets[obj.dataSetName] = obj.dataSet;
+                                }
+                                if (obj.object === "DATASETLABELS") {
+                                    g_dataSetLabels = obj.labels;
                                 }
                                 if (obj.object === "RRDENTRIES") {
                                     // sent in response to 'rrdentries' request. 
@@ -1028,51 +1063,136 @@
 
             }
 
+
+            document.getElementById("dataSetSelector").onchange = function () {
+                var dataSetSelector = document.getElementById("dataSetSelector");
+                createGraphDataTable(g_dataSets[selectedValue(dataSetSelector)]);
+            }
+
+            function setSelectedOption(selectElement, value) {
+                var options = selectElement.options;
+                for (var i = 0, optionsLength = options.length; i < optionsLength; i++) {
+                    if (options[i].value == value) {
+                        selectElement.selectedIndex = i;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function getOptionByValue(selectElement, value) {
+                var options = selectElement.options;
+                for (var i = 0, optionsLength = options.length; i < optionsLength; i++) {
+                    if (options[i].value == value) {
+                        return options[i];
+                    }
+                }
+                return null;
+            }
+
+            function selectedValue(selectElement) {
+                return selectElement.options[selectElement.selectedIndex].value;
+            }
+            function sortRRDEntries() {
+                if (!g_sortedRRDEntries) {
+                    var arr = new Array();
+                    var i = 0;
+                    for (var key in g_allElements) {
+                        if (g_rrdentries.has(key)) {
+                            arr[i] = key;
+                            i = i + 1;
+                        }
+                    }
+                    arr.sort();
+                    g_sortedRRDEntries = arr;
+                }
+            }
+
+
+            function createGraphDataTable(dataSet) {
+
+                //var graphmodalform = document.getElementById("graphmodalform");
+                var graphDataTableDiv = document.getElementById("graphDataTableDiv");
+
+                // remove the old one
+
+                var graphDataTable = document.getElementById("graphDataTable");
+                if (graphDataTable) {
+                    if (graphDataTable.parentNode) {
+                        graphDataTable.parentNode.removeChild(graphDataTable);
+                    }
+                }
+
+                // create a new one
+                var table = document.createElement('table');
+                table.id = "graphDataTable";
+                graphDataTableDiv.appendChild(table);
+
+                for (var i = 0; i < g_sortedRRDEntries.length; i = i + 1) {
+                    key = g_sortedRRDEntries[i];
+                    if (key in dataSet) {
+                        var vio = g_allElements[key];
+
+                        var row = document.createElement('tr');
+                        table.appendChild(row);
+
+                        var vioCell = document.createElement('td');
+                        vioCell.innerHTML = key;
+                        row.appendChild(vioCell);
+
+                        // create a color choser for this vio
+                        vio.colorChoser = createColorChoser(key);
+                        setSelectedOption(vio.colorChoser, dataSet[key]);
+                        var colorCell = document.createElement('td');
+                        colorCell.appendChild(vio.colorChoser);
+                        row.appendChild(colorCell);
+                    }
+                }
+
+            }
+
             document.getElementById("GraphButton").onclick = function () {
                 // clicking on this button makes the graph modal appear
-                // First create the list of vio that can appear on the graph
+
                 if (g_drawing !== "none") {
 
-                    // The first time this function is called, build the modal
-                    // The vio that can be graphed are stored in g_rrdentries
+                    var dataSetSelector = document.getElementById("dataSetSelector");
+
+                    // The first time this function is called, there is no data set selector or table of dataSets yet
+                    // Build the dataset selector
+                    // Build a table of data sets (arbitrarily selected)
 
                     if (!document.getElementById("graphDataTable")) {
 
-                        var graphmodalform = document.getElementById("graphmodalform");
+                        for (var key in g_dataSets) {
+                            var dataSet = document.createElement("option");
+                            dataSet.value = key;
+                            dataSet.text = key;
+                            dataSetSelector.appendChild(dataSet);
+                            dataSet.selected = true;
+                        }
 
+                        if (dataSetSelector.selectedIndex === -1) {
+                            // g_dataSets is empty. This means no data sets were ever created.
+                            // because they are already sent by the server in response to load dataSets
+                            // Create a data set with all RDD entries
+                            var defaultDataSet = new Object();
 
-                        var table = document.createElement('table');
-                        table.className = "graphDataTable";
-                        graphmodalform.appendChild(table);
-
-
-
-                for (var key in g_allElements) {
-                    if (g_rrdentries.has(key)) {
-                        var vio = g_allElements[key];
-
-                            var row = document.createElement('tr');
-                            table.appendChild(row);
-
-                            var vioCell = document.createElement('td');
-                            vioCell.innerHTML = key;
-                            row.appendChild(vioCell);
-
-                            // create a color choser for this vio
-                            vio.colorChoser = createColorChoser(key);
-
-                            var colorCell = document.createElement('td');
-                            colorCell.appendChild(vio.colorChoser);
-                            row.appendChild(colorCell);
-                     }
-                 }
-                }
-                     
+                            for (var i = 0; i < g_sortedRRDEntries.length; i = i + 1) {
+                                key = g_sortedRRDEntries[i];
+                                defaultDataSet[key] = "any";
+                            }
+                            createGraphDataTable(defaultDataSet);
+                        } else {
+                            createGraphDataTable(g_dataSets[selectedValue(dataSetSelector)]);
+                        }
+                    }
 
                     // show the modal
                     g_createGraphModal.style.display = "block";
                 }
             }
+
 
             function createColorChoser(id) {
                 var colorselect = document.createElement('select');
@@ -1102,7 +1222,92 @@
             }
 
 
+            document.getElementById("createDataSet").onclick = function () {
+
+                var newDataSetField = document.getElementById("newDataSet");
+                var newDataSetLabelField = document.getElementById("newDataSetLabel");
+                var dataSetSelector = document.getElementById("dataSetSelector");
+
+                var dataSets = Array.from(dataSetSelector.childNodes);
+                var createNewDataSet = true;
+                dataSets.forEach(function (dataSet) {
+                    if (dataSet.value === newDataSetField.value) {
+                        alert("\"" + dataSet.value + "\" already exists");
+                        createNewDataSet = false;
+                    }
+                });
+
+                g_dataSetLabels[newDataSetField.value] = newDataSetLabelField.value.replace(/ /g, "");
+
+                if (createNewDataSet) {
+                    var dataSet = document.createElement("option");
+                    dataSet.value = newDataSetField.value;
+                    dataSet.text = newDataSetField.value;
+                    dataSetSelector.appendChild(dataSet);
+                    dataSet.selected = true;
+
+                    // create the dataSet object in g_dataSets;
+
+                    newDataSet = new Object();
+                    var dataTable = document.getElementById("graphDataTable");
+                    if (dataTable) {
+                        var rows = Array.from(dataTable.childNodes);
+                        rows.forEach(function (row) {
+                            var key = row.cells[0].innerHTML;
+                            var vio = g_allElements[key];
+                            var color = selectedValue(vio.colorChoser);
+                            newDataSet[key] = color;
+                        });
+                        g_dataSets[newDataSetField.value] = newDataSet;
+
+                        storeDataSets();
+                    }
+                }
+            }
+
+            document.getElementById("deleteDataSet").onclick = function () {
+                var dataSetSelector = document.getElementById("dataSetSelector");
+                var dataSetOption = dataSetSelector.options[dataSetSelector.selectedIndex];
+                var dataSetName = dataSetOption.value;
+                dataSetSelector.removeChild(dataSetOption);
+                delete g_dataSets[dataSetName];
+                delete g_dataSetLabels[dataSetName];
+                storeDataSets();
+            }
+
+
+            function storeDataSets() {
+                var cmd = new Object();
+                cmd.Command = "store";
+                cmd.Arg1 = "dataSets";   // store with this tag
+
+                for (var key in g_dataSets) {
+                    var msg = new Object();
+                    msg.object = "DATASET";
+                    msg.dataSetName = key;
+                    msg.dataSet = g_dataSets[key];
+                    cmd.Arg2 = JSON.stringify(msg);
+                    g_ws.send(JSON.stringify(cmd));
+                }
+                var msg = new Object();
+                msg.object = "DATASETLABELS";
+                msg.labels = g_dataSetLabels;
+                cmd.Arg2 = JSON.stringify(msg);
+                g_ws.send(JSON.stringify(cmd));
+
+                cmd.Arg2 = ".";
+                g_ws.send(JSON.stringify(cmd));
+            }
+
+
+
             document.getElementById("showGraphButton").onclick = function () {
+
+                // name of the data set
+                var dataSetSelector = document.getElementById("dataSetSelector");
+                var dataSetName = selectedValue(dataSetSelector);
+                var dataSetLabel = g_dataSetLabels[dataSetName];
+
                 // make create graph modal invisible
                 g_createGraphModal.style.display = "none";
 
@@ -1116,25 +1321,23 @@
                 var e = document.getElementById("graphScale");
                 var graphScale = e.options[e.selectedIndex].value;
                 var graphRange = document.getElementById("graphRange").value;
-                console.log(" graph range: " + graphRange + " graph scale: " + graphScale);
 
-                graphArgs = " range=" + graphRange + graphScale;
+                graphArgs = " label=" + dataSetName + " ylabel=" + dataSetLabel + " range=" + graphRange + graphScale;
 
                 // read the colors for the colorChosers of the vios in g_rrdentries
 
-                for (var key in g_allElements) {
-                    if (g_rrdentries.has(key)) {
-                        var vio = g_allElements[key];
-                        var chosenColor = vio.colorChoser.value;
-                        if (chosenColor != "none") {
-                            console.log(" graph data : " + key + chosenColor);
-                            graphArgs = graphArgs + " " + key;
-                            if (chosenColor != "any") {
-                                graphArgs = graphArgs + "=" + chosenColor;
-                            }
+                for (var i = 0; i < g_sortedRRDEntries.length; i = i + 1) {
+                    key = g_sortedRRDEntries[i];
+                    var vio = g_allElements[key];
+                    var chosenColor = vio.colorChoser.value;
+                    if (chosenColor != "none") {
+                        graphArgs = graphArgs + " " + key;
+                        if (chosenColor != "any") {
+                            graphArgs = graphArgs + "=" + chosenColor;
                         }
                     }
-                };
+                }
+                ;
 
 // ask the server to generate a graph and return the file name of the graph:1
                 var cmd = new Object();
@@ -1191,5 +1394,3 @@
 
     </body>
 </html>
-
-

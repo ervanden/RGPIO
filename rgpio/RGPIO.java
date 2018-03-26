@@ -148,9 +148,43 @@ class UpdateRRDThread extends Thread {
                         VInput vinput = (VInput) vio;
                         Integer value = vinput.avg();
                         if (value != null) {
-//                            System.out.println("updating RRD with " + vinput.name + " = " + vinput.avg() + " (time=" + time + ")");
+                            System.out.println("updating RRD with " + vinput.name + " = " + vinput.avg() + " (time=" + time + ")");
                             RGPIO.RRDSample.setValue(vinput.name, vinput.avg());
                             updates++;
+                        }
+                    }
+                    if (vio.type == IOType.analogOutput) {
+                        VOutput voutput = (VOutput) vio;
+                        try {
+                            System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
+                            Integer value = Integer.parseInt(voutput.value);
+                            RGPIO.RRDSample.setValue(voutput.name, value);
+                            updates++;
+
+                        } catch (NumberFormatException e) {
+                            System.out.println(" value is not an integer: " + voutput.value + " Ignored.");
+                        }
+                    }
+                    if (vio.type == IOType.digitalInput) {
+                        VInput vinput = (VInput) vio;
+                        Integer value = vinput.nrHigh();
+                        if (value != null) {
+                            System.out.println("updating RRD with " + vinput.name + " = " + vinput.nrHigh() + " (time=" + time + ")");
+                            RGPIO.RRDSample.setValue(vinput.name, vinput.nrHigh());
+                            updates++;
+                        }
+                    }
+                    if (vio.type == IOType.digitalOutput) {
+                        VOutput voutput = (VOutput) vio;
+                        System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
+                        if (voutput.value.equals("High")) {
+                            RGPIO.RRDSample.setValue(voutput.name, 1);
+                            updates++;
+                        } else if (voutput.value.equals("Low")) {
+                            RGPIO.RRDSample.setValue(voutput.name, 0);
+                            updates++;
+                        } else {
+                            System.out.println(" Invalid value of digital output : " + voutput.value + " Ignored.");
                         }
                     }
                 }
@@ -196,6 +230,8 @@ public class RGPIO {
 
     public static void initialize() {
 
+        String application = "RGPIO";   // maybe later make multi instance possible
+
         VDeviceMap = new VDeviceMap();
         PDeviceMap = new PDeviceMap();
         VDigitalInputMap = new VInputMap(IOType.digitalInput);
@@ -205,17 +241,12 @@ public class RGPIO {
         VAnalogOutputMap = new VOutputMap(IOType.analogOutput);
         VStringOutputMap = new VOutputMap(IOType.stringOutput);
 
-        if (System.getProperty("file.separator").equals("/")) {
-            RGPIODirectory = "/home/pi/RGPIO/";
-            RRDDirectory = RGPIODirectory + "dataStore/";
-            readConfigurationFile(RGPIODirectory + "RGPIO.json");
-            readDevicesFile(RGPIODirectory + "devices.json");
-        } else {  // for windows, .txt is easier
-            RGPIODirectory = "C:\\Users\\erikv\\Documents\\RGPIO\\";
-            RRDDirectory = "C:\\Users\\erikv\\Documents\\RRD\\";
-            readConfigurationFile(RGPIODirectory + "RGPIO.txt");
-            readDevicesFile(RGPIODirectory + "devices.txt");
-        }
+//        if (System.getProperty("file.separator").equals("/")) {
+        RGPIODirectory = "/home/pi/" + application + "/";
+        RRDDirectory = RGPIODirectory + "dataStore/";
+        readConfigurationFile(RGPIODirectory + "RGPIO.json");
+        readDevicesFile(RGPIODirectory + "devices.json");
+//        } 
 
         // Start listening to messages from devices
         new DeviceMonitorThread().start();
@@ -225,9 +256,11 @@ public class RGPIO {
         deviceProbeThread.start();
 
         ClientHandler clientHandler = new ClientHandler();
+
         webSocketServer = new WSServer(webSocketPort);
         webSocketServer.addListener(clientHandler);
         webSocketServer.start();
+
     }
 
     public static void sendMail(String to, String subject, String content) {
@@ -245,20 +278,34 @@ public class RGPIO {
 
         // create the list of data source names for the graph.
         // For now it is only the analog inputs
-        for (VInput vinput : VAnalogInputMap.values()) {
-            System.out.println("RDD entry: " + vinput.name);
-            RRDVIO.add(vinput);
-            vinputNames.add(vinput.name);
+        for (VInput v : VAnalogInputMap.values()) {
+            System.out.println("RDD entry: " + v.name);
+            RRDVIO.add(v);
+            vinputNames.add(v.name);
         }
-
+        for (VOutput v : VAnalogOutputMap.values()) {
+            System.out.println("RDD entry: " + v.name);
+            RRDVIO.add(v);
+            vinputNames.add(v.name);
+        }
+        for (VInput v : VDigitalInputMap.values()) {
+            System.out.println("RDD entry: " + v.name);
+            RRDVIO.add(v);
+            vinputNames.add(v.name);
+        }
+        for (VOutput v : VDigitalOutputMap.values()) {
+            System.out.println("RDD entry: " + v.name);
+            RRDVIO.add(v);
+            vinputNames.add(v.name);
+        }
         // create a RRD database with an entry every Step seconds
         String RRDPath = RGPIO.RRDDirectory + "datastore.rrd";
-        RRDDB=RRDGenerator.createRRD(RRDPath, vinputNames, RRDStep);
-        if (RRDDB==null){
+        RRDDB = RRDGenerator.createRRD(RRDPath, vinputNames, RRDStep);
+        if (RRDDB == null) {
             System.out.println("No RRDB. Exiting...");
             System.exit(0);
         }
-        
+
         try {
             RRDSample = RRDDB.createSample();
         } catch (IOException ioe) {
