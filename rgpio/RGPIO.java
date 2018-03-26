@@ -148,7 +148,7 @@ class UpdateRRDThread extends Thread {
                         VInput vinput = (VInput) vio;
                         Integer value = vinput.avg();
                         if (value != null) {
-                            System.out.println("updating RRD with " + vinput.name + " = " + vinput.avg() + " (time=" + time + ")");
+                            System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
                             RGPIO.RRDSample.setValue(vinput.name, vinput.avg());
                             updates++;
                         }
@@ -157,9 +157,11 @@ class UpdateRRDThread extends Thread {
                         VOutput voutput = (VOutput) vio;
                         try {
                             System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
-                            Integer value = Integer.parseInt(voutput.value);
-                            RGPIO.RRDSample.setValue(voutput.name, value);
-                            updates++;
+                            if (voutput.value != null) {
+                                Integer value = Integer.parseInt(voutput.value);
+                                RGPIO.RRDSample.setValue(voutput.name, value);
+                                updates++;
+                            }
 
                         } catch (NumberFormatException e) {
                             System.out.println(" value is not an integer: " + voutput.value + " Ignored.");
@@ -168,8 +170,8 @@ class UpdateRRDThread extends Thread {
                     if (vio.type == IOType.digitalInput) {
                         VInput vinput = (VInput) vio;
                         Integer value = vinput.nrHigh();
+                        System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
                         if (value != null) {
-                            System.out.println("updating RRD with " + vinput.name + " = " + vinput.nrHigh() + " (time=" + time + ")");
                             RGPIO.RRDSample.setValue(vinput.name, vinput.nrHigh());
                             updates++;
                         }
@@ -177,14 +179,16 @@ class UpdateRRDThread extends Thread {
                     if (vio.type == IOType.digitalOutput) {
                         VOutput voutput = (VOutput) vio;
                         System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
-                        if (voutput.value.equals("High")) {
-                            RGPIO.RRDSample.setValue(voutput.name, 1);
-                            updates++;
-                        } else if (voutput.value.equals("Low")) {
-                            RGPIO.RRDSample.setValue(voutput.name, 0);
-                            updates++;
-                        } else {
-                            System.out.println(" Invalid value of digital output : " + voutput.value + " Ignored.");
+                        if (voutput.value != null) {
+                            if (voutput.value.equals("High")) {
+                                RGPIO.RRDSample.setValue(voutput.name, 1);
+                                updates++;
+                            } else if (voutput.value.equals("Low")) {
+                                RGPIO.RRDSample.setValue(voutput.name, 0);
+                                updates++;
+                            } else {
+                                System.out.println(" Invalid value of digital output : " + voutput.value + " Ignored.");
+                            }
                         }
                     }
                 }
