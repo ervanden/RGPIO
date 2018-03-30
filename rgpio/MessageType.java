@@ -18,9 +18,11 @@ public enum MessageType {
     DeviceNotResponding,
     DigitalEvent,
     ReceivedMessage,
+    ReceivedReply,
     SendMessage,
     InvalidMessage,
-    DeviceGroupMinimum
+    DeviceGroupMinimum,
+    UpdateRRDB
 
 }
 

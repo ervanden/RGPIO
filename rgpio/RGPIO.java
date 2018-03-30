@@ -8,7 +8,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import mail.MailGenerator;
 import org.rrd4j.core.RrdDb;
@@ -137,6 +136,10 @@ class UpdateRRDThread extends Thread {
     }
 
     public void run() {
+
+        // message event to be re-used for every update
+        MessageEvent e = new MessageEvent(MessageType.UpdateRRDB);
+
         while (true) {
             try {
                 Thread.sleep(step * 1000);
@@ -144,11 +147,14 @@ class UpdateRRDThread extends Thread {
                 RGPIO.RRDSample.setTime(time);
                 int updates = 0;
                 for (VIO vio : RGPIO.RRDVIO) {
+                    e.vdevice = vio.name;
                     if (vio.type == IOType.analogInput) {
                         VInput vinput = (VInput) vio;
                         Integer value = vinput.avg();
                         if (value != null) {
-                            System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
+                            e.description = "value=" + value;
+                            RGPIO.message(e);
+                            //System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
                             RGPIO.RRDSample.setValue(vinput.name, vinput.avg());
                             updates++;
                         }
@@ -156,38 +162,46 @@ class UpdateRRDThread extends Thread {
                     if (vio.type == IOType.analogOutput) {
                         VOutput voutput = (VOutput) vio;
                         try {
-                            System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
+                            //System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
                             if (voutput.value != null) {
                                 Integer value = Integer.parseInt(voutput.value);
+                                e.description = "value=" + value;
+                                RGPIO.message(e);
                                 RGPIO.RRDSample.setValue(voutput.name, value);
                                 updates++;
                             }
 
-                        } catch (NumberFormatException e) {
-                            System.out.println(" value is not an integer: " + voutput.value + " Ignored.");
+                        } catch (NumberFormatException nfe) {
+                            System.out.println("UpdateRDD: value is not an integer: " + voutput.value + " Ignored.");
                         }
                     }
                     if (vio.type == IOType.digitalInput) {
                         VInput vinput = (VInput) vio;
                         Integer value = vinput.nrHigh();
-                        System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
+                        //System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
                         if (value != null) {
+                            e.description = "value=" + value;
+                            RGPIO.message(e);
                             RGPIO.RRDSample.setValue(vinput.name, vinput.nrHigh());
                             updates++;
                         }
                     }
                     if (vio.type == IOType.digitalOutput) {
                         VOutput voutput = (VOutput) vio;
-                        System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
+                        //System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
                         if (voutput.value != null) {
                             if (voutput.value.equals("High")) {
+                                e.description = "value=" + "1";
+                                RGPIO.message(e);
                                 RGPIO.RRDSample.setValue(voutput.name, 1);
                                 updates++;
                             } else if (voutput.value.equals("Low")) {
+                                e.description = "value=" + "0";
+                                RGPIO.message(e);
                                 RGPIO.RRDSample.setValue(voutput.name, 0);
                                 updates++;
                             } else {
-                                System.out.println(" Invalid value of digital output : " + voutput.value + " Ignored.");
+                                System.out.println("UpdateRDD: Invalid value of digital output : " + voutput.value + " Ignored.");
                             }
                         }
                     }

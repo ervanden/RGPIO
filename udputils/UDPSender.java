@@ -16,11 +16,11 @@ public class UDPSender {
         // returns the reply if it arrives within the timeout, otherwise null
         // timeout of 0 means we skip waiting for the reply
         try {
-            //           byte[] sendData = new byte[1024];
+            
             byte[] receiveData = new byte[1024];
 
             MessageEvent e = new MessageEvent(MessageType.SendMessage);
-            e.description = "|" + message + "|";
+            e.description = message;
             e.ipAddress = ipAddress;
             if (device != null) {
                 e.HWid = device.HWid;
@@ -34,7 +34,6 @@ public class UDPSender {
 
                 byte[] sendData = message.getBytes();
                 DatagramPacket sendPacket = new DatagramPacket(sendData, message.length(), IPAddress, port);
-//                sendPacket.setLength(message.length());
                 clientSocket.send(sendPacket);
 
                 if (timeout > 0) {
@@ -44,8 +43,8 @@ public class UDPSender {
                         String reply = new String(receivePacket.getData());
                         reply = reply.substring(0, receivePacket.getLength());
 
-                        MessageEvent e1 = new MessageEvent(MessageType.SendMessage);
-                        e1.description = "REPLY(" + r + ") : " + reply;
+                        MessageEvent e1 = new MessageEvent(MessageType.ReceivedReply);
+                        e1.description = reply +" (retry=" + r + ")";
                         e1.ipAddress = ipAddress;
                         if (device != null) {
                             e1.HWid = device.HWid;
@@ -55,7 +54,6 @@ public class UDPSender {
                         clientSocket.close();
                         return reply;
                     } catch (SocketTimeoutException se) {
-                        // System.out.println("socket timeout");
                     }
                 } else {  // sender not interested in reply
                     clientSocket.close();
