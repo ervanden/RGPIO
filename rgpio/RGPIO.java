@@ -249,8 +249,8 @@ public class RGPIO {
         new DeviceMonitorThread().start();
 
         // Start broadcasting Report requests
-        DeviceProbeThread deviceProbeThread = new DeviceProbeThread(reportInterval);
-        deviceProbeThread.start();
+//       DeviceProbeThread deviceProbeThread = new DeviceProbeThread(reportInterval);
+//       deviceProbeThread.start();
 
         ClientHandler clientHandler = new ClientHandler();
 
