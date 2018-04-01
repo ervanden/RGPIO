@@ -1,11 +1,13 @@
 package rgpio;
 
 import rgpioutils.DeviceMessage;
+import udputils.UDPSender;
 import utils.JSON2Object;
+import utils.JSONString;
 
 public class DeviceHandler {
 
-    public static boolean handleDeviceMessage(String deviceIPAddress, String message) {
+    public static String handleDeviceMessage(String deviceIPAddress, String message) {
 
         MessageEvent e = new MessageEvent(MessageType.ReceivedMessage);
         e.description = "|" + message + "|";
@@ -45,6 +47,16 @@ public class DeviceHandler {
 
             pdevice.setActive();
 
+            JSONString json = new JSONString();
+            json.addProperty("destination", pdevice.HWid);
+            json.addProperty("origin","RGPIO");
+            json.addProperty("command", "ACKREPORT");
+            String ackReport = json.asString();
+
+            UDPSender.send(ackReport, pdevice.ipAddress, null, RGPIO.devicePort, 0, 1);
+            //timeout==0  dont wait for a reply
+            //retries==1  send only once, REPORTs are repeated
+
         } else if (msg.command.equals("EVENT")) {
             String HWid = msg.hwid;
             String pin = msg.pin;
@@ -57,9 +69,9 @@ public class DeviceHandler {
             e.description = "invalid command from device <" + message + ">";
             e.ipAddress = deviceIPAddress;
             RGPIO.message(e);
-            return false;
+
         }
-        return true;
+        return msg.command;
 
     }
 

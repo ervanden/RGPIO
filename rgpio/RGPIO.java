@@ -31,36 +31,15 @@ class DeviceMonitorThread extends Thread {
             DatagramSocket serverSocket = new DatagramSocket(RGPIO.serverPort);
             serverSocket.setBroadcast(true);
             byte[] receiveData = new byte[1024];
-            byte[] sendData;
+
             while (true) {
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 serverSocket.receive(receivePacket);
                 InetAddress deviceIPAddress = receivePacket.getAddress();
-                //  int devicePort = receivePacket.getPort();
                 String message = new String(receivePacket.getData());
                 message = message.substring(0, receivePacket.getLength());
 
-                boolean validCommand = DeviceHandler.handleDeviceMessage(deviceIPAddress.toString().substring(1), message);
-
-                if (validCommand) {
-
-                    // After receiving a valid command from the device, RGPIO sends OK
-                    // 50 msec delay is required before sending anything to ESP.
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException ie) {
-                    };
-                    sendData = ("OK").getBytes();
-                    DatagramPacket sendPacket
-                            = new DatagramPacket(sendData, sendData.length, deviceIPAddress, RGPIO.devicePort);
-                    serverSocket.send(sendPacket);
-
-                    MessageEvent e = new MessageEvent(MessageType.SendMessage);
-                    e.description = "OK to |" + message + "|";
-                    e.ipAddress = deviceIPAddress.toString().substring(1);
-                    RGPIO.message(e);
-                }
-
+                DeviceHandler.handleDeviceMessage(deviceIPAddress.toString().substring(1), message);
             }
         } catch (SocketException so) {
             so.printStackTrace();
