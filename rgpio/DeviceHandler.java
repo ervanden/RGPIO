@@ -1,7 +1,9 @@
 package rgpio;
 
 import rgpioutils.DeviceMessage;
+import udputils.UDPSender;
 import utils.JSON2Object;
+import utils.JSONString;
 
 public class DeviceHandler {
 
@@ -45,6 +47,16 @@ public class DeviceHandler {
 
             pdevice.setActive();
 
+            JSONString json = new JSONString();
+            json.addProperty("to", pdevice.HWid);
+            json.addProperty("from","RGPIO");
+            json.addProperty("command", "ACKREPORT");
+            String ackReport = json.asString();
+
+            UDPSender.send(ackReport, pdevice.ipAddress, null, RGPIO.devicePort, 0, 1);
+            //timeout==0  dont wait for a reply
+            //retries==1  send only once, REPORTs are repeated
+            
         } else if (msg.command.equals("EVENT")) {
             String HWid = msg.hwid;
             String pin = msg.pin;
