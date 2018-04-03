@@ -6,7 +6,7 @@ public class PInput {
 
     public String name;
     public String value;
-
+    public long event_received; // see SendGetCommandThread()
     public PDevice device;
     public IOType type;
     public VInput vinput;
@@ -43,17 +43,6 @@ public class PInput {
     }
 
     public void setDebounced(String value) {
-
-        if (type == IOType.digitalInput) {
-            if (value.equals("High")) {
-            }
-            if (value.equals("Low")) {
-            }
-        } else if (type == IOType.analogInput) {
-
-        } else if (type == IOType.stringInput) {
-
-        }
         setValue(value);
     }
 

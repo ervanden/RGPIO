@@ -89,16 +89,18 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
 
         PInput pinput = null;
         pinput = d.inputs.get(pinLabel);
-
-        if (pinput == null) {
+        POutput poutput = null;
+        poutput = d.outputs.get(pinLabel);
+        
+        if ((pinput == null)&&(poutput == null)) {
             MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
-            e.description = "received event from unknown input pin";
+            e.description = "received event from unknown pin";
             e.HWid = d.HWid;
             e.pinLabel = pinLabel;
             RGPIO.message(e);
             return;
         }
-
+if (pinput!=null) { // event for an input pin
         if (pinput.vinput == null) {
             MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
             e.description = "received event from unassigned device pin of type " + pinput.type.name();
@@ -141,6 +143,21 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
         }
 
         pinput.setDebounced(value);
+}
+
+if (poutput!=null) { // event for an output pin ( device sends EVENT when receiving SET )
+        if (poutput.voutput == null) {
+            MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
+            e.description = "received event from unassigned device pin of type " + poutput.type.name();
+            e.HWid = d.HWid;
+            e.pinLabel = pinLabel;
+            RGPIO.message(e);
+        }
+
+  
+        poutput.event_received=System.currentTimeMillis();
+}
+
 
     }
 

@@ -48,9 +48,9 @@ public class DeviceHandler {
             pdevice.setActive();
 
             JSONString json = new JSONString();
-            json.addProperty("to", pdevice.HWid);
-            json.addProperty("from","RGPIO");
             json.addProperty("command", "ACKREPORT");
+            json.addProperty("from","RGPIO");
+            json.addProperty("to", pdevice.HWid);
             String ackReport = json.asString();
 
             UDPSender.send(ackReport, pdevice.ipAddress, null, RGPIO.devicePort);
