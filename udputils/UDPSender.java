@@ -6,18 +6,13 @@ import rgpio.PDevice;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketTimeoutException;
 import rgpio.*;
 
 public class UDPSender {
 
-    public static String send(String message, String ipAddress, PDevice device, int port, int timeout, int retries) {
+    public static String send(String message, String ipAddress, PDevice device, int port) {
 
-        // returns the reply if it arrives within the timeout, otherwise null
-        // timeout of 0 means we skip waiting for the reply
         try {
-            
-            byte[] receiveData = new byte[1024];
 
             MessageEvent e = new MessageEvent(MessageType.SendMessage);
             e.description = message;
@@ -27,40 +22,13 @@ public class UDPSender {
             }
             RGPIO.message(e);
 
-            for (int r = 1; r <= retries; r++) {
-                DatagramSocket clientSocket = new DatagramSocket();
-                clientSocket.setSoTimeout(timeout);
-                InetAddress IPAddress = InetAddress.getByName(ipAddress);
+            DatagramSocket clientSocket = new DatagramSocket();
+            InetAddress IPAddress = InetAddress.getByName(ipAddress);
+            byte[] sendData = message.getBytes();
+            DatagramPacket sendPacket = new DatagramPacket(sendData, message.length(), IPAddress, port);
+            clientSocket.send(sendPacket);
+            clientSocket.close();
 
-                byte[] sendData = message.getBytes();
-                DatagramPacket sendPacket = new DatagramPacket(sendData, message.length(), IPAddress, port);
-                clientSocket.send(sendPacket);
-
-                if (timeout > 0) {
-                    try {
-                        DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-                        clientSocket.receive(receivePacket);
-                        String reply = new String(receivePacket.getData());
-                        reply = reply.substring(0, receivePacket.getLength());
-
-                        MessageEvent e1 = new MessageEvent(MessageType.ReceivedReply);
-                        e1.description = reply +" (retry=" + r + ")";
-                        e1.ipAddress = ipAddress;
-                        if (device != null) {
-                            e1.HWid = device.HWid;
-                        }
-                        RGPIO.message(e1);
-
-                        clientSocket.close();
-                        return reply;
-                    } catch (SocketTimeoutException se) {
-                    }
-                } else {  // sender not interested in reply
-                    clientSocket.close();
-                    return null;
-                }
-            }
-            //  socket timed out 3x
         } catch (Exception e) {
             e.printStackTrace();
             return null;

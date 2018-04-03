@@ -53,9 +53,7 @@ public class DeviceHandler {
             json.addProperty("command", "ACKREPORT");
             String ackReport = json.asString();
 
-            UDPSender.send(ackReport, pdevice.ipAddress, null, RGPIO.devicePort, 0, 1);
-            //timeout==0  dont wait for a reply
-            //retries==1  send only once, REPORTs are repeated
+            UDPSender.send(ackReport, pdevice.ipAddress, null, RGPIO.devicePort);
             
         } else if (msg.command.equals("EVENT")) {
             String HWid = msg.hwid;

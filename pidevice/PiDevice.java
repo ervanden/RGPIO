@@ -222,9 +222,9 @@ public class PiDevice {
         report=report+"}";
         
         if (serverIPAddress != null) {
-            UDPSender.send(report, serverIPAddress, null, PiDevice.serverPort, 0, 1);
+            UDPSender.send(report, serverIPAddress, null, PiDevice.serverPort);
         } else {
-            UDPSender.send(report, RGPIO.broadcastAddress, null, PiDevice.serverPort, 0, 1);
+            UDPSender.send(report, RGPIO.broadcastAddress, null, PiDevice.serverPort);
         }
     }
 
@@ -253,7 +253,7 @@ public class PiDevice {
                         + "/Value:" + value;
 
                 if (serverIPAddress != null) {
-                    UDPSender.send(event, serverIPAddress, null, PiDevice.serverPort, 0, 1);
+                    UDPSender.send(event, serverIPAddress, null, PiDevice.serverPort);
                 } else {
                     System.out.println("sendEvent() : server IP address is not known");
                 }

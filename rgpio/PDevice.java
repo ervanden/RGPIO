@@ -117,7 +117,7 @@ public class PDevice {
         }
     }
 
-    public String sendToDevice(String message) {
+    public void sendToDevice(String message) {
 
         // delay because ESP misses packet if it receives SET  too fast after sending EVENT
         // (UDP is stopped and started on ESP after sending = blackout of a few msec)
@@ -126,21 +126,21 @@ public class PDevice {
         } catch (InterruptedException ie) {
         };
 
-        String reply = null;
         if (ipAddress == null) {
             MessageEvent e = new MessageEvent(MessageType.SendWarning);
             e.description = "cannot send message to unreported device";
             e.HWid = HWid;
             RGPIO.message(e);
         } else if (status == PDeviceStatus.ACTIVE) {
-            reply = UDPSender.send(message, ipAddress, this, RGPIO.devicePort, 2000, 3);
+            UDPSender.send(message, ipAddress, this, RGPIO.devicePort);
+/*
             if (reply == null) {
                 setNotResponding("device did not reply to <" + message + ">");
             } else {
                 setActive();
             }
+*/
         }
-        return reply;
     }
 
     public void addPOutput(

@@ -19,7 +19,8 @@ public class SendSetCommandThread extends Thread {
     public void run() {
         
         JSONString json = new JSONString();
-        json.addProperty("destination", device.HWid);
+        json.addProperty("to", device.HWid);
+                json.addProperty("from", "RGPIO");
         json.addProperty("command", "SET");
         json.addProperty("pin", p.name); 
         json.addProperty("value", p.get_value());

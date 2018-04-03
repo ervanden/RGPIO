@@ -18,11 +18,12 @@ public class SendGetCommandThread extends Thread {
     public void run() {
         
         JSONString json = new JSONString();
-        json.addProperty("destination", device.HWid);
+        json.addProperty("to", device.HWid);
+                json.addProperty("from", "RGPIO");
         json.addProperty("command", "GET");
         json.addProperty("pin", ip.name);       
  
-        ip.setValue(device.sendToDevice(json.asString()));
+        device.sendToDevice(json.asString());
     }
 }
 

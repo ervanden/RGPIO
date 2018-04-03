@@ -41,7 +41,7 @@ class DeviceMonitorThread extends Thread {
                 message = message.substring(0, receivePacket.getLength());
 
                 boolean validCommand = DeviceHandler.handleDeviceMessage(deviceIPAddress.toString().substring(1), message);
-
+/* send an OK: no longer needed 
                 if (validCommand) {
 
                     // After receiving a valid command from the device, RGPIO sends OK
@@ -60,7 +60,7 @@ class DeviceMonitorThread extends Thread {
                     e.ipAddress = deviceIPAddress.toString().substring(1);
                     RGPIO.message(e);
                 }
-
+*/
             }
         } catch (SocketException so) {
             so.printStackTrace();
@@ -89,9 +89,7 @@ class DeviceProbeThread extends Thread {
     public void run() {
         while (true) {
             try {
-                UDPSender.send(broadcastReport, RGPIO.broadcastAddress, null, RGPIO.devicePort, 0, 1);
-                //timeout==0  no use to wait for a reply here, it is sent to the listener
-                //retries==1  send only once now, the broadcast is repeated anyway
+                UDPSender.send(broadcastReport, RGPIO.broadcastAddress, null, RGPIO.devicePort);
                 Thread.sleep(reportInterval * 1000);
                 // Check if a device has not responded within the last reportInterval.
                 long now = new TimeStamp().getTimeInMillis();
