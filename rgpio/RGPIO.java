@@ -268,11 +268,11 @@ public class RGPIO {
 
         // Start listening to messages from devices
         new DeviceMonitorThread().start();
-
+/*
         // Start broadcasting Report requests
         DeviceProbeThread deviceProbeThread = new DeviceProbeThread(reportInterval);
         deviceProbeThread.start();
-
+*/
         ClientHandler clientHandler = new ClientHandler();
 
         webSocketServer = new WSServer(webSocketPort);
