@@ -6,14 +6,12 @@ import java.util.List;
 
 
 public class DeviceMessage {
-    
-//  Report/HWid:rgpio/Model:RASPBERRY/Uptime:335/Dip:button/Aip:distance/Aip:temp/Dop:heating/Dop:boiler/Dop:pump
-//  Event/HWid:rgpio/Model:RASPBERRY/Dip:button/Value:High
  
 // common fields
     
+public String from;
+public String to;
 public String command;
-public String hwid;
 
 // report fields
 

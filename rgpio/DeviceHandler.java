@@ -18,7 +18,7 @@ public class DeviceHandler {
         msg = (DeviceMessage) JSON2Object.jsonStringToObject(message, DeviceMessage.class);
 
         if (msg.command.equals("REPORT")) {
-            String HWid = msg.hwid;
+            String HWid = msg.from;
             String model = msg.model;
             Integer upTime = Integer.parseInt(msg.uptime);
 
@@ -56,7 +56,7 @@ public class DeviceHandler {
             UDPSender.send(ackReport, pdevice.ipAddress, null, RGPIO.devicePort);
             
         } else if (msg.command.equals("EVENT")) {
-            String HWid = msg.hwid;
+            String HWid = msg.from;
             String pin = msg.pin;
             String value = msg.value;
 
