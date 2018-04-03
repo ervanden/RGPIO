@@ -40,7 +40,7 @@ public class VOutput extends VIO {
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (POutput p : device.outputs.values()) {
                 if (p.voutput == this) {
-                    System.out.println("  device " + device.HWid + " pin " + p.name + " " + device.get_status().toString());
+//                    System.out.println("  device " + device.HWid + " pin " + p.name + " " + device.get_status().toString());
                     if (device.get_status() == PDeviceStatus.ACTIVE) {
                         m++;
                     }
