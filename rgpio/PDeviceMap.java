@@ -49,8 +49,8 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
         if (pdevice != null) {
             // REPORT received for an existing PDevice.
             // If upTime is less than the interval between two REPORT requests, the device has rebooted
-            if (upTime<RGPIO.reportInterval) {
-                System.out.println("***Device uptime < "+RGPIO.reportInterval+ " : updating all pins");
+            if (upTime < RGPIO.reportInterval) {
+                System.out.println("***Device uptime < " + RGPIO.reportInterval + " : updating all pins");
                 pdevice.updateAllPins();
             }
         } else {
@@ -91,8 +91,15 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
         pinput = d.inputs.get(pinLabel);
         POutput poutput = null;
         poutput = d.outputs.get(pinLabel);
-        
-        if ((pinput == null)&&(poutput == null)) {
+
+        if (pinput != null) {
+            pinput.event_received = System.currentTimeMillis();
+        }
+        if (poutput != null) {
+            poutput.event_received = System.currentTimeMillis();
+        }
+
+        if ((pinput == null) && (poutput == null)) {
             MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
             e.description = "received event from unknown pin";
             e.HWid = d.HWid;
@@ -100,64 +107,63 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
             RGPIO.message(e);
             return;
         }
-if (pinput!=null) { // event for an input pin
-        if (pinput.vinput == null) {
-            MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
-            e.description = "received event from unassigned device pin of type " + pinput.type.name();
-            e.HWid = d.HWid;
-            e.pinLabel = pinLabel;
-            RGPIO.message(e);
-        }
 
-        MessageEvent e = new MessageEvent(MessageType.Info);
-        e.description = "Pinput value change";
-        e.HWid = d.HWid;
-        e.pinLabel = pinLabel;
-        e.value = value;
-        RGPIO.message(e);
+        if (pinput != null) { // event for an input pin
 
-        if (pinput.type == IOType.digitalInput) {
-            if (!(value.equals("High")) && !(value.equals("Low"))) {
-                e.type = MessageType.InvalidPinValue;
-                e.description = "received event with invalid digital input value";
+            if (pinput.vinput == null) {
+                MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
+                e.description = "received event from unassigned device pin of type " + pinput.type.name();
                 e.HWid = d.HWid;
                 e.pinLabel = pinLabel;
-                e.value = value;
                 RGPIO.message(e);
-                return;
             }
-        } else if (pinput.type == IOType.analogInput) {
-            try {
-                Float.parseFloat(value);
-            } catch (NumberFormatException nfe) {
-                e.type = MessageType.InvalidPinValue;
-                e.description = "received event with invalid analog input value";
-                e.HWid = d.HWid;
-                e.pinLabel = pinLabel;
-                e.value = value;
-                RGPIO.message(e);
-                return;
-            }
-        } else if (pinput.type == IOType.stringInput) {
 
-        }
-
-        pinput.setDebounced(value);
-}
-
-if (poutput!=null) { // event for an output pin ( device sends EVENT when receiving SET )
-        if (poutput.voutput == null) {
-            MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
-            e.description = "received event from unassigned device pin of type " + poutput.type.name();
+            MessageEvent e = new MessageEvent(MessageType.Info);
+            e.description = "Pinput value change";
             e.HWid = d.HWid;
             e.pinLabel = pinLabel;
+            e.value = value;
             RGPIO.message(e);
+
+            if (pinput.type == IOType.digitalInput) {
+                if (!(value.equals("High")) && !(value.equals("Low"))) {
+                    e.type = MessageType.InvalidPinValue;
+                    e.description = "received event with invalid digital input value";
+                    e.HWid = d.HWid;
+                    e.pinLabel = pinLabel;
+                    e.value = value;
+                    RGPIO.message(e);
+                    return;
+                }
+            } else if (pinput.type == IOType.analogInput) {
+                try {
+                    Float.parseFloat(value);
+                } catch (NumberFormatException nfe) {
+                    e.type = MessageType.InvalidPinValue;
+                    e.description = "received event with invalid analog input value";
+                    e.HWid = d.HWid;
+                    e.pinLabel = pinLabel;
+                    e.value = value;
+                    RGPIO.message(e);
+                    return;
+                }
+            } else if (pinput.type == IOType.stringInput) {
+
+            }
+
+            pinput.setDebounced(value);
         }
 
-  
-        poutput.event_received=System.currentTimeMillis();
-}
-
+        if (poutput != null) { // event for an output pin ( device sends EVENT when receiving SET )
+            if (poutput.voutput == null) {
+                MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
+                e.description = "received event from unassigned device pin of type " + poutput.type.name();
+                e.HWid = d.HWid;
+                e.pinLabel = pinLabel;
+                RGPIO.message(e);
+            }
+   // nothing useful to do , only the event_received time is important
+        }
 
     }
 
