@@ -4,6 +4,7 @@ import utils.JSONString;
 import java.util.ArrayList;
 import java.util.List;
 import udputils.SendGetCommandThread;
+import udputils.SendSetCommandThread;
 
 public class VInput extends VIO {
 
@@ -51,6 +52,18 @@ public class VInput extends VIO {
     }
 
     public void get() {
+        for (PDevice device : RGPIO.PDeviceMap.values()) {
+            for (PInput ip : device.inputs.values()) {
+                if (ip.vinput == this) {
+                    new SendGetCommandThread(device, ip).start();
+                }
+            }
+        }
+    }
+        
+        
+        
+    public void getSync() {
         // send a GET command to the devices
         // this will update the value of the input pin of each device
         // Start all the GET commands in parallel and wait until all threads finished
@@ -85,6 +98,7 @@ public class VInput extends VIO {
             }
         }
         RGPIO.webSocketServer.sendToAll(toJSON());
+        
     }
 
     private List<VInputListener> listeners = new ArrayList<>();

@@ -21,23 +21,23 @@ public class VOutput extends VIO {
         return json.asString();
     }
 
-    public void setAsync(String newValue) {
+    public void set(String newValue) {
 
         value = newValue;
-        RGPIO.webSocketServer.sendToAll(toJSON());
+        // web update not needed, will receive an EVENT
+ //       RGPIO.webSocketServer.sendToAll(toJSON());
 
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (POutput p : device.outputs.values()) {
                 if (p.voutput == this) {
                     p.set_value(newValue);
                     new SendSetCommandThread(device, p).start();
-
                 }
             }
         }
     }
 
-    public void set(String newValue) {
+    public void setSync(String newValue) {
 
         value = newValue;
 
