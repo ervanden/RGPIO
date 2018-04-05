@@ -1,7 +1,6 @@
 package udputils;
 
-import rgpio.PInput;
-import rgpio.PDevice;
+import rgpio.*;
 import utils.JSONString;
 
 public class SendGetCommandThread extends Thread {
@@ -22,6 +21,7 @@ public class SendGetCommandThread extends Thread {
         while ((retry <= 3) && !(p.event_received > commandSent)) {
             JSONString json = new JSONString();
             json.addProperty("command", "GET");
+                                   json.addProperty("id", RGPIO.msgId());
             json.addProperty("from", "RGPIO");
             json.addProperty("to", device.HWid);
             json.addProperty("retry", retry.toString());

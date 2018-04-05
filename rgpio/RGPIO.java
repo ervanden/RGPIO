@@ -1,7 +1,5 @@
 package rgpio;
 
-import utils.TimeStamp;
-import udputils.UDPSender;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -18,7 +16,6 @@ import rgpioutils.DeviceFileEntry;
 import rrd.RRDGenerator;
 import tcputils.WSServer;
 import utils.JSON2Object;
-import utils.JSONString;
 
 class DeviceMonitorThread extends Thread {
 
@@ -279,6 +276,12 @@ public class RGPIO {
         webSocketServer.addListener(clientHandler);
         webSocketServer.start();
 
+    }
+    
+    static Integer msgId=0;
+    public static String msgId(){
+        msgId++;
+        return msgId.toString();
     }
 
     public static void sendMail(String to, String subject, String content) {

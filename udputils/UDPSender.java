@@ -9,6 +9,8 @@ import java.net.InetAddress;
 import rgpio.*;
 
 public class UDPSender {
+    
+    int msgId = 1;
 
     public static String send(String message, String ipAddress, PDevice device, int port) {
 

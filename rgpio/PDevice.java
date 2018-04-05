@@ -14,7 +14,7 @@ public class PDevice {
     public String HWid = null;        // unique hardware identifier
     public String ipAddress = null;
     public int uptime;   // last reported uptime
-        public long report_received=0; // time stamp of last report
+    public long report_received = 0; // time stamp of last report
 
     public HashMap<String, PInput> inputs = new HashMap<>();
     public HashMap<String, POutput> outputs = new HashMap<>();
@@ -67,38 +67,38 @@ public class PDevice {
             RGPIO.webSocketServer.sendToAll(op.toJSON());
         }
     }
-/*
-    public void updatePOutput(POutput op) {
-        if (op.voutput != null) {
-            if (op.voutput.value != null) {
-                new SendSetCommandThread(this, op).start();
-                op.set_value(op.voutput.value); // includes web update
-            }
-        }
-    }
+    /*
+     public void updatePOutput(POutput op) {
+     if (op.voutput != null) {
+     if (op.voutput.value != null) {
+     new SendSetCommandThread(this, op).start();
+     op.set_value(op.voutput.value); // includes web update
+     }
+     }
+     }
 
-    public void updatePInput(PInput ip) {
-        if (ip.vinput != null) {
-            ip.vinput.get();   // includes web update
-        }
-    }
-*/
-    
+     public void updatePInput(PInput ip) {
+     if (ip.vinput != null) {
+     ip.vinput.get();   // includes web update
+     }
+     }
+     */
+
     public void updateAllPins() {
-        
+
         System.out.println("*** updating all input pins of " + HWid);
         for (PInput ip : inputs.values()) {
             if (ip.vinput != null) {
-      System.out.println(ip.vinput.name+".get()");
+                System.out.println(ip.vinput.name + ".get()");
                 ip.vinput.get();   // includes web update
             }
         }
-        
+
         System.out.println("*** updating all output pins of " + HWid);
         for (POutput op : outputs.values()) {
             if (op.voutput != null) {
                 if (op.voutput.value != null) {
-                          System.out.println(op.voutput.name+".set("+op.voutput.value+")");
+                    System.out.println(op.voutput.name + ".set(" + op.voutput.value + ")");
                     op.voutput.set(op.voutput.value); // includes web update
                 }
             }
