@@ -3,7 +3,6 @@ package rgpio;
 import utils.TimeStamp;
 import utils.JSONString;
 import java.util.HashMap;
-import udputils.SendSetCommandThread;
 import udputils.UDPSender;
 
 public class PDevice {
@@ -21,7 +20,6 @@ public class PDevice {
     public HashMap<String, PInput> inputs = new HashMap<>();
     public HashMap<String, POutput> outputs = new HashMap<>();
 
-    
     public String toJSON() {
         JSONString json = new JSONString();
         json.addProperty("object", "PDEV");
@@ -73,7 +71,7 @@ public class PDevice {
             RGPIO.webSocketServer.sendToAll(op.toJSON());
         }
     }
-
+/*
     public void updatePOutput(POutput op) {
         if (op.voutput != null) {
             if (op.voutput.value != null) {
@@ -88,32 +86,39 @@ public class PDevice {
             ip.vinput.get();   // includes web update
         }
     }
-
+*/
+    
     public void updateAllPins() {
-        System.out.println("*** updating all pins of " + HWid + " get...");
-
+        
+        System.out.println("*** updating all input pins of " + HWid);
         for (PInput ip : inputs.values()) {
-            updatePInput(ip);
+            if (ip.vinput != null) {
+                ip.vinput.get();   // includes web update
+            }
         }
-        System.out.println("*** updating all pins of " + HWid + " set...");
-
+        
+        System.out.println("*** updating all output pins of " + HWid);
         for (POutput op : outputs.values()) {
-            updatePOutput(op);
+            if (op.voutput != null) {
+                if (op.voutput.value != null) {
+                    op.voutput.set(op.voutput.value); // includes web update
+                }
+            }
         }
     }
-    
-        public void updateVIOMembers() {
+
+    public void updateVIOMembers() {
 
         for (PInput ip : inputs.values()) {
-        if (ip.vinput != null) {
-            ip.vinput.countMembers();   // includes web update
-        }
+            if (ip.vinput != null) {
+                ip.vinput.countMembers();   // includes web update
+            }
         }
 
         for (POutput op : outputs.values()) {
-        if (op.voutput != null) {
-            op.voutput.countMembers();   // includes web update
-        }
+            if (op.voutput != null) {
+                op.voutput.countMembers();   // includes web update
+            }
         }
     }
 
@@ -133,13 +138,13 @@ public class PDevice {
             RGPIO.message(e);
         } else if (status == PDeviceStatus.ACTIVE) {
             UDPSender.send(message, ipAddress, this, RGPIO.devicePort);
-/*
-            if (reply == null) {
-                setNotResponding("device did not reply to <" + message + ">");
-            } else {
-                setActive();
-            }
-*/
+            /*
+             if (reply == null) {
+             setNotResponding("device did not reply to <" + message + ">");
+             } else {
+             setActive();
+             }
+             */
         }
     }
 
