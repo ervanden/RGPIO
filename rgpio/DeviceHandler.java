@@ -48,6 +48,10 @@ public class DeviceHandler {
                 }
                 // The application may have set() a pin before the device reports
                 pdevice.ipAddress = deviceIPAddress;  // ip address may have changed
+                pdevice.uptime = upTime;
+                pdevice.report_received = System.currentTimeMillis();
+                pdevice.setActive();             
+                sendACKREPORT(pdevice); // send ACKREPORT otherwise device will not respond   
                 System.out.println("***Device booted : updating all pins");
                 pdevice.updateAllPins();
                 pdevice.updateVIOMembers();
@@ -55,25 +59,16 @@ public class DeviceHandler {
                 // REPORT received for an existing PDevice.
                 // If upTime is lower than from previous REPORT, the device has rebooted
                 pdevice.ipAddress = deviceIPAddress;  // ip address may have changed
+                pdevice.uptime = upTime;
+                pdevice.report_received = System.currentTimeMillis();
+                pdevice.setActive();
+                sendACKREPORT(pdevice);  // send ACKREPORT otherwise device will not respond after reboot
                 if (upTime < pdevice.uptime) {
                     System.out.println("***Device rebooted : updating all pins");
                     pdevice.updateAllPins();
                     pdevice.updateVIOMembers();
                 }
             }
-            pdevice.uptime = upTime;
-            pdevice.report_received = System.currentTimeMillis();
-
-            JSONString json = new JSONString();
-            json.addProperty("command", "ACKREPORT");
-            json.addProperty("from", "RGPIO");
-            json.addProperty("to", pdevice.HWid);
-            String ackReport = json.asString();
-            UDPSender.send(ackReport, pdevice.ipAddress, null, RGPIO.devicePort);
-
-            // setActive() after ACKREPORT is sent, because it takes some time if all device pins
-            // need to be updated.
-            pdevice.setActive();
 
         } else if (msg.command.equals("EVENT")) {
             String HWid = msg.from;
@@ -93,4 +88,12 @@ public class DeviceHandler {
 
     }
 
+    private static void sendACKREPORT(PDevice pdevice) {
+        JSONString json = new JSONString();
+        json.addProperty("command", "ACKREPORT");
+        json.addProperty("from", "RGPIO");
+        json.addProperty("to", pdevice.HWid);
+        String ackReport = json.asString();
+        UDPSender.send(ackReport, pdevice.ipAddress, null, RGPIO.devicePort);
+    }
 }
