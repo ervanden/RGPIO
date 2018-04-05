@@ -138,13 +138,6 @@ public class PDevice {
             RGPIO.message(e);
         } else if (status == PDeviceStatus.ACTIVE) {
             UDPSender.send(message, ipAddress, this, RGPIO.devicePort);
-            /*
-             if (reply == null) {
-             setNotResponding("device did not reply to <" + message + ">");
-             } else {
-             setActive();
-             }
-             */
         }
     }
 
