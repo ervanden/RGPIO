@@ -1,9 +1,7 @@
 package rgpio;
 
-import utils.TimeStamp;
-import utils.*;
 
-import java.util.Calendar;
+import utils.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,58 +17,19 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
         Console.verbose(true);
     }
 
-    public void print() {
-
-        String formatString = "%12s %12s  %13s  %12s  %12s  %12s\n";
-        System.out.printf(formatString,
-                "HWid", "deviceGroup", "status", "ipAddress", "lastContact", "powerOn");
-        for (PDevice d : this.values()) {
-            String HWid = d.HWid;
-            String status = d.get_status().name();
-            String deviceGroupName = null;
-            if (d.vdevice != null) {
-                deviceGroupName = d.vdevice.name;
-            }
-            String ipAddress = d.ipAddress;
-            String lastContact = "" + d.lastContact.asString();
-            String powerOn = "" + d.powerOn.asString();
-            System.out.printf(formatString,
-                    HWid, deviceGroupName, status, ipAddress, lastContact, powerOn);
-        }
-    }
-
-    public PDevice addPDevice(
-            String HWid,
-            String modelName,
-            String ipAddress,
-            int upTime) {
-
-        PDevice pdevice = get(HWid);
-        if (pdevice != null) {
-            // REPORT received for an existing PDevice.
-            // If upTime is less than the interval between two REPORT requests, the device has rebooted
-            if (upTime < RGPIO.reportInterval) {
-                System.out.println("***Device uptime < " + RGPIO.reportInterval + " : updating all pins");
-                pdevice.updateAllPins();
-            }
-        } else {
-            // pdevice does not yet exist. Create it and match to a vdevice
-            pdevice = new PDevice();
-            RGPIO.PDeviceMap.put(HWid, pdevice);
-            pdevice.HWid = HWid;
-            pdevice.vdevice = null;
-            pdevice.modelName = modelName;
-            this.put(HWid, pdevice);
-            matchToGroup(pdevice);
-        }
-        pdevice.ipAddress = ipAddress;
-        pdevice.lastContact = new TimeStamp();  //now
-        pdevice.powerOn = new TimeStamp();
-        pdevice.powerOn.add(Calendar.SECOND, -upTime);
+    public PDevice addPDevice(String HWid, String modelName) {
+        // Create it and match to a vdevice
+        PDevice pdevice = new PDevice();
+        RGPIO.PDeviceMap.put(HWid, pdevice);
+        pdevice.HWid = HWid;
+        pdevice.vdevice = null;
+        pdevice.modelName = modelName;
+        this.put(HWid, pdevice);
+        matchToGroup(pdevice);
         return pdevice;
     }
 
-    public void deviceReportedPinEvent(
+    public void deviceEventHandler(
             String HWid,
             String pinLabel,
             String value) {
@@ -162,7 +121,7 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
                 e.pinLabel = pinLabel;
                 RGPIO.message(e);
             }
-   // nothing useful to do , only the event_received time is important
+            // nothing useful to do , only the event_received time is important
         }
 
     }

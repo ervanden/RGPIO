@@ -1,6 +1,5 @@
 package rgpio;
 
-import utils.TimeStamp;
 import utils.JSONString;
 import java.util.HashMap;
 import udputils.UDPSender;
@@ -14,8 +13,8 @@ public class PDevice {
     public VDevice vdevice = null;
     public String HWid = null;        // unique hardware identifier
     public String ipAddress = null;
-    public TimeStamp lastContact = new TimeStamp(0); // timestamp
-    public TimeStamp powerOn = new TimeStamp(0);     // timestamp of device power-on
+    public int uptime;   // last reported uptime
+        public long report_received=0; // time stamp of last report
 
     public HashMap<String, PInput> inputs = new HashMap<>();
     public HashMap<String, POutput> outputs = new HashMap<>();
@@ -44,7 +43,6 @@ public class PDevice {
             updateAllPins(); // includes web update to replace NOTRESPONDING
             updateVIOMembers();
         }
-        this.lastContact = new TimeStamp();
     }
 
     public void setNotResponding(String msg) {

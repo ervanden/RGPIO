@@ -71,6 +71,7 @@ class DeviceMonitorThread extends Thread {
 
 }
 
+/*
 class DeviceProbeThread extends Thread {
 
     int reportInterval;
@@ -123,6 +124,7 @@ class DeviceProbeThread extends Thread {
         }
     }
 }
+*/
 
 class UpdateRRDThread extends Thread {
 
