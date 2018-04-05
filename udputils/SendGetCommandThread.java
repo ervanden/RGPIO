@@ -19,7 +19,7 @@ public class SendGetCommandThread extends Thread {
 
         long commandSent = System.currentTimeMillis();
         Integer retry = 0;
-        while ((retry <= 3) || !(p.event_received > commandSent)) {
+        while ((retry <= 3) && !(p.event_received > commandSent)) {
             JSONString json = new JSONString();
             json.addProperty("command", "GET");
             json.addProperty("from", "RGPIO");
