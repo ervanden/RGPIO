@@ -6,7 +6,7 @@ public class PInput {
 
     public String name;
     public String value;
-    public long event_received; // see SendGetCommandThread()
+    public long event_received=0; // see SendGetCommandThread()
     public PDevice device;
     public IOType type;
     public VInput vinput;

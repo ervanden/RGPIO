@@ -7,7 +7,7 @@ public class POutput {
     public String name;
     private String value;
 
-    public long event_received; // see SendSetCommandThread()
+    public long event_received=0; // see SendSetCommandThread()
 
     public PDevice device;
     public IOType type;

@@ -16,27 +16,25 @@ public class SendSetCommandThread extends Thread {
 
     }
 
-    public void run() {
+    
+        public void run() {
 
-        JSONString json = new JSONString();
+        long commandSent = System.currentTimeMillis();
+        Integer retry = 0;
+        while ((retry <= 3) || !(p.event_received > commandSent)) {
+                    JSONString json = new JSONString();
         json.addProperty("command", "SET");
         json.addProperty("from", "RGPIO");
         json.addProperty("to", device.HWid);
+                  json.addProperty("retry", retry.toString());
         json.addProperty("pin", p.name);
         json.addProperty("value", p.get_value());
-
-        long set_sent = System.currentTimeMillis();
-        int endLoop = 3;
-        while (endLoop > 0) {
             device.sendToDevice(json.asString());
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException ie) {
             };
-            endLoop = endLoop - 1;
-            if (p.event_received>set_sent) {
-                endLoop = 0;
-            }
+            retry = retry + 1;
         }
 
     }
