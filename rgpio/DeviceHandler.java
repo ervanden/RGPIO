@@ -50,6 +50,7 @@ public class DeviceHandler {
                 pdevice.ipAddress = deviceIPAddress;  // ip address may have changed
                 System.out.println("***Device booted : updating all pins");
                 pdevice.updateAllPins();
+                pdevice.updateVIOMembers();
             } else {
                 // REPORT received for an existing PDevice.
                 // If upTime is lower than from previous REPORT, the device has rebooted
@@ -57,6 +58,7 @@ public class DeviceHandler {
                 if (upTime < pdevice.uptime) {
                     System.out.println("***Device rebooted : updating all pins");
                     pdevice.updateAllPins();
+                    pdevice.updateVIOMembers();
                 }
             }
             pdevice.uptime = upTime;

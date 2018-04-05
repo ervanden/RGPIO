@@ -40,8 +40,6 @@ public class PDevice {
             if (vdevice != null) {
                 vdevice.stateChange();
             }
-            updateAllPins(); // includes web update to replace NOTRESPONDING
-            updateVIOMembers();
         }
     }
 
@@ -91,6 +89,7 @@ public class PDevice {
         System.out.println("*** updating all input pins of " + HWid);
         for (PInput ip : inputs.values()) {
             if (ip.vinput != null) {
+      System.out.println(ip.vinput.name+".get()");
                 ip.vinput.get();   // includes web update
             }
         }
@@ -99,6 +98,7 @@ public class PDevice {
         for (POutput op : outputs.values()) {
             if (op.voutput != null) {
                 if (op.voutput.value != null) {
+                          System.out.println(op.voutput.name+".set("+op.voutput.value+")");
                     op.voutput.set(op.voutput.value); // includes web update
                 }
             }
