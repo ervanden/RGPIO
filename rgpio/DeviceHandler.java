@@ -47,20 +47,21 @@ public class DeviceHandler {
                     }
                 }
                 // The application may have set() a pin before the device reports
+                pdevice.ipAddress = deviceIPAddress;  // ip address may have changed
                 System.out.println("***Device booted : updating all pins");
                 pdevice.updateAllPins();
             } else {
                 // REPORT received for an existing PDevice.
                 // If upTime is lower than from previous REPORT, the device has rebooted
+                pdevice.ipAddress = deviceIPAddress;  // ip address may have changed
                 if (upTime < pdevice.uptime) {
                     System.out.println("***Device rebooted : updating all pins");
                     pdevice.updateAllPins();
                 }
             }
             pdevice.uptime = upTime;
-            pdevice.ipAddress = deviceIPAddress;  // ip address may have changed
             pdevice.report_received = System.currentTimeMillis();
-            
+
             JSONString json = new JSONString();
             json.addProperty("command", "ACKREPORT");
             json.addProperty("from", "RGPIO");
