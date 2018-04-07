@@ -21,13 +21,26 @@ public class VDevice extends VIO {
         json.addProperty("activeMembers", activeMembers.toString());
         return json.asString();
     }
-    
-    public void sleep(int sleepTime){
-           for (PDevice pdevice : RGPIO.PDeviceMap.values()) {
+
+    public void sleep(int sleepTime) {
+        for (PDevice pdevice : RGPIO.PDeviceMap.values()) {
             if (pdevice.vdevice == this) {
-                                new SendSleepCommandThread(pdevice, sleepTime).start();
+                new SendSleepCommandThread(pdevice, sleepTime).start();
             }
-        }     
+        }
+    }
+
+    public void send(String command) {
+        for (PDevice pdevice : RGPIO.PDeviceMap.values()) {
+            if (pdevice.vdevice == this) {
+                JSONString json = new JSONString();
+                json.addProperty("command", command);
+                json.addProperty("id", RGPIO.msgId());
+                json.addProperty("from", "RGPIO");
+                json.addProperty("to", pdevice.HWid);
+                pdevice.sendToDevice(json.asString());
+            }
+        }
     }
 
     public void stateChange() {
