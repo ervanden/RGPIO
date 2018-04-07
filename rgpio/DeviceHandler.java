@@ -52,9 +52,9 @@ public class DeviceHandler {
                 pdevice.report_received = System.currentTimeMillis();
                 pdevice.setActive();
                 sendACKREPORT(pdevice); // send ACKREPORT otherwise device will not respond   
-                System.out.println("***Device booted : (not)updating all pins");
+//                System.out.println("***Device booted : (not)updating all pins");
 //                pdevice.updateAllPins();
-                pdevice.updateVIOMembers();
+//                pdevice.updateVIOMembers();
             } else {
                 // REPORT received for an existing PDevice.
                 // If upTime is lower than from previous REPORT, the device has rebooted
@@ -64,9 +64,9 @@ public class DeviceHandler {
                 pdevice.setActive();
                 sendACKREPORT(pdevice);  // send ACKREPORT otherwise device will not respond after reboot
                 if (upTime < pdevice.uptime) {
-                    System.out.println("***Device rebooted : (not)updating all pins");
+ //                   System.out.println("***Device rebooted : (not)updating all pins");
  //                   pdevice.updateAllPins();
-                    pdevice.updateVIOMembers();
+ //                   pdevice.updateVIOMembers();
                 }
             }
 
