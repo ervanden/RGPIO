@@ -55,7 +55,7 @@ public class VInput extends VIO {
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput ip : device.inputs.values()) {
                 if (ip.vinput == this) {
-                    new SendGetCommandThread(device, ip).start();
+                    new SendGetCommandThread(device, ip,0).start();
                 }
             }
         }
@@ -73,7 +73,7 @@ public class VInput extends VIO {
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput ip : device.inputs.values()) {
                 if (ip.vinput == this) {
-                    SendGetCommandThread t = new SendGetCommandThread(device, ip);
+                    SendGetCommandThread t = new SendGetCommandThread(device, ip,3);
                     threads.add(t);
                     t.start();
                 }

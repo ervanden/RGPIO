@@ -31,7 +31,7 @@ public class VOutput extends VIO {
             for (POutput p : device.outputs.values()) {
                 if (p.voutput == this) {
                     p.set_value(newValue);
-                    new SendSetCommandThread(device, p).start();
+                    new SendSetCommandThread(device, p,0).start();
                 }
             }
         }
@@ -49,7 +49,7 @@ public class VOutput extends VIO {
             for (POutput p : device.outputs.values()) {
                 if (p.voutput == this) {
                     p.set_value(newValue);
-                    SendSetCommandThread t = new SendSetCommandThread(device, p);
+                    SendSetCommandThread t = new SendSetCommandThread(device, p,3);
                     threads.add(t);
                     t.start();
                 }
