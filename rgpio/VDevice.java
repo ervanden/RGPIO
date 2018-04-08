@@ -1,5 +1,7 @@
 package rgpio;
 
+import java.util.ArrayList;
+import java.util.List;
 import udputils.SendSleepCommandThread;
 import utils.JSONString;
 
@@ -53,6 +55,23 @@ public class VDevice extends VIO {
             }
         }
         RGPIO.webSocketServer.sendToAll(toJSON());
+    }
+    
+    
+    private List<VDeviceListener> listeners = new ArrayList<>();
+
+    public void addVinputListener(VDeviceListener toAdd) {
+        listeners.add(toAdd);
+    }
+
+    public void deliverMessage(String message) {
+
+        for (VDeviceListener l : listeners) {
+            try {
+                l.onDeviceMessage(this,message);
+            } catch (Exception e) {
+            }
+        }
     }
 
 }

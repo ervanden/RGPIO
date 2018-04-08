@@ -74,12 +74,13 @@ public class DeviceHandler {
             String HWid = msg.from;
             String pin = msg.pin;
             String value = msg.value;
-
-            RGPIO.PDeviceMap.deviceEventHandler(HWid, pin, value);
-
+            RGPIO.PDeviceMap.deviceEventHandler(HWid, pin, value);           
+        } else if (msg.command.equals("MESSAGE")) {
+            String HWid = msg.from;
+            RGPIO.PDeviceMap.deviceMessageHandler(HWid, msg.message);
         } else {
             e = new MessageEvent(MessageType.InvalidMessage);
-            e.description = "invalid command from device <" + message + ">";
+            e.description = "invalid command from device <" + msg.message + ">";
             e.ipAddress = deviceIPAddress;
             RGPIO.message(e);
             return false;

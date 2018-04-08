@@ -22,6 +22,8 @@ public class MessageEvent {
 
     public String vinput = null;
     public String voutput = null;
+    
+    public String message = null;
 
     public MessageEvent(MessageType type) {
         time = new TimeStamp().getTimeInMillis();
@@ -65,6 +67,9 @@ public class MessageEvent {
         if (voutput != null) {
             msg = msg + " voutput=" + voutput;
         }
+        if (message != null) {
+            msg = msg + " message=" + message;
+        }
         return msg;
     }
 
@@ -105,6 +110,9 @@ public class MessageEvent {
         }
         if (voutput != null) {
             json.addProperty("voutput", voutput);
+        }
+                if (message != null) {
+            json.addProperty("message", message);
         }
         return json.asString();
     }

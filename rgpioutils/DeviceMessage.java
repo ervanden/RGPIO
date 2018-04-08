@@ -25,4 +25,9 @@ public List<String> aops;
 // event fields
 public String pin;
 public String value;
+
+// message fields
+
+public String message;
+
 }

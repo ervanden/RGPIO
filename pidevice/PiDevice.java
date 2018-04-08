@@ -307,7 +307,6 @@ public class PiDevice {
             ServerMessage cmd;
             cmd = (ServerMessage) JSON2Object.jsonStringToObject(message, ServerMessage.class);
 
-            String destination = cmd.destination;
             String command = cmd.command;
             String pin = cmd.pin;
             String value = cmd.value;

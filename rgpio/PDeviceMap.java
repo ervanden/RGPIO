@@ -125,6 +125,28 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
         }
 
     }
+    
+        public void deviceMessageHandler(String HWid, String message) {
+        PDevice pdevice = this.get(HWid);
+        if (pdevice == null) {
+            MessageEvent e = new MessageEvent(MessageType.UnreportedDevice);
+            e.description = "received message from an unreported device";
+            e.HWid = HWid;
+            e.message = message;
+            RGPIO.message(e);
+            return;
+        } else if (pdevice.vdevice == null) {
+                MessageEvent e = new MessageEvent(MessageType.InvalidPinName);
+                e.description = "received event from unassigned device";
+                e.HWid = pdevice.HWid;
+                e.message=message;
+                RGPIO.message(e);
+            } else pdevice.vdevice.deliverMessage(message);
+
+        pdevice.setActive();
+
+    }
+
 
     public static void matchToGroup(PDevice device) {
 
