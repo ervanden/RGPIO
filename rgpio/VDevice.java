@@ -60,7 +60,7 @@ public class VDevice extends VIO {
     
     private List<VDeviceListener> listeners = new ArrayList<>();
 
-    public void addVinputListener(VDeviceListener toAdd) {
+    public void addVDeviceListener(VDeviceListener toAdd) {
         listeners.add(toAdd);
     }
 
