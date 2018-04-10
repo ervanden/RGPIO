@@ -186,7 +186,7 @@ public class PDevice {
                 poutput.voutput = theOnlyVOutput;
 
                 MessageEvent e = new MessageEvent(MessageType.Info);
-                e.description = "device pin assigned to " + type.name();
+                e.description = "PDevice pin assigned to " + type.name();
                 e.HWid = HWid;
                 e.pinLabel = pinName;
                 e.voutput = poutput.voutput.name;
@@ -194,14 +194,14 @@ public class PDevice {
             }
             if (nrInstances == 0) {
                 MessageEvent e = new MessageEvent(MessageType.UnassignedPin);
-                e.description = "device pin can not be assigned to " + type.name();
+                e.description = "PDevice pin can not be assigned to " + type.name();
                 e.HWid = HWid;
                 e.pinLabel = pinName;
                 RGPIO.message(e);
             }
             if (nrInstances > 1) {
                 MessageEvent e = new MessageEvent(MessageType.UnassignedPin);
-                e.description = "device pin matches more than one " + type.name();
+                e.description = "PDevice pin matches more than one " + type.name();
                 e.HWid = HWid;
                 e.pinLabel = pinName;
                 RGPIO.message(e);

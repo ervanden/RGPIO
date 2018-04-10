@@ -30,4 +30,8 @@ public String value;
 
 public String message;
 
+// trace field (trace packet)
+
+public String trace;
+
 }
