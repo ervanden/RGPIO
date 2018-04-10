@@ -16,8 +16,10 @@ public class DeviceHandler {
 
         DeviceMessage msg;
         msg = (DeviceMessage) JSON2Object.jsonStringToObject(message, DeviceMessage.class);
-
-        if (msg.command.equals("REPORT")) {
+        if (!msg.trace.equals("")) {
+            // special trace packet
+            // it contains no other fields
+        } else if (msg.command.equals("REPORT")) {
             String HWid = msg.from;
             String model = msg.model;
             Integer upTime = Integer.parseInt(msg.uptime);
@@ -65,8 +67,8 @@ public class DeviceHandler {
                 sendACKREPORT(pdevice);  // send ACKREPORT otherwise device will not respond after reboot
                 if (upTime < pdevice.uptime) {
  //                   System.out.println("***Device rebooted : (not)updating all pins");
- //                   pdevice.updateAllPins();
- //                   pdevice.updateVIOMembers();
+                    //                   pdevice.updateAllPins();
+                    //                   pdevice.updateVIOMembers();
                 }
             }
 
@@ -74,7 +76,7 @@ public class DeviceHandler {
             String HWid = msg.from;
             String pin = msg.pin;
             String value = msg.value;
-            RGPIO.PDeviceMap.deviceEventHandler(HWid, pin, value);           
+            RGPIO.PDeviceMap.deviceEventHandler(HWid, pin, value);
         } else if (msg.command.equals("MESSAGE")) {
             String HWid = msg.from;
             RGPIO.PDeviceMap.deviceMessageHandler(HWid, msg.message);
