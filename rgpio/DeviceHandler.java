@@ -16,7 +16,7 @@ public class DeviceHandler {
 
         DeviceMessage msg;
         msg = (DeviceMessage) JSON2Object.jsonStringToObject(message, DeviceMessage.class);
-        if (!msg.trace.equals("")) {
+        if (msg.trace!=null) {
             // special trace packet
             // it contains no other fields
         } else if (msg.command.equals("REPORT")) {
