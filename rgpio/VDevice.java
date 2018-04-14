@@ -32,14 +32,15 @@ public class VDevice extends VIO {
         }
     }
 
-    public void send(String command) {
+    public void sendMessage(String message) {
         for (PDevice pdevice : RGPIO.PDeviceMap.values()) {
             if (pdevice.vdevice == this) {
                 JSONString json = new JSONString();
-                json.addProperty("command", command);
+                json.addProperty("command", "MESSAGE");
                 json.addProperty("id", RGPIO.msgId());
                 json.addProperty("from", "RGPIO");
                 json.addProperty("to", pdevice.HWid);
+                json.addProperty("message", message);
                 pdevice.sendToDevice(json.asString());
             }
         }
@@ -56,8 +57,7 @@ public class VDevice extends VIO {
         }
         RGPIO.webSocketServer.sendToAll(toJSON());
     }
-    
-    
+
     private List<VDeviceListener> listeners = new ArrayList<>();
 
     public void addVDeviceListener(VDeviceListener toAdd) {
@@ -68,7 +68,7 @@ public class VDevice extends VIO {
 
         for (VDeviceListener l : listeners) {
             try {
-                l.onDeviceMessage(this,message);
+                l.onDeviceMessage(this, message);
             } catch (Exception e) {
             }
         }
