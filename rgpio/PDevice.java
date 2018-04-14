@@ -121,14 +121,14 @@ public class PDevice {
     }
 
     public void sendToDevice(String message) {
-
+/*
         // delay because ESP misses packet if it receives SET  too fast after sending EVENT
         // (UDP is stopped and started on ESP after sending = blackout of a few msec)
         try {
             Thread.sleep(50);
         } catch (InterruptedException ie) {
         };
-
+*/
         if (ipAddress == null) {
             MessageEvent e = new MessageEvent(MessageType.SendWarning);
             e.description = "cannot send message to unreported device";
