@@ -1,0 +1,86 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <style>
+            body {
+                margin: 0px;
+                padding: 0px;
+            }
+            canvas.drawing {
+                border-style: solid;
+                border-width: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="myCanvas" width=1000 height=600 class="drawing"></canvas>
+        <script>
+
+            nodes = [{"name": "8888888", "x": 100, "y": 100},
+                {"name": "9999999", "x": 300, "y": 300},
+                {"name": "444444", "x": 200, "y": 400},
+                {"name": "11111", "x": 400, "y": 100}
+            ];
+
+            links = [{"label": "8", "x1": 100, "y1": 100, "x2": 300, "y2": 300}, // 8 9
+                {"name": "9", "x1": 300, "y1": 300, "x2": 400, "y2": 100}, // 9 1
+                {"name": "4", "x1": 200, "y1": 400, "x2": 300, "y2": 300}, // 9  4
+                {"name": "1", "x1": 400, "y1": 100, "x2": 100, "y2": 100}            // 1 8
+            ];
+
+
+            function drawBalls(ctx) {
+                ctx.lineWidth = 1;
+                /*
+                 ctx.beginPath();
+                 ctx.moveTo(300, 300);
+                 ctx.lineTo(500, 500);
+                 ctx.stroke();
+                 
+                 ctx.beginPath();
+                 ctx.arc(300, 300, 100, 0, 2 * Math.PI);
+                 ctx.fillStyle = "green";
+                 ctx.fill();
+                 ctx.strokeStyle = 'black';
+                 ctx.stroke();
+                 */
+                ctx.font = "30px Arial";
+                ctx.fillStyle = "black";
+                ctx.textAlign = "center";
+                for (var i = 0; i < links.length; i++) {
+                    ctx.moveTo(links[i].x1, links[i].y1);
+                    ctx.lineTo(links[i].x2, links[i].y2);
+                    ctx.stroke();
+                }
+                for (var i = 0; i < nodes.length; i++) {
+                    var x = nodes[i].x;
+                    var y = nodes[i].y;
+                    var tx = ctx.measureText(nodes[i].name).width;
+                    var ty = 30;
+                    var spacing = 5;
+                    console.log(x + " " + y + " " + tx + " " + ty);
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(x - tx / 2 - spacing, y - ty / 2 - spacing, tx + 2 * spacing, ty + 2 * spacing);
+                    ctx.fillStyle = 'black';
+                    ctx.fillText(nodes[i].name, x, y + ty / 2);
+                }
+
+
+            }
+
+
+
+            var canvas = document.getElementById('myCanvas');
+            canvas.width = 1200;
+            canvas.heigth = 800;
+            var ctx = canvas.getContext('2d');
+
+            drawBalls(ctx);
+
+
+
+        </script>
+    </body>
+</html>      
+
+
