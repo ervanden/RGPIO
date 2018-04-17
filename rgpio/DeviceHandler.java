@@ -16,9 +16,26 @@ public class DeviceHandler {
 
         DeviceMessage msg;
         msg = (DeviceMessage) JSON2Object.jsonStringToObject(message, DeviceMessage.class);
-        if (msg.trace!=null) {
+        if (msg.trace != null) {
             // special trace packet
             // it contains no other fields
+            // example {"trace":"8650083(-51)8650811(-52)"}
+            // Parse the trace packet and add the topology information to the device tree
+            String previousHop = null;
+            String currentHop = null;
+            String[] traceSplit = msg.trace.split("\\)");
+            for (String hop : traceSplit) {
+                String[] hopSplit = hop.split("\\(");
+                currentHop = hopSplit[0];
+                if (previousHop != null) {
+                    System.out.println(previousHop + " -> " + currentHop);
+                    RGPIO.deviceTree.addLink(previousHop,currentHop);
+                }
+                previousHop = currentHop;
+            }
+            System.out.println(previousHop + " -> " + "RGPIO");
+                                RGPIO.deviceTree.addLink(previousHop,"RGPIO");
+
         } else if (msg.command.equals("REPORT")) {
             String HWid = msg.from;
             String model = msg.model;
@@ -66,7 +83,7 @@ public class DeviceHandler {
                 pdevice.setActive();
                 sendACKREPORT(pdevice);  // send ACKREPORT otherwise device will not respond after reboot
                 if (upTime < pdevice.uptime) {
- //                   System.out.println("***Device rebooted : (not)updating all pins");
+                    //                   System.out.println("***Device rebooted : (not)updating all pins");
                     //                   pdevice.updateAllPins();
                     //                   pdevice.updateVIOMembers();
                 }

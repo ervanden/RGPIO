@@ -1,4 +1,4 @@
-package utils;
+package devicetree;
 
 public class JSONString {
 
@@ -13,6 +13,13 @@ public class JSONString {
             s = s + ",";
         };
         s = s + " \"" + name + "\":\"" + value + "\"";
+    }
+
+    public void addPropertyFloat(String name, float value) {
+        if (!s.equals("{")) {
+            s = s + ",";
+        };
+        s = s + " \"" + name + "\":" + value;
     }
 
     public String asString() {

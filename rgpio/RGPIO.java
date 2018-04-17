@@ -13,6 +13,7 @@ import org.rrd4j.core.Sample;
 import org.rrd4j.core.Util;
 import rgpioutils.ConfigurationFileEntry;
 import rgpioutils.DeviceFileEntry;
+import rgpioutils.DeviceTree;
 import rrd.RRDGenerator;
 import tcputils.WSServer;
 import utils.JSON2Object;
@@ -38,26 +39,26 @@ class DeviceMonitorThread extends Thread {
                 message = message.substring(0, receivePacket.getLength());
 
                 boolean validCommand = DeviceHandler.handleDeviceMessage(deviceIPAddress.toString().substring(1), message);
-/* send an OK: no longer needed 
-                if (validCommand) {
+                /* send an OK: no longer needed 
+                 if (validCommand) {
 
-                    // After receiving a valid command from the device, RGPIO sends OK
-                    // 50 msec delay is required before sending anything to ESP.
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException ie) {
-                    };
-                    sendData = ("OK").getBytes();
-                    DatagramPacket sendPacket
-                            = new DatagramPacket(sendData, sendData.length, deviceIPAddress, RGPIO.devicePort);
-                    serverSocket.send(sendPacket);
+                 // After receiving a valid command from the device, RGPIO sends OK
+                 // 50 msec delay is required before sending anything to ESP.
+                 try {
+                 Thread.sleep(50);
+                 } catch (InterruptedException ie) {
+                 };
+                 sendData = ("OK").getBytes();
+                 DatagramPacket sendPacket
+                 = new DatagramPacket(sendData, sendData.length, deviceIPAddress, RGPIO.devicePort);
+                 serverSocket.send(sendPacket);
 
-                    MessageEvent e = new MessageEvent(MessageType.SendMessage);
-                    e.description = "OK to |" + message + "|";
-                    e.ipAddress = deviceIPAddress.toString().substring(1);
-                    RGPIO.message(e);
-                }
-*/
+                 MessageEvent e = new MessageEvent(MessageType.SendMessage);
+                 e.description = "OK to |" + message + "|";
+                 e.ipAddress = deviceIPAddress.toString().substring(1);
+                 RGPIO.message(e);
+                 }
+                 */
             }
         } catch (SocketException so) {
             so.printStackTrace();
@@ -69,60 +70,59 @@ class DeviceMonitorThread extends Thread {
 }
 
 /*
-class DeviceProbeThread extends Thread {
+ class DeviceProbeThread extends Thread {
 
-    int reportInterval;
-    String broadcastReport;
+ int reportInterval;
+ String broadcastReport;
 
-    public DeviceProbeThread(int reportInterval) {
-        super();
-        this.reportInterval = reportInterval;
+ public DeviceProbeThread(int reportInterval) {
+ super();
+ this.reportInterval = reportInterval;
 
-        JSONString json = new JSONString();
-        json.addProperty("destination", "ALL");
-        json.addProperty("command", "REPORT");
-        broadcastReport = json.asString();
-    }
+ JSONString json = new JSONString();
+ json.addProperty("destination", "ALL");
+ json.addProperty("command", "REPORT");
+ broadcastReport = json.asString();
+ }
 
-    public void run() {
-        while (true) {
-            try {
-                UDPSender.send(broadcastReport, RGPIO.broadcastAddress, null, RGPIO.devicePort);
-                Thread.sleep(reportInterval * 1000);
-                // Check if a device has not responded within the last reportInterval.
-                long now = new TimeStamp().getTimeInMillis();
-                for (PDevice device : RGPIO.PDeviceMap.values()) {
-                    long inactive = now - device.lastContact.getTimeInMillis();
-                    if (inactive > reportInterval * 1000) {
-                        device.setNotResponding("device did not respond in last " + Math.round(inactive / 1000) + " sec");
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+ public void run() {
+ while (true) {
+ try {
+ UDPSender.send(broadcastReport, RGPIO.broadcastAddress, null, RGPIO.devicePort);
+ Thread.sleep(reportInterval * 1000);
+ // Check if a device has not responded within the last reportInterval.
+ long now = new TimeStamp().getTimeInMillis();
+ for (PDevice device : RGPIO.PDeviceMap.values()) {
+ long inactive = now - device.lastContact.getTimeInMillis();
+ if (inactive > reportInterval * 1000) {
+ device.setNotResponding("device did not respond in last " + Math.round(inactive / 1000) + " sec");
+ }
+ }
+ } catch (Exception e) {
+ e.printStackTrace();
+ }
 
-            for (VDevice deviceGroup : RGPIO.VDeviceMap.values()) {
-                int n = 0;
-                for (PDevice device : RGPIO.PDeviceMap.values()) {
-                    if ((device.vdevice == deviceGroup) && (device.get_status() == PDeviceStatus.ACTIVE)) {
-                        n++;
-                    }
-                }
-                if (deviceGroup.minMembers != null) {
-                    if (n < deviceGroup.minMembers) {
-                        MessageEvent e = new MessageEvent(MessageType.DeviceGroupMinimum);
-                        e.description = "device group has too few members : " + n;
-                        e.vdevice = deviceGroup.name;
-                        RGPIO.message(e);
-                    }
-                }
-            }
+ for (VDevice deviceGroup : RGPIO.VDeviceMap.values()) {
+ int n = 0;
+ for (PDevice device : RGPIO.PDeviceMap.values()) {
+ if ((device.vdevice == deviceGroup) && (device.get_status() == PDeviceStatus.ACTIVE)) {
+ n++;
+ }
+ }
+ if (deviceGroup.minMembers != null) {
+ if (n < deviceGroup.minMembers) {
+ MessageEvent e = new MessageEvent(MessageType.DeviceGroupMinimum);
+ e.description = "device group has too few members : " + n;
+ e.vdevice = deviceGroup.name;
+ RGPIO.message(e);
+ }
+ }
+ }
 
-        }
-    }
-}
-*/
-
+ }
+ }
+ }
+ */
 class UpdateRRDThread extends Thread {
 
     int step;
@@ -228,6 +228,8 @@ public class RGPIO {
 
     public static WSServer webSocketServer;
 
+    public static DeviceTree deviceTree;
+
     // parameters configurable from the RGPIO.txt configuration file
     public static int serverPort;  // server listens on this port for commands from devices
     public static int devicePort;  // devices listen on this port for server commands
@@ -265,21 +267,23 @@ public class RGPIO {
 
         // Start listening to messages from devices
         new DeviceMonitorThread().start();
-/*
-        // Start broadcasting Report requests
-        DeviceProbeThread deviceProbeThread = new DeviceProbeThread(reportInterval);
-        deviceProbeThread.start();
-*/
+        /*
+         // Start broadcasting Report requests
+         DeviceProbeThread deviceProbeThread = new DeviceProbeThread(reportInterval);
+         deviceProbeThread.start();
+         */
         ClientHandler clientHandler = new ClientHandler();
 
         webSocketServer = new WSServer(webSocketPort);
         webSocketServer.addListener(clientHandler);
         webSocketServer.start();
 
+       deviceTree = new DeviceTree("RGPIO");
     }
-    
-    static Integer msgId=0;
-    public static String msgId(){
+
+    static Integer msgId = 0;
+
+    public static String msgId() {
         msgId++;
         return msgId.toString();
     }
