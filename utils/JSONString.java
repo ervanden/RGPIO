@@ -1,4 +1,4 @@
-package devicetree;
+package utils;
 
 public class JSONString {
 

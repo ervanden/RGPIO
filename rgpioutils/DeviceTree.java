@@ -5,7 +5,7 @@
  */
 package rgpioutils;
 
-import devicetree.JSONString;
+import utils.JSONString;
 import java.util.HashMap;
 import java.util.HashSet;
 
