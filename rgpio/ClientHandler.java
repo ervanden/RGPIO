@@ -74,7 +74,7 @@ public class ClientHandler implements WSServerListener {
              */
             if (storeFile == null) {
                 try {
-                    String fileName = RGPIO.RGPIODirectory+"storage/" + cmd.Arg1 + ".txt";
+                    String fileName = RGPIO.RGPIODirectory + "storage/" + cmd.Arg1 + ".txt";
                     reply.add("opening file : " + fileName);
                     File file = new File(fileName);
                     OutputStream is = new FileOutputStream(file);
@@ -108,7 +108,7 @@ public class ClientHandler implements WSServerListener {
              */
 
             try {
-                String fileName = RGPIO.RGPIODirectory+"storage/" + cmd.Arg1 + ".txt";
+                String fileName = RGPIO.RGPIODirectory + "storage/" + cmd.Arg1 + ".txt";
                 reply.add("opening file : " + fileName);
                 File file = new File(fileName);
                 InputStream is = new FileInputStream(file);
@@ -229,6 +229,9 @@ public class ClientHandler implements WSServerListener {
             String jsonReply = "{ \"object\":\"GRAPH\", \"filename\":\"" + fileName + "\"}";
             reply.add(jsonReply);
 
+        } else if (cmd.Command.equals("tree")) {
+            return RGPIO.deviceTree.generateLayout();
+            
         } else {
             MessageEvent e = new MessageEvent(MessageType.Info);
             e.description = "unrecognized websocket request : |" + request + "|";

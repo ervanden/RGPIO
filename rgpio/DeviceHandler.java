@@ -40,7 +40,11 @@ public class DeviceHandler {
             if (RGPIO.deviceTree.addLink(previousHop, "RGPIO")) {
                 topologyChanged = true;
             }
-            if (topologyChanged) RGPIO.deviceTree.layout();
+            if (topologyChanged) {
+                for (String s : RGPIO.deviceTree.generateLayout()) {
+                    RGPIO.webSocketServer.sendToAll(s);
+                }
+            }
 
         } else if (msg.command.equals("REPORT")) {
             String HWid = msg.from;

@@ -5,6 +5,7 @@
  */
 package rgpioutils;
 
+import java.util.ArrayList;
 import utils.JSONString;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -128,7 +129,10 @@ public class DeviceTree {
         }
     }
 
-    public void layout() {
+    public ArrayList<String> generateLayout() {
+        
+        ArrayList<String> layout = new ArrayList<>();
+        
         System.out.println(" ----------- layout() -------------");
         
         // determine tree depth
@@ -191,8 +195,8 @@ public class DeviceTree {
 
         JSONString json = new JSONString();
         json.addProperty("object", "BEGINTREE");
-        RGPIO.webSocketServer.sendToAll(json.asString());
-
+        layout.add(json.asString());
+        
         // print all links (before the nodes, because the nodes overlay the links)
         depthFirst(root, 0,
                 (Device d, int depth) -> {
@@ -204,8 +208,8 @@ public class DeviceTree {
                         json1.addPropertyFloat("y1", d.y);
                         json1.addPropertyFloat("x2", d.upstream.x);
                         json1.addPropertyFloat("y2", d.upstream.y);
-                        RGPIO.webSocketServer.sendToAll(json1.asString());
-                        //                       System.out.println("drawTreeLink(" + json.asString() + ");");
+                        layout.add(json1.asString());
+                        // System.out.println("drawTreeLink(" + json.asString() + ");");
                     }
                 }
         );
@@ -218,15 +222,16 @@ public class DeviceTree {
                     json2.addProperty("name", d.name);
                     json2.addPropertyFloat("x", d.x);
                     json2.addPropertyFloat("y", d.y);
-                    RGPIO.webSocketServer.sendToAll(json2.asString());
-                    //                   System.out.println("drawTreeNode(" + json.asString() + ");");
+                    layout.add(json2.asString());
+                    // System.out.println("drawTreeNode(" + json.asString() + ");");
                 }
         );
-
+/*
         json = new JSONString();
         json.addProperty("object", "ENDTREE");
         RGPIO.webSocketServer.sendToAll(json.asString());
-
+*/
+        return layout;
     }
 
 }
