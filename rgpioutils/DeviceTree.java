@@ -8,6 +8,7 @@ package rgpioutils;
 import utils.JSONString;
 import java.util.HashMap;
 import java.util.HashSet;
+import rgpio.RGPIO;
 
 class Device {
 
@@ -77,9 +78,11 @@ public class DeviceTree {
             du.downstream.add(d);
         }
 
-        System.out.println("adding " + d.name + " to downstream of " + du.name + " : " + du.downstream.size());
+        System.out.print("adding " + d.name + " to downstream of " + du.name + " : " + du.downstream.size());
         if (topologyChange) {
-            layout();
+            System.out.println(" : topology change");
+        } else {
+            System.out.println(" : no topology change");
         }
         return topologyChange;
     }
@@ -126,7 +129,10 @@ public class DeviceTree {
     }
 
     public void layout() {
-        System.out.println(" ----------- topology change -------------");
+        System.out.println(" ----------- layout() -------------");
+        
+        // determine tree depth
+        
         depthFirst(root, 0,
                 (Device d, int depth) -> {
                     System.out.println("Device " + d.name + " depth=" + depth);
@@ -141,6 +147,8 @@ public class DeviceTree {
             nrDevices[i] = 0;
             leftFilled[i] = 0;
         }
+        
+        // count the nr of devices at every level; to calculate the spacing
         depthFirst(root, 0,
                 (Device d, int depth) -> {
                     nrDevices[depth]++;
@@ -149,6 +157,10 @@ public class DeviceTree {
         for (int i = 0; i <= treeDepth; i++) {
             System.out.println(" nr of devices at depth " + i + " = " + nrDevices[i]);
         }
+        
+        // calculate the coordinates of every node.
+        // sub trees are drawn from left to right
+        // at every level, the nodes fill from left to right with equal spacing
         depthFirst(root, 0,
                 (Device d, int depth) -> {
                     float spacing = 0;
@@ -177,61 +189,73 @@ public class DeviceTree {
                 }
         );
 
-        // print all links (before the nodes, because they overlay)
+        JSONString json = new JSONString();
+        json.addProperty("object", "BEGINTREE");
+        RGPIO.webSocketServer.sendToAll(json.asString());
+
+        // print all links (before the nodes, because the nodes overlay the links)
         depthFirst(root, 0,
                 (Device d, int depth) -> {
                     if (depth > 0) {
-                        JSONString json = new JSONString();
-                        json.addProperty("name", "link");
-                        json.addPropertyFloat("x1", d.x);
-                        json.addPropertyFloat("y1", d.y);
-                        json.addPropertyFloat("x2", d.upstream.x);
-                        json.addPropertyFloat("y2", d.upstream.y);
-                    System.out.println("drawTreeLink("+json.asString() + ");");
+                        JSONString json1 = new JSONString();
+                        json1.addProperty("object", "TREELINK");
+                        json1.addProperty("name", "link");
+                        json1.addPropertyFloat("x1", d.x);
+                        json1.addPropertyFloat("y1", d.y);
+                        json1.addPropertyFloat("x2", d.upstream.x);
+                        json1.addPropertyFloat("y2", d.upstream.y);
+                        RGPIO.webSocketServer.sendToAll(json1.asString());
+                        //                       System.out.println("drawTreeLink(" + json.asString() + ");");
                     }
                 }
         );
-        
+
         // print all nodes
         depthFirst(root, 0,
                 (Device d, int depth) -> {
-                    JSONString json = new JSONString();
-                    json.addProperty("name", d.name);
-                    json.addPropertyFloat("x", d.x);
-                    json.addPropertyFloat("y", d.y);
-                    System.out.println("drawTreeNode("+json.asString() + ");");
+                    JSONString json2 = new JSONString();
+                    json2.addProperty("object", "TREENODE");
+                    json2.addProperty("name", d.name);
+                    json2.addPropertyFloat("x", d.x);
+                    json2.addPropertyFloat("y", d.y);
+                    RGPIO.webSocketServer.sendToAll(json2.asString());
+                    //                   System.out.println("drawTreeNode(" + json.asString() + ");");
                 }
         );
+
+        json = new JSONString();
+        json.addProperty("object", "ENDTREE");
+        RGPIO.webSocketServer.sendToAll(json.asString());
 
     }
 
 }
 
 /*
-public class DeviceTree {
+ public class DeviceTree {
 
-    public static void main(String[] args) {
-        boolean topologyChange;
-        DeviceTree deviceTree = new DeviceTree("RGPIO");
-        topologyChange = deviceTree.addLink("n3", "n2");
-        topologyChange = deviceTree.addLink("n4", "n2");
-        topologyChange = deviceTree.addLink("n5", "n2");
-        topologyChange = deviceTree.addLink("n2", "n1");
-        topologyChange = deviceTree.addLink("n6", "RGPIO");
-        topologyChange = deviceTree.addLink("n7", "n1");
-        topologyChange = deviceTree.addLink("n1", "RGPIO");
+ public static void main(String[] args) {
+ boolean topologyChange;
+ DeviceTree deviceTree = new DeviceTree("RGPIO");
+ topologyChange = deviceTree.addLink("n3", "n2");
+ topologyChange = deviceTree.addLink("n4", "n2");
+ topologyChange = deviceTree.addLink("n5", "n2");
+ topologyChange = deviceTree.addLink("n2", "n1");
+ topologyChange = deviceTree.addLink("n6", "RGPIO");
+ topologyChange = deviceTree.addLink("n7", "n1");
+ topologyChange = deviceTree.addLink("n1", "RGPIO");
   
-                topologyChange = deviceTree.addLink("n3", "n2");
-        topologyChange = deviceTree.addLink("n4", "n2");
-        topologyChange = deviceTree.addLink("n5", "n2");
-        topologyChange = deviceTree.addLink("n2", "n1");
-        topologyChange = deviceTree.addLink("n6", "RGPIO");
-        topologyChange = deviceTree.addLink("n7", "n1");
-        topologyChange = deviceTree.addLink("n1", "RGPIO");
-        System.out.println("changing topology");
-        topologyChange = deviceTree.addLink("n2", "n6");
+ topologyChange = deviceTree.addLink("n3", "n2");
+ topologyChange = deviceTree.addLink("n4", "n2");
+ topologyChange = deviceTree.addLink("n5", "n2");
+ topologyChange = deviceTree.addLink("n2", "n1");
+ topologyChange = deviceTree.addLink("n6", "RGPIO");
+ topologyChange = deviceTree.addLink("n7", "n1");
+ topologyChange = deviceTree.addLink("n1", "RGPIO");
+ System.out.println("changing topology");
+ topologyChange = deviceTree.addLink("n2", "n6");
 
-    }
+ }
 
-}
-*/
+ }
+ */

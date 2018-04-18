@@ -23,18 +23,24 @@ public class DeviceHandler {
             // Parse the trace packet and add the topology information to the device tree
             String previousHop = null;
             String currentHop = null;
+            boolean topologyChanged = false;
             String[] traceSplit = msg.trace.split("\\)");
             for (String hop : traceSplit) {
                 String[] hopSplit = hop.split("\\(");
                 currentHop = hopSplit[0];
                 if (previousHop != null) {
                     System.out.println(previousHop + " -> " + currentHop);
-                    RGPIO.deviceTree.addLink(previousHop,currentHop);
+                    if (RGPIO.deviceTree.addLink(previousHop, currentHop)) {
+                        topologyChanged = true;
+                    }
                 }
                 previousHop = currentHop;
             }
             System.out.println(previousHop + " -> " + "RGPIO");
-                                RGPIO.deviceTree.addLink(previousHop,"RGPIO");
+            if (RGPIO.deviceTree.addLink(previousHop, "RGPIO")) {
+                topologyChanged = true;
+            }
+            if (topologyChanged) RGPIO.deviceTree.layout();
 
         } else if (msg.command.equals("REPORT")) {
             String HWid = msg.from;
