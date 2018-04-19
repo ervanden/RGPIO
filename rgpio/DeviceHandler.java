@@ -36,7 +36,7 @@ public class DeviceHandler {
                 }
                 previousHop = currentHop;
             }
-            System.out.println(previousHop + " -> " + "RGPIO");
+  //          System.out.println(previousHop + " -> " + "RGPIO");
             if (RGPIO.deviceTree.addLink(previousHop, "RGPIO")) {
                 topologyChanged = true;
             }

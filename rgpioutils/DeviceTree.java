@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import utils.JSONString;
 import java.util.HashMap;
 import java.util.HashSet;
+import rgpio.RGPIO;
 
 class Device {
 
@@ -278,7 +279,9 @@ public class DeviceTree {
                 }
                 if (topologyChange) {
                     System.out.println("generateLayout because device(s) expired");
-                    generateLayout();
+                    for (String s : generateLayout()) {
+                        RGPIO.webSocketServer.sendToAll(s);
+                    }
                 }
 
                 try {
