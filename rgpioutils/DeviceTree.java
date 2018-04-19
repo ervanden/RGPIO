@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import utils.JSONString;
 import java.util.HashMap;
 import java.util.HashSet;
-import rgpio.RGPIO;
 
 class Device {
 
@@ -18,6 +17,8 @@ class Device {
     float x, y;
     Device upstream;
     HashSet<Device> downstream;
+    long lastUpdate;
+    boolean expired;
 }
 
 public class DeviceTree {
@@ -41,6 +42,7 @@ public class DeviceTree {
         if (d == null) {
             d = new Device();
             d.name = name;
+            d.expired = false;
             d.upstream = null;
             d.downstream = new HashSet<Device>();
             nodes.put(name, d);
@@ -54,10 +56,10 @@ public class DeviceTree {
         Device d;
         Device du;
         boolean topologyChange = false;
+        long now = System.currentTimeMillis();
 
-        d = addDevice(name);
-        du = addDevice(upstreamName);
-
+//        d = addDevice(name);
+//        du = addDevice(upstreamName);
         d = nodes.get(name);
         if (d == null) {
             topologyChange = true;
@@ -70,6 +72,17 @@ public class DeviceTree {
             du = addDevice(upstreamName);
         }
 
+        // if a device was expired but is now back, this is a topology change since the visual layout changes
+        if (d.expired) {
+            topologyChange = true;
+        }
+        if (du.expired) {
+            topologyChange = true;
+        }
+
+        d.lastUpdate = now;
+        du.lastUpdate = now;
+
         if (d.upstream != du) {
             topologyChange = true;
             if (d.upstream != null) {
@@ -80,11 +93,24 @@ public class DeviceTree {
         }
 
         System.out.print("adding " + d.name + " to downstream of " + du.name + " : " + du.downstream.size());
+
+        // Another reason for topology change can be that some other nodes have not been updated since too long
+        // Find these nodes and set them to 'expired'
+        for (Device device : nodes.values()) {
+            if ((now - device.lastUpdate) > 10000) {
+                if (!device.expired) {
+                    topologyChange = true;
+                }
+                device.expired = true;
+            }
+        }
+
         if (topologyChange) {
             System.out.println(" : topology change");
         } else {
             System.out.println(" : no topology change");
         }
+
         return topologyChange;
     }
 
@@ -95,9 +121,11 @@ public class DeviceTree {
     }
 
     public void depthFirst(Device device, int depth, DoSomething action) {
-        action.doIt(device, depth);
-        for (Device d : device.downstream) {
-            depthFirst(d, depth + 1, action);
+        if (!device.expired) {
+            action.doIt(device, depth);
+            for (Device d : device.downstream) {
+                depthFirst(d, depth + 1, action);
+            }
         }
     }
 
@@ -130,13 +158,12 @@ public class DeviceTree {
     }
 
     public ArrayList<String> generateLayout() {
-        
+
         ArrayList<String> layout = new ArrayList<>();
-        
+
         System.out.println(" ----------- layout() -------------");
-        
+
         // determine tree depth
-        
         depthFirst(root, 0,
                 (Device d, int depth) -> {
                     System.out.println("Device " + d.name + " depth=" + depth);
@@ -151,7 +178,7 @@ public class DeviceTree {
             nrDevices[i] = 0;
             leftFilled[i] = 0;
         }
-        
+
         // count the nr of devices at every level; to calculate the spacing
         depthFirst(root, 0,
                 (Device d, int depth) -> {
@@ -161,7 +188,7 @@ public class DeviceTree {
         for (int i = 0; i <= treeDepth; i++) {
             System.out.println(" nr of devices at depth " + i + " = " + nrDevices[i]);
         }
-        
+
         // calculate the coordinates of every node.
         // sub trees are drawn from left to right
         // at every level, the nodes fill from left to right with equal spacing
@@ -179,24 +206,26 @@ public class DeviceTree {
                     d.y = (float) depth / (float) treeDepth;
                 }
         );
-        breadthFirst(
-                (Device d, int depth) -> {
-                    for (int i = 0; i < depth; i++) {
-                        System.out.print("-");
-                    }
-                    if (depth == 0) {
-                        System.out.println(" " + d.name + "(" + d.x + "," + d.y + ")");
-                    } else {
-                        System.out.println(" " + d.name + "(" + d.x + "," + d.y + ") - "
-                                + d.upstream.name + "(" + d.upstream.x + "," + d.upstream.y + ")");
-                    }
-                }
-        );
+        /*
+         breadthFirst(
+         (Device d, int depth) -> {
+         for (int i = 0; i < depth; i++) {
+         System.out.print("-");
+         }
+         if (depth == 0) {
+         System.out.println(" " + d.name + "(" + d.x + "," + d.y + ")");
+         } else {
+         System.out.println(" " + d.name + "(" + d.x + "," + d.y + ") - "
+         + d.upstream.name + "(" + d.upstream.x + "," + d.upstream.y + ")");
+         }
+         }
+         );
+         */
 
         JSONString json = new JSONString();
         json.addProperty("object", "BEGINTREE");
         layout.add(json.asString());
-        
+
         // print all links (before the nodes, because the nodes overlay the links)
         depthFirst(root, 0,
                 (Device d, int depth) -> {
@@ -226,11 +255,11 @@ public class DeviceTree {
                     // System.out.println("drawTreeNode(" + json.asString() + ");");
                 }
         );
-/*
-        json = new JSONString();
-        json.addProperty("object", "ENDTREE");
-        RGPIO.webSocketServer.sendToAll(json.asString());
-*/
+        /*
+         json = new JSONString();
+         json.addProperty("object", "ENDTREE");
+         RGPIO.webSocketServer.sendToAll(json.asString());
+         */
         return layout;
     }
 
