@@ -161,7 +161,7 @@ public class DeviceTree {
         System.out.println(" ----------- layout() -------------");
         
         for (Device d : nodes.values()) {
-            System.out.println(" device " + device.name + " expired=" + device.expired);
+            System.out.println(" device " + d.name + " expired=" + d.expired);
         }
         
         // determine tree depth
