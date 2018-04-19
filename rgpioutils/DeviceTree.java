@@ -72,14 +72,6 @@ public class DeviceTree {
             du = addDevice(upstreamName);
         }
 
-        // if a device was expired but is now back, this is a topology change since the visual layout changes
-        if (d.expired) {
-            topologyChange = true;
-        }
-        if (du.expired) {
-            topologyChange = true;
-        }
-
         d.lastUpdate = now;
         du.lastUpdate = now;
 
@@ -97,11 +89,16 @@ public class DeviceTree {
         // Another reason for topology change can be that some other nodes have not been updated since too long
         // Find these nodes and set them to 'expired'
         for (Device device : nodes.values()) {
-            if ((now - device.lastUpdate) > 10000) {
+            if ((now - device.lastUpdate) > 10000) {  // device expired
                 if (!device.expired) {
                     topologyChange = true;
                 }
                 device.expired = true;
+            } else { // device confirmed presence
+                if (device.expired) {
+                    topologyChange = true;
+                }
+                device.expired = false;
             }
         }
 
@@ -162,7 +159,11 @@ public class DeviceTree {
         ArrayList<String> layout = new ArrayList<>();
 
         System.out.println(" ----------- layout() -------------");
-
+        
+        for (Device d : nodes.values()) {
+            System.out.println(" device " + device.name + " expired=" + device.expired);
+        }
+        
         // determine tree depth
         depthFirst(root, 0,
                 (Device d, int depth) -> {
