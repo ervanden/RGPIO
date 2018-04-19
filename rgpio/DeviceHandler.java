@@ -29,7 +29,7 @@ public class DeviceHandler {
                 String[] hopSplit = hop.split("\\(");
                 currentHop = hopSplit[0];
                 if (previousHop != null) {
-                    System.out.println(previousHop + " -> " + currentHop);
+ //                   System.out.println(previousHop + " -> " + currentHop);
                     if (RGPIO.deviceTree.addLink(previousHop, currentHop)) {
                         topologyChanged = true;
                     }

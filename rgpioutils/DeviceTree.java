@@ -84,7 +84,7 @@ public class DeviceTree {
             du.downstream.add(d);
         }
 
-        System.out.print("adding " + d.name + " to downstream of " + du.name + " : " + du.downstream.size());
+        System.out.print("adding " + d.name + " -> " + du.name);
 
         // device confirmed presence
         if (d.expired) {
@@ -229,7 +229,7 @@ public class DeviceTree {
                         json1.addPropertyFloat("x2", d.upstream.x);
                         json1.addPropertyFloat("y2", d.upstream.y);
                         layout.add(json1.asString());
-                        // System.out.println("drawTreeLink(" + json.asString() + ");");
+                        System.out.println(json1.asString());
                     }
                 }
         );
@@ -243,14 +243,10 @@ public class DeviceTree {
                     json2.addPropertyFloat("x", d.x);
                     json2.addPropertyFloat("y", d.y);
                     layout.add(json2.asString());
-                    // System.out.println("drawTreeNode(" + json.asString() + ");");
+                    System.out.println(json.asString());
                 }
         );
-        /*
-         json = new JSONString();
-         json.addProperty("object", "ENDTREE");
-         RGPIO.webSocketServer.sendToAll(json.asString());
-         */
+
         return layout;
     }
 
