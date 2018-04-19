@@ -243,7 +243,7 @@ public class DeviceTree {
                     json2.addPropertyFloat("x", d.x);
                     json2.addPropertyFloat("y", d.y);
                     layout.add(json2.asString());
-                    System.out.println(json.asString());
+                    System.out.println(json2.asString());
                 }
         );
 
