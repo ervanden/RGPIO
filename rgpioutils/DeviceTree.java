@@ -34,6 +34,8 @@ public class DeviceTree {
         root = addDevice(name);
         nrDevices = new int[100];
         leftFilled = new int[100];
+        generateLayout();
+        new DeviceAliveThread().start();
     }
 
     private Device addDevice(String name) {
@@ -58,8 +60,6 @@ public class DeviceTree {
         boolean topologyChange = false;
         long now = System.currentTimeMillis();
 
-//        d = addDevice(name);
-//        du = addDevice(upstreamName);
         d = nodes.get(name);
         if (d == null) {
             topologyChange = true;
@@ -86,21 +86,11 @@ public class DeviceTree {
 
         System.out.print("adding " + d.name + " to downstream of " + du.name + " : " + du.downstream.size());
 
-        // Another reason for topology change can be that some other nodes have not been updated since too long
-        // Find these nodes and set them to 'expired'
-        for (Device device : nodes.values()) {
-            if ((now - device.lastUpdate) > 10000) {  // device expired
-                if (!device.expired) {
-                    topologyChange = true;
-                }
-                device.expired = true;
-            } else { // device confirmed presence
-                if (device.expired) {
-                    topologyChange = true;
-                }
-                device.expired = false;
-            }
+        // device confirmed presence
+        if (d.expired) {
+            topologyChange = true;
         }
+        d.expired = false;
 
         if (topologyChange) {
             System.out.println(" : topology change");
@@ -159,11 +149,11 @@ public class DeviceTree {
         ArrayList<String> layout = new ArrayList<>();
 
         System.out.println(" ----------- layout() -------------");
-        
+
         for (Device d : nodes.values()) {
             System.out.println(" device " + d.name + " expired=" + d.expired);
         }
-        
+
         // determine tree depth
         depthFirst(root, 0,
                 (Device d, int depth) -> {
@@ -264,33 +254,45 @@ public class DeviceTree {
         return layout;
     }
 
+    class DeviceAliveThread extends Thread {
+
+        public DeviceAliveThread() {
+            super("DeviceAliveThread");
+        }
+
+        public void run() {
+
+            // Find the nodes that have not sent a trace since 10 seconds and set them to 'expired'
+            boolean topologyChange;
+            long now;
+            while (true) {
+
+                topologyChange = false;
+                now = System.currentTimeMillis();
+
+                for (Device device : nodes.values()) {
+                    if (device != root) {
+                        if ((now - device.lastUpdate) > 10000) {  // device expired
+                            if (!device.expired) {
+                                topologyChange = true;
+                            }
+                            device.expired = true;
+                        }
+                    }
+                }
+                if (topologyChange) {
+                    System.out.println("generateLayout because device(s) expired");
+                    generateLayout();
+                }
+
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                };
+            }
+
+        }
+
+    }
+
 }
-
-/*
- public class DeviceTree {
-
- public static void main(String[] args) {
- boolean topologyChange;
- DeviceTree deviceTree = new DeviceTree("RGPIO");
- topologyChange = deviceTree.addLink("n3", "n2");
- topologyChange = deviceTree.addLink("n4", "n2");
- topologyChange = deviceTree.addLink("n5", "n2");
- topologyChange = deviceTree.addLink("n2", "n1");
- topologyChange = deviceTree.addLink("n6", "RGPIO");
- topologyChange = deviceTree.addLink("n7", "n1");
- topologyChange = deviceTree.addLink("n1", "RGPIO");
-  
- topologyChange = deviceTree.addLink("n3", "n2");
- topologyChange = deviceTree.addLink("n4", "n2");
- topologyChange = deviceTree.addLink("n5", "n2");
- topologyChange = deviceTree.addLink("n2", "n1");
- topologyChange = deviceTree.addLink("n6", "RGPIO");
- topologyChange = deviceTree.addLink("n7", "n1");
- topologyChange = deviceTree.addLink("n1", "RGPIO");
- System.out.println("changing topology");
- topologyChange = deviceTree.addLink("n2", "n6");
-
- }
-
- }
- */
