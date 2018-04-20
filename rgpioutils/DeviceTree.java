@@ -195,7 +195,11 @@ public class DeviceTree {
                         // only one device at this depth
                         d.x = 0.5f;
                     }
-                    d.y = (float) depth / (float) treeDepth;
+                    if (treeDepth == 0) { // tree contains only RGPIO
+                        d.y = 0;
+                    } else {
+                        d.y = (float) depth / (float) treeDepth;
+                    }
                 }
         );
         /*
