@@ -30,7 +30,7 @@ public class SendSetCommandThread extends Thread {
             json.addProperty("retry", retry.toString());
             json.addProperty("pin", p.name);
             json.addProperty("value", p.get_value());
-            device.sendToDevice(json.asString());
+            device.sendPacket(json.asString());
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException ie) {

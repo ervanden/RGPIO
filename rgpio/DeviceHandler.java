@@ -125,7 +125,7 @@ public class DeviceHandler {
         json.addProperty("from", "RGPIO");
         json.addProperty("to", pdevice.HWid);
         String ackReport = json.asString();
-        //       pdevice.sendToDevice(ackReport);
+        //       pdevice.sendPacket(ackReport);
         UDPSender.send(ackReport, pdevice.ipAddress, null, RGPIO.devicePort);
     }
 }

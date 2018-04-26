@@ -28,7 +28,7 @@ public class SendGetCommandThread extends Thread {
             json.addProperty("to", device.HWid);
             json.addProperty("retry", retry.toString());
             json.addProperty("pin", p.name);
-            device.sendToDevice(json.asString());
+            device.sendPacket(json.asString());
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException ie) {

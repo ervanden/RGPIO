@@ -22,7 +22,7 @@ public class SendSleepCommandThread extends Thread {
         json.addProperty("command", "SLEEP");
         json.addProperty("sleeptime", sleepTime.toString());
  
-        device.sendToDevice(json.asString());   
+        device.sendPacket(json.asString());   
         
     }
 }

@@ -25,13 +25,14 @@ public class VOutput extends VIO {
 
         value = newValue;
         // web update not needed, will receive an EVENT
- //       RGPIO.webSocketServer.sendToAll(toJSON());
+        //       RGPIO.webSocketServer.sendToAll(toJSON());
 
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (POutput p : device.outputs.values()) {
                 if (p.voutput == this) {
                     p.set_value(newValue);
-                    new SendSetCommandThread(device, p,0).start();
+                    //new SendSetCommandThread(device, p,0).start();
+                    device.sendSetCommand(p);
                 }
             }
         }
@@ -49,7 +50,7 @@ public class VOutput extends VIO {
             for (POutput p : device.outputs.values()) {
                 if (p.voutput == this) {
                     p.set_value(newValue);
-                    SendSetCommandThread t = new SendSetCommandThread(device, p,3);
+                    SendSetCommandThread t = new SendSetCommandThread(device, p, 3);
                     threads.add(t);
                     t.start();
                 }
@@ -75,8 +76,6 @@ public class VOutput extends VIO {
         }
         RGPIO.webSocketServer.sendToAll(toJSON());
     }
-    
-    
 
     public void countMembers() {
         int m = 0;

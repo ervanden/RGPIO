@@ -67,22 +67,6 @@ public class PDevice {
             RGPIO.webSocketServer.sendToAll(op.toJSON());
         }
     }
-    /*
-     public void updatePOutput(POutput op) {
-     if (op.voutput != null) {
-     if (op.voutput.value != null) {
-     new SendSetCommandThread(this, op).start();
-     op.set_value(op.voutput.value); // includes web update
-     }
-     }
-     }
-
-     public void updatePInput(PInput ip) {
-     if (ip.vinput != null) {
-     ip.vinput.get();   // includes web update
-     }
-     }
-     */
 
     public void updateAllPins() {
 
@@ -120,15 +104,48 @@ public class PDevice {
         }
     }
 
-    public void sendToDevice(String message) {
-/*
-        // delay because ESP misses packet if it receives SET  too fast after sending EVENT
-        // (UDP is stopped and started on ESP after sending = blackout of a few msec)
+    public void sendGetCommand(PInput p) {
+        JSONString json = new JSONString();
+        json.addProperty("command", "GET");
+        json.addProperty("id", RGPIO.msgId());
+        json.addProperty("from", "RGPIO");
+        json.addProperty("to", HWid);
+        json.addProperty("pin", p.name);
+        sendPacket(json.asString());
+    }
+
+    public void sendSetCommand(POutput p) {
+
+        JSONString json = new JSONString();
+        json.addProperty("command", "SET");
+        json.addProperty("id", RGPIO.msgId());
+        json.addProperty("from", "RGPIO");
+        json.addProperty("to", HWid);
+        json.addProperty("pin", p.name);
+        json.addProperty("value", p.get_value());
+        sendPacket(json.asString());
+    }
+
+    public void sendMessage(String message) {
+        JSONString json = new JSONString();
+        json.addProperty("command", "MESSAGE");
+        json.addProperty("id", RGPIO.msgId());
+        json.addProperty("from", "RGPIO");
+        json.addProperty("to", HWid);
+        json.addProperty("message", message);
+        sendPacket(json.asString());
+    }
+    
+    
+
+    public void sendPacket(String message) {
+
+        // throttle sending packets to a device
         try {
-            Thread.sleep(50);
+            Thread.sleep(500);
         } catch (InterruptedException ie) {
-        };
-*/
+        }
+
         if (ipAddress == null) {
             MessageEvent e = new MessageEvent(MessageType.SendWarning);
             e.description = "cannot send message to unreported device";

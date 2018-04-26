@@ -35,13 +35,7 @@ public class VDevice extends VIO {
     public void sendMessage(String message) {
         for (PDevice pdevice : RGPIO.PDeviceMap.values()) {
             if (pdevice.vdevice == this) {
-                JSONString json = new JSONString();
-                json.addProperty("command", "MESSAGE");
-                json.addProperty("id", RGPIO.msgId());
-                json.addProperty("from", "RGPIO");
-                json.addProperty("to", pdevice.HWid);
-                json.addProperty("message", message);
-                pdevice.sendToDevice(json.asString());
+              pdevice.sendMessage(message);
             }
         }
     }

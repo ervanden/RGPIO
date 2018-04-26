@@ -55,7 +55,8 @@ public class VInput extends VIO {
         for (PDevice device : RGPIO.PDeviceMap.values()) {
             for (PInput ip : device.inputs.values()) {
                 if (ip.vinput == this) {
-                    new SendGetCommandThread(device, ip,0).start();
+ //                   new SendGetCommandThread(device, ip,0).start();
+                    device.sendGetCommand(ip);
                 }
             }
         }
@@ -139,7 +140,7 @@ public class VInput extends VIO {
         }
     }
 
-    // when a SET or GET time out, the value of the pin is set to null (return value of sendToDevice())
+    // when a SET or GET time out, the value of the pin is set to null (return value of sendPacket())
     // so pins on non-responding devices are not taken into account in all the functions below
     public Integer nrHigh() {
         int nrHigh = 0;
