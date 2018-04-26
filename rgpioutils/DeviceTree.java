@@ -85,20 +85,20 @@ public class DeviceTree {
             du.downstream.add(d);
         }
 
-        System.out.print("adding " + d.name + " -> " + du.name);
+ //       System.out.print("adding " + d.name + " -> " + du.name);
 
         // device confirmed presence
         if (d.expired) {
             topologyChange = true;
         }
         d.expired = false;
-
+/*
         if (topologyChange) {
             System.out.println(" : topology change");
         } else {
             System.out.println(" : no topology change");
         }
-
+*/
         return topologyChange;
     }
 
