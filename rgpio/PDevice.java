@@ -136,13 +136,20 @@ public class PDevice {
         sendPacket(json.asString());
     }
     
-    
+    public void sendACKREPORT() {
+        JSONString json = new JSONString();
+        json.addProperty("command", "ACKREPORT");
+        json.addProperty("id", RGPIO.msgId());
+        json.addProperty("from", "RGPIO");
+        json.addProperty("to", HWid);
+        sendPacket(json.asString());
+    } 
 
     public void sendPacket(String message) {
 
         // throttle sending packets to a device
         try {
-            Thread.sleep(500);
+            Thread.sleep(1000);
         } catch (InterruptedException ie) {
         }
 

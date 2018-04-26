@@ -80,7 +80,7 @@ public class DeviceHandler {
                 pdevice.uptime = upTime;
                 pdevice.report_received = System.currentTimeMillis();
                 pdevice.setActive();
-                sendACKREPORT(pdevice); // send ACKREPORT otherwise device will not respond   
+                pdevice.sendACKREPORT(); // send ACKREPORT otherwise device will not respond   
 //                System.out.println("***Device booted : (not)updating all pins");
 //                pdevice.updateAllPins();
 //                pdevice.updateVIOMembers();
@@ -91,7 +91,7 @@ public class DeviceHandler {
                 pdevice.uptime = upTime;
                 pdevice.report_received = System.currentTimeMillis();
                 pdevice.setActive();
-                sendACKREPORT(pdevice);  // send ACKREPORT otherwise device will not respond after reboot
+                pdevice.sendACKREPORT();  // send ACKREPORT otherwise device will not respond after reboot
                 if (upTime < pdevice.uptime) {
                     //                   System.out.println("***Device rebooted : (not)updating all pins");
                     //                   pdevice.updateAllPins();
@@ -118,14 +118,5 @@ public class DeviceHandler {
 
     }
 
-    private static void sendACKREPORT(PDevice pdevice) {
-        JSONString json = new JSONString();
-        json.addProperty("command", "ACKREPORT");
-        json.addProperty("id", RGPIO.msgId());
-        json.addProperty("from", "RGPIO");
-        json.addProperty("to", pdevice.HWid);
-        String ackReport = json.asString();
-        //       pdevice.sendPacket(ackReport);
-        UDPSender.send(ackReport, pdevice.ipAddress, null, RGPIO.devicePort);
-    }
+   
 }
