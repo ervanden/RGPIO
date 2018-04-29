@@ -143,6 +143,72 @@ class UpdateRRDThread extends Thread {
                 long time = Util.getTimestamp();
                 RGPIO.RRDSample.setTime(time);
                 int updates = 0;
+
+                // new code not using RRDVIO
+                // purpose : to store last recorded values in the VAnalogInput,... objects
+                
+                for (VInput v : RGPIO.VAnalogInputMap.values()) {
+                    e.vdevice = v.name;
+                    Integer value = v.avg();
+                    if (value != null) {
+                        e.description = "value=" + value;
+                        RGPIO.message(e);
+                        //System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
+                        RGPIO.RRDSample.setValue(v.name, v.avg());
+                        updates++;
+                    }
+                }
+
+                for (VOutput v : RGPIO.VAnalogOutputMap.values()) {
+                    e.vdevice = v.name;
+                    try {
+                        //System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
+                        if (v.value != null) {
+                            Integer value = Integer.parseInt(v.value);
+                            e.description = "value=" + value;
+                            RGPIO.message(e);
+                            RGPIO.RRDSample.setValue(v.name, value);
+                            updates++;
+                        }
+                    } catch (NumberFormatException nfe) {
+                        System.out.println("UpdateRDD: value is not an integer: " + v.value + " Ignored.");
+                    }
+                }
+
+                for (VInput v : RGPIO.VDigitalInputMap.values()) {
+                    e.vdevice = v.name;
+                    Integer value = v.nrHigh();
+                    //System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
+                    if (value != null) {
+                        e.description = "value=" + value;
+                        RGPIO.message(e);
+                        RGPIO.RRDSample.setValue(v.name, v.nrHigh());
+                        updates++;
+                    }
+                }
+                
+                for (VOutput v : RGPIO.VDigitalOutputMap.values()) {
+                    e.vdevice = v.name;
+                        //System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
+                        if (v.value != null) {
+                            if (v.value.equals("High")) {
+                                e.description = "value=" + "1";
+                                RGPIO.message(e);
+                                RGPIO.RRDSample.setValue(v.name, 1);
+                                updates++;
+                            } else if (v.value.equals("Low")) {
+                                e.description = "value=" + "0";
+                                RGPIO.message(e);
+                                RGPIO.RRDSample.setValue(v.name, 0);
+                                updates++;
+                            } else {
+                                System.out.println("UpdateRDD: Invalid value of digital output : " + v.value + " Ignored.");
+                            }
+                        }
+                    }
+                
+ /* using RRDVIO               
+
                 for (VIO vio : RGPIO.RRDVIO) {
                     e.vdevice = vio.name;
                     if (vio.type == IOType.analogInput) {
@@ -203,11 +269,13 @@ class UpdateRRDThread extends Thread {
                         }
                     }
                 }
+*/
+                
                 if (updates > 0) {
                     try {
                         RGPIO.RRDSample.update();
                     } catch (IOException ioe) {
-                    };
+                    }
                 }
             } catch (InterruptedException ie) {
             }
@@ -278,7 +346,7 @@ public class RGPIO {
         webSocketServer.addListener(clientHandler);
         webSocketServer.start();
 
-       deviceTree = new DeviceTree("RGPIO");
+        deviceTree = new DeviceTree("RGPIO");
     }
 
     static Integer msgId = 0;
