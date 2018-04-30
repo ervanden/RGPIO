@@ -1,7 +1,6 @@
 package rgpio;
 
 import java.util.ArrayList;
-import udputils.SendGetCommandThread;
 import utils.JSONString;
 import udputils.SendSetCommandThread;
 

@@ -106,11 +106,9 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
                     RGPIO.message(e);
                     return;
                 }
-            } else if (pinput.type == IOType.stringInput) {
+            } 
 
-            }
-
-            pinput.setDebounced(value);
+            pinput.setValue(value);
         }
 
         if (poutput != null) { // event for an output pin ( device sends EVENT when receiving SET )
