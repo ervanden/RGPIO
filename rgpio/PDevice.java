@@ -1,5 +1,7 @@
 package rgpio;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import utils.JSONString;
 import java.util.HashMap;
 import udputils.UDPSender;
@@ -245,16 +247,13 @@ public class PDevice {
 
         // add the pin to the device output map
         // and to the matching VInput map
-        HashMap<String, VInput> VInputs = null;
+        ArrayList<VInput> vinputs = null;
 
         if (type == IOType.digitalInput) {
-            VInputs = RGPIO.VDigitalInputMap;
+            vinputs = new ArrayList<>(RGPIO.VDigitalInputMap.values());
         }
         if (type == IOType.analogInput) {
-            VInputs = RGPIO.VAnalogInputMap;
-        }
-        if (type == IOType.stringInput) {
-            VInputs = RGPIO.VStringInputMap;
+            vinputs = new ArrayList<>(RGPIO.VAnalogInputMap.values());
         }
 
         PInput pinput = pdevice.inputs.get(pinName);
@@ -269,7 +268,7 @@ public class PDevice {
             // match to a vinput
             int nrInstances = 0;
             VInput theOnlyVInput = null;
-            for (VInput vinput : VInputs.values()) {
+            for (VInput vinput : vinputs) {
                 if (vinput.matchesDevicePin(pinName, modelName, HWid)) {
                     theOnlyVInput = vinput;
                     nrInstances++;

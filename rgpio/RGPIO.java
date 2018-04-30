@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import mail.MailGenerator;
 import org.rrd4j.core.RrdDb;
@@ -146,8 +147,7 @@ class UpdateRRDThread extends Thread {
 
                 // new code not using RRDVIO
                 // purpose : to store last recorded values in the VAnalogInput,... objects
-                
-                for (VInput v : RGPIO.VAnalogInputMap.values()) {
+                for (VAnalogInput v : RGPIO.VAnalogInputMap.values()) {
                     e.vdevice = v.name;
                     Integer value = v.avg();
                     if (value != null) {
@@ -186,91 +186,90 @@ class UpdateRRDThread extends Thread {
                         updates++;
                     }
                 }
-                
+
                 for (VOutput v : RGPIO.VDigitalOutputMap.values()) {
                     e.vdevice = v.name;
-                        //System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
-                        if (v.value != null) {
-                            if (v.value.equals("High")) {
-                                e.description = "value=" + "1";
-                                RGPIO.message(e);
-                                RGPIO.RRDSample.setValue(v.name, 1);
-                                updates++;
-                            } else if (v.value.equals("Low")) {
-                                e.description = "value=" + "0";
-                                RGPIO.message(e);
-                                RGPIO.RRDSample.setValue(v.name, 0);
-                                updates++;
-                            } else {
-                                System.out.println("UpdateRDD: Invalid value of digital output : " + v.value + " Ignored.");
-                            }
-                        }
-                    }
-                
- /* using RRDVIO               
-
-                for (VIO vio : RGPIO.RRDVIO) {
-                    e.vdevice = vio.name;
-                    if (vio.type == IOType.analogInput) {
-                        VInput vinput = (VInput) vio;
-                        Integer value = vinput.avg();
-                        if (value != null) {
-                            e.description = "value=" + value;
+                    //System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
+                    if (v.value != null) {
+                        if (v.value.equals("High")) {
+                            e.description = "value=" + "1";
                             RGPIO.message(e);
-                            //System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
-                            RGPIO.RRDSample.setValue(vinput.name, vinput.avg());
+                            RGPIO.RRDSample.setValue(v.name, 1);
                             updates++;
-                        }
-                    }
-                    if (vio.type == IOType.analogOutput) {
-                        VOutput voutput = (VOutput) vio;
-                        try {
-                            //System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
-                            if (voutput.value != null) {
-                                Integer value = Integer.parseInt(voutput.value);
-                                e.description = "value=" + value;
-                                RGPIO.message(e);
-                                RGPIO.RRDSample.setValue(voutput.name, value);
-                                updates++;
-                            }
-
-                        } catch (NumberFormatException nfe) {
-                            System.out.println("UpdateRDD: value is not an integer: " + voutput.value + " Ignored.");
-                        }
-                    }
-                    if (vio.type == IOType.digitalInput) {
-                        VInput vinput = (VInput) vio;
-                        Integer value = vinput.nrHigh();
-                        //System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
-                        if (value != null) {
-                            e.description = "value=" + value;
+                        } else if (v.value.equals("Low")) {
+                            e.description = "value=" + "0";
                             RGPIO.message(e);
-                            RGPIO.RRDSample.setValue(vinput.name, vinput.nrHigh());
+                            RGPIO.RRDSample.setValue(v.name, 0);
                             updates++;
-                        }
-                    }
-                    if (vio.type == IOType.digitalOutput) {
-                        VOutput voutput = (VOutput) vio;
-                        //System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
-                        if (voutput.value != null) {
-                            if (voutput.value.equals("High")) {
-                                e.description = "value=" + "1";
-                                RGPIO.message(e);
-                                RGPIO.RRDSample.setValue(voutput.name, 1);
-                                updates++;
-                            } else if (voutput.value.equals("Low")) {
-                                e.description = "value=" + "0";
-                                RGPIO.message(e);
-                                RGPIO.RRDSample.setValue(voutput.name, 0);
-                                updates++;
-                            } else {
-                                System.out.println("UpdateRDD: Invalid value of digital output : " + voutput.value + " Ignored.");
-                            }
+                        } else {
+                            System.out.println("UpdateRDD: Invalid value of digital output : " + v.value + " Ignored.");
                         }
                     }
                 }
-*/
-                
+
+                /* using RRDVIO               
+
+                 for (VIO vio : RGPIO.RRDVIO) {
+                 e.vdevice = vio.name;
+                 if (vio.type == IOType.analogInput) {
+                 VInput vinput = (VInput) vio;
+                 Integer value = vinput.avg();
+                 if (value != null) {
+                 e.description = "value=" + value;
+                 RGPIO.message(e);
+                 //System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
+                 RGPIO.RRDSample.setValue(vinput.name, vinput.avg());
+                 updates++;
+                 }
+                 }
+                 if (vio.type == IOType.analogOutput) {
+                 VOutput voutput = (VOutput) vio;
+                 try {
+                 //System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
+                 if (voutput.value != null) {
+                 Integer value = Integer.parseInt(voutput.value);
+                 e.description = "value=" + value;
+                 RGPIO.message(e);
+                 RGPIO.RRDSample.setValue(voutput.name, value);
+                 updates++;
+                 }
+
+                 } catch (NumberFormatException nfe) {
+                 System.out.println("UpdateRDD: value is not an integer: " + voutput.value + " Ignored.");
+                 }
+                 }
+                 if (vio.type == IOType.digitalInput) {
+                 VInput vinput = (VInput) vio;
+                 Integer value = vinput.nrHigh();
+                 //System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
+                 if (value != null) {
+                 e.description = "value=" + value;
+                 RGPIO.message(e);
+                 RGPIO.RRDSample.setValue(vinput.name, vinput.nrHigh());
+                 updates++;
+                 }
+                 }
+                 if (vio.type == IOType.digitalOutput) {
+                 VOutput voutput = (VOutput) vio;
+                 //System.out.println("updating RRD with " + voutput.name + " = " + voutput.value + " (time=" + time + ")");
+                 if (voutput.value != null) {
+                 if (voutput.value.equals("High")) {
+                 e.description = "value=" + "1";
+                 RGPIO.message(e);
+                 RGPIO.RRDSample.setValue(voutput.name, 1);
+                 updates++;
+                 } else if (voutput.value.equals("Low")) {
+                 e.description = "value=" + "0";
+                 RGPIO.message(e);
+                 RGPIO.RRDSample.setValue(voutput.name, 0);
+                 updates++;
+                 } else {
+                 System.out.println("UpdateRDD: Invalid value of digital output : " + voutput.value + " Ignored.");
+                 }
+                 }
+                 }
+                 }
+                 */
                 if (updates > 0) {
                     try {
                         RGPIO.RRDSample.update();
@@ -288,7 +287,7 @@ public class RGPIO {
     public static PDeviceMap PDeviceMap;
     public static VDeviceMap VDeviceMap;
     public static VInputMap VDigitalInputMap;
-    public static VInputMap VAnalogInputMap;
+    public static HashMap<String, VAnalogInput> VAnalogInputMap;
     public static VInputMap VStringInputMap;
     public static VOutputMap VDigitalOutputMap;
     public static VOutputMap VAnalogOutputMap;
@@ -320,7 +319,7 @@ public class RGPIO {
         VDeviceMap = new VDeviceMap();
         PDeviceMap = new PDeviceMap();
         VDigitalInputMap = new VInputMap(IOType.digitalInput);
-        VAnalogInputMap = new VInputMap(IOType.analogInput);
+        VAnalogInputMap = new HashMap<String, VAnalogInput>();
         VStringInputMap = new VInputMap(IOType.stringInput);
         VDigitalOutputMap = new VOutputMap(IOType.digitalOutput);
         VAnalogOutputMap = new VOutputMap(IOType.analogOutput);
@@ -547,8 +546,8 @@ public class RGPIO {
             DeviceFileEntry dfe = (DeviceFileEntry) o;
 //            System.out.println(dfe.toString());
             VDevice device = null;
-            VInput vinput = null;
-            VOutput voutput = null;
+
+            VIO vio = null;
             String model = null;
             String HWid = null;
             String pin = null;
@@ -557,23 +556,26 @@ public class RGPIO {
                 device = VDeviceMap.add(dfe.Device);
             }
             if (dfe.DigitalInput != null) {
-                vinput = VDigitalInputMap.add(dfe.DigitalInput);
+                VDigitalInput v = new VDigitalInput();
+                VDigitalInputMap.put(dfe.DigitalInput, v);
+                vio = v;
             }
             if (dfe.DigitalOutput != null) {
-                voutput = VDigitalOutputMap.add(dfe.DigitalOutput);
+                VDigitalOutput v = new VDigitalOutput();
+                VDigitalOutputMap.put(dfe.DigitalOutput, v);
+                vio = v;
             }
             if (dfe.AnalogInput != null) {
-                vinput = VAnalogInputMap.add(dfe.AnalogInput);
+                VAnalogInput v = new VAnalogInput();
+                VAnalogInputMap.put(dfe.AnalogInput, v);
+                vio = v;
             }
             if (dfe.AnalogOutput != null) {
-                voutput = VAnalogOutputMap.add(dfe.AnalogOutput);
+                VAnalogOutput v = new VAnalogOutput();
+                VAnalogOutputMap.put(dfe.AnalogOutput, v);
+                vio = v;
             }
-            if (dfe.StringInput != null) {
-                vinput = VStringInputMap.add(dfe.StringInput);
-            }
-            if (dfe.StringOutput != null) {
-                voutput = VStringOutputMap.add(dfe.StringOutput);
-            }
+
             if (dfe.Model != null) {
                 model = dfe.Model;
             }
@@ -595,24 +597,13 @@ public class RGPIO {
                     selectors++;
                 }
             }
-            if ((voutput != null) && (pin != null)) {
+            if ((vio != null) && (pin != null)) {
                 if (model != null) {
-                    voutput.addSelectSpec(pin, "Model", model);
+                    vio.addSelectSpec(pin, "Model", model);
                     selectors++;
                 }
                 if (HWid != null) {
-                    voutput.addSelectSpec(pin, "HWid", HWid);
-                    selectors++;
-                }
-            }
-
-            if ((vinput != null) && (pin != null)) {
-                if (model != null) {
-                    vinput.addSelectSpec(pin, "Model", model);
-                    selectors++;
-                }
-                if (HWid != null) {
-                    vinput.addSelectSpec(pin, "HWid", HWid);
+                    vio.addSelectSpec(pin, "HWid", HWid);
                     selectors++;
                 }
             }
