@@ -184,8 +184,8 @@ public class ClientHandler implements WSServerListener {
             String jsonReply = "{ \"object\":\"RRDENTRIES\", \"list\": [";
             String separator = "";
 
-            for (VIO vio : RGPIO.RRDVIO) {
-                jsonReply = jsonReply + separator + "\"" + vio.name + "\"";
+            for (String name : RGPIO.RRDVIO) {
+                jsonReply = jsonReply + separator + "\"" + name + "\"";
                 separator = ", ";
             }
 

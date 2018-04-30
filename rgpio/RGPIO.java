@@ -363,37 +363,31 @@ public class RGPIO {
     // createRRD is to be called by the main application after creating Vinputs
     // It will initialize the RRD database and start the thread that updates the database
     // every RRDStep seconds
-    public static ArrayList<VIO> RRDVIO = new ArrayList<>();
+    public static ArrayList<String> RRDVIO = new ArrayList<>();
 
     public static void createRRD(int RRDStep) {
-
-        ArrayList<String> vinputNames = new ArrayList<>();
 
         // create the list of data source names for the graph.
         // For now it is only the analog inputs
         for (VInput v : VAnalogInputMap.values()) {
             System.out.println("RDD entry: " + v.name);
-            RRDVIO.add(v);
-            vinputNames.add(v.name);
+            RRDVIO.add(v.name);
         }
         for (VOutput v : VAnalogOutputMap.values()) {
             System.out.println("RDD entry: " + v.name);
-            RRDVIO.add(v);
-            vinputNames.add(v.name);
+            RRDVIO.add(v.name);
         }
         for (VInput v : VDigitalInputMap.values()) {
             System.out.println("RDD entry: " + v.name);
-            RRDVIO.add(v);
-            vinputNames.add(v.name);
+            RRDVIO.add(v.name);
         }
         for (VOutput v : VDigitalOutputMap.values()) {
             System.out.println("RDD entry: " + v.name);
-            RRDVIO.add(v);
-            vinputNames.add(v.name);
+            RRDVIO.add(v.name);
         }
         // create a RRD database with an entry every Step seconds
         String RRDPath = RGPIO.RRDDirectory + "datastore.rrd";
-        RRDDB = RRDGenerator.createRRD(RRDPath, vinputNames, RRDStep);
+        RRDDB = RRDGenerator.createRRD(RRDPath, RRDVIO, RRDStep);
         if (RRDDB == null) {
             System.out.println("No RRDB. Exiting...");
             System.exit(0);
