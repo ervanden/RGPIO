@@ -29,7 +29,7 @@ public class DeviceHandler {
                 String[] hopSplit = hop.split("\\(");
                 currentHop = hopSplit[0];
                 if (previousHop != null) {
-                    System.out.println(previousHop + " -> " + currentHop);
+                    //System.out.println(previousHop + " -> " + currentHop);
                     // previousHop and currentHop are HWid of physical devices.
                     if (RGPIO.deviceTree.addLink(displayName(previousHop), displayName(currentHop))) {
                         topologyChanged = true;
@@ -37,7 +37,7 @@ public class DeviceHandler {
                 }
                 previousHop = currentHop;
             }
-                     System.out.println(previousHop + " -> " + "RGPIO");
+            //         System.out.println(previousHop + " -> " + "RGPIO");
             if (RGPIO.deviceTree.addLink(displayName(previousHop), "RGPIO")) {
                 topologyChanged = true;
             }
@@ -126,9 +126,9 @@ public class DeviceHandler {
         String name = HWid;
         pdevice = RGPIO.PDeviceMap.get(HWid);
         if (pdevice != null) {
-            System.out.println(" pdevice exists for " + HWid);
+            //System.out.println(" pdevice exists for " + HWid);
             if (pdevice.vdevice != null) {
-                System.out.println(" vdevice exists for " + HWid);
+                //System.out.println(" vdevice exists for " + HWid);
                 name = pdevice.vdevice.name;
             }
         }
