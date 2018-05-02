@@ -23,20 +23,42 @@ public class DeviceHandler {
             // Parse the trace packet and add the topology information to the device tree
             String previousHop = null;
             String currentHop = null;
+            String previousHopName = null;
+            String currentHopName = null;
             boolean topologyChanged = false;
             String[] traceSplit = msg.trace.split("\\)");
             for (String hop : traceSplit) {
                 String[] hopSplit = hop.split("\\(");
                 currentHop = hopSplit[0];
                 if (previousHop != null) {
- //                   System.out.println(previousHop + " -> " + currentHop);
-                    if (RGPIO.deviceTree.addLink(previousHop, currentHop)) {
+                    //                   System.out.println(previousHop + " -> " + currentHop);
+                    // previousHop and currentHop are HWid of physical devices.
+                    // If the pdevice is part of a vdevice, we use the vdevice name on the graph display
+                    // if not, just use the HWid as display name.
+                    PDevice pdevice;
+                    previousHopName = previousHop;
+                    pdevice = RGPIO.PDeviceMap.get(previousHop);
+                    if (pdevice != null) {
+                        if (pdevice.vdevice != null) {
+                            previousHopName = pdevice.vdevice.name;
+                        }
+                    }
+                    currentHopName = currentHop;
+                    pdevice = RGPIO.PDeviceMap.get(currentHop);
+                    if (pdevice != null) {
+                        if (pdevice.vdevice != null) {
+                            currentHopName = pdevice.vdevice.name;
+                        }
+                    }
+                    
+                    
+                    if (RGPIO.deviceTree.addLink(previousHopName, currentHopName)) {
                         topologyChanged = true;
                     }
                 }
                 previousHop = currentHop;
             }
-  //          System.out.println(previousHop + " -> " + "RGPIO");
+            //          System.out.println(previousHop + " -> " + "RGPIO");
             if (RGPIO.deviceTree.addLink(previousHop, "RGPIO")) {
                 topologyChanged = true;
             }
@@ -118,5 +140,4 @@ public class DeviceHandler {
 
     }
 
-   
 }
