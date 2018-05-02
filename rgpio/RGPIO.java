@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import mail.MailGenerator;
 import org.rrd4j.core.RrdDb;
@@ -126,10 +127,15 @@ class DeviceMonitorThread extends Thread {
 class UpdateRRDThread extends Thread {
 
     int step;
+    HashMap<String,Integer> lastValues;
 
+    // lastValues stores the last measured valid value for every Vinput.
+    // If a measurement does not produce a valid value, take the last recorded one
+    
     public UpdateRRDThread(int step) {
         super();
         this.step = step;
+        lastValues = new HashMap<>();
     }
 
     public void run() {
@@ -150,13 +156,19 @@ class UpdateRRDThread extends Thread {
                 for (VInput v : RGPIO.VAnalogInputMap.values()) {
                     e.vdevice = v.name;
                     Integer value = v.avg();
+                    if (value==null) {
+                        value=lastValues.get(v.name);
+                        System.out.println("RRD Using last value for "+v.name+ ":"+ value);
+                    }
                     if (value != null) {
                         e.description = "value=" + value;
                         RGPIO.message(e);
                         //System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
-                        RGPIO.RRDSample.setValue(v.name, v.avg());
+                        RGPIO.RRDSample.setValue(v.name, value);
                         updates++;
-                    }
+              System.out.println("RRD storing valid value for "+v.name+ ":"+ value);
+                        lastValues.put(v.name,value);
+                    } 
                 }
 
                 for (VOutput v : RGPIO.VAnalogOutputMap.values()) {
@@ -179,11 +191,15 @@ class UpdateRRDThread extends Thread {
                     e.vdevice = v.name;
                     Integer value = v.nrHigh();
                     //System.out.println("updating RRD with " + vinput.name + " = " + value + " (time=" + time + ")");
-                    if (value != null) {
+                                        if (value==null) {
+                        value=lastValues.get(v.name);
+                    }
+                                        if (value != null) {
                         e.description = "value=" + value;
                         RGPIO.message(e);
                         RGPIO.RRDSample.setValue(v.name, v.nrHigh());
                         updates++;
+                                                lastValues.put(v.name,value);
                     }
                 }
                 

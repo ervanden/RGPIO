@@ -4,7 +4,6 @@ import utils.JSONString;
 import java.util.ArrayList;
 import java.util.List;
 import udputils.SendGetCommandThread;
-import udputils.SendSetCommandThread;
 
 public class VInput extends VIO {
 
