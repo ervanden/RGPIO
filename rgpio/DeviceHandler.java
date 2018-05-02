@@ -23,8 +23,6 @@ public class DeviceHandler {
             // Parse the trace packet and add the topology information to the device tree
             String previousHop = null;
             String currentHop = null;
-            String previousHopName = null;
-            String currentHopName = null;
             boolean topologyChanged = false;
             String[] traceSplit = msg.trace.split("\\)");
             for (String hop : traceSplit) {
@@ -33,37 +31,14 @@ public class DeviceHandler {
                 if (previousHop != null) {
                     System.out.println(previousHop + " -> " + currentHop);
                     // previousHop and currentHop are HWid of physical devices.
-                    // If the pdevice is part of a vdevice, we use the vdevice name on the graph display
-                    // if not, just use the HWid as display name.
-
-                    PDevice pdevice;
-                    previousHopName = previousHop;
-                    pdevice = RGPIO.PDeviceMap.get(previousHop);
-                    if (pdevice != null) {
-                        System.out.println(" pdevice exists for " + previousHop);
-                        if (pdevice.vdevice != null) {
-                            System.out.println(" vdevice exists for " + previousHop);
-                            previousHopName = pdevice.vdevice.name;
-                        }
-                    }
-                    currentHopName = currentHop;
-                    pdevice = RGPIO.PDeviceMap.get(currentHop);
-                    if (pdevice != null) {
-                        System.out.println(" pdevice exists for " + currentHop);
-                        if (pdevice.vdevice != null) {
-                            System.out.println(" vdevice exists for " + currentHop);
-                            currentHopName = pdevice.vdevice.name;
-                        }
-                    }
-
-                    if (RGPIO.deviceTree.addLink(previousHop, currentHop)) {
+                    if (RGPIO.deviceTree.addLink(displayName(previousHop), displayName(currentHop))) {
                         topologyChanged = true;
                     }
                 }
                 previousHop = currentHop;
             }
-            //          System.out.println(previousHop + " -> " + "RGPIO");
-            if (RGPIO.deviceTree.addLink(previousHop, "RGPIO")) {
+                     System.out.println(previousHop + " -> " + "RGPIO");
+            if (RGPIO.deviceTree.addLink(displayName(previousHop), "RGPIO")) {
                 topologyChanged = true;
             }
             if (topologyChanged) {
@@ -144,4 +119,20 @@ public class DeviceHandler {
 
     }
 
+    static String displayName(String HWid) {
+        // returns the name of the vdevice where this pdevice is assigned to
+        // if there is no vdevice, just return HWid
+        PDevice pdevice;
+        String name = HWid;
+        pdevice = RGPIO.PDeviceMap.get(HWid);
+        if (pdevice != null) {
+            System.out.println(" pdevice exists for " + HWid);
+            if (pdevice.vdevice != null) {
+                System.out.println(" vdevice exists for " + HWid);
+                name = pdevice.vdevice.name;
+            }
+        }
+        return name;
+    }
+    
 }
