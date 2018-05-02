@@ -31,28 +31,32 @@ public class DeviceHandler {
                 String[] hopSplit = hop.split("\\(");
                 currentHop = hopSplit[0];
                 if (previousHop != null) {
-                    //                   System.out.println(previousHop + " -> " + currentHop);
+                    System.out.println(previousHop + " -> " + currentHop);
                     // previousHop and currentHop are HWid of physical devices.
                     // If the pdevice is part of a vdevice, we use the vdevice name on the graph display
                     // if not, just use the HWid as display name.
+
                     PDevice pdevice;
                     previousHopName = previousHop;
                     pdevice = RGPIO.PDeviceMap.get(previousHop);
                     if (pdevice != null) {
+                        System.out.println(" pdevice exists for " + previousHop);
                         if (pdevice.vdevice != null) {
+                            System.out.println(" vdevice exists for " + previousHop);
                             previousHopName = pdevice.vdevice.name;
                         }
                     }
                     currentHopName = currentHop;
                     pdevice = RGPIO.PDeviceMap.get(currentHop);
                     if (pdevice != null) {
+                        System.out.println(" pdevice exists for " + currentHop);
                         if (pdevice.vdevice != null) {
+                            System.out.println(" vdevice exists for " + currentHop);
                             currentHopName = pdevice.vdevice.name;
                         }
                     }
-                    
-                    
-                    if (RGPIO.deviceTree.addLink(previousHopName, currentHopName)) {
+
+                    if (RGPIO.deviceTree.addLink(previousHop, currentHop)) {
                         topologyChanged = true;
                     }
                 }
