@@ -36,7 +36,7 @@ public class DeviceTree {
         nrDevices = new int[100];
         leftFilled = new int[100];
         generateLayout();
-        new DeviceAliveThread().start();
+ //       new DeviceAliveThread().start();
     }
 
     private Device addDevice(String name) {
@@ -53,7 +53,23 @@ public class DeviceTree {
         return d;
     }
 
-    public boolean addLink(String name, String upstreamName) {
+    public void expireDevice(String name) {
+        Device d;
+                 System.out.println("expiring device : " + name);
+        d = nodes.get(name);
+        if (d != null) {
+            if (!d.expired) {
+                d.expired = true;
+                for (String s : generateLayout()) {
+                    RGPIO.webSocketServer.sendToAll(s);
+                }
+            }
+        } else {
+            System.out.println("expiring non existing device : " + name);
+        }
+    }
+
+    public synchronized void addLink(String name, String upstreamName) {
 
         // returns true if adding this link changes the tree
         Device d;
@@ -85,21 +101,25 @@ public class DeviceTree {
             du.downstream.add(d);
         }
 
- //       System.out.print("adding " + d.name + " -> " + du.name);
+        System.out.print("adding " + d.name + " -> " + du.name);
 
         // device confirmed presence
         if (d.expired) {
             topologyChange = true;
         }
         d.expired = false;
-/*
+
         if (topologyChange) {
             System.out.println(" : topology change");
         } else {
             System.out.println(" : no topology change");
         }
-*/
-        return topologyChange;
+
+        if (topologyChange) {
+            for (String s : generateLayout()) {
+                RGPIO.webSocketServer.sendToAll(s);
+            }
+        }
     }
 
     public interface DoSomething {

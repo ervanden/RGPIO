@@ -89,6 +89,7 @@ class DeviceProbeThread extends Thread {
                     long inactive = now - device.report_received;
                     if (inactive > 10000) {
                         device.setNotResponding("device did not respond in last " + Math.round(inactive / 1000) + " sec");
+                    RGPIO.deviceTree.expireDevice(RGPIO.PDeviceMap.vDeviceName(device.HWid));
                     }
                 }
             } catch (Exception e) {
@@ -141,8 +142,6 @@ class UpdateRRDThread extends Thread {
                 RGPIO.RRDSample.setTime(time);
                 int updates = 0;
 
-                // new code not using RRDVIO
-                // purpose : to store last recorded values in the VAnalogInput,... objects
                 for (VInput v : RGPIO.VAnalogInputMap.values()) {
                     e.vdevice = v.name;
                     Integer value = v.avg();

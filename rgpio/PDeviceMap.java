@@ -28,6 +28,22 @@ public class PDeviceMap extends ConcurrentHashMap<String, PDevice> {
         matchToGroup(pdevice);
         return pdevice;
     }
+    
+    static String vDeviceName(String HWid) {
+        // returns the name of the vdevice where this pdevice is assigned to
+        // if there is no vdevice, just return HWid
+        PDevice pdevice;
+        String name = HWid;
+        pdevice = RGPIO.PDeviceMap.get(HWid);
+        if (pdevice != null) {
+            //System.out.println(" pdevice exists for " + HWid);
+            if (pdevice.vdevice != null) {
+                //System.out.println(" vdevice exists for " + HWid);
+                name = pdevice.vdevice.name;
+            }
+        }
+        return name;
+    }
 
     public void deviceEventHandler(
             String HWid,

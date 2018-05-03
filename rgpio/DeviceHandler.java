@@ -23,7 +23,6 @@ public class DeviceHandler {
             // Parse the trace packet and add the topology information to the device tree
             String previousHop = null;
             String currentHop = null;
-            boolean topologyChanged = false;
             String[] traceSplit = msg.trace.split("\\)");
             for (String hop : traceSplit) {
                 String[] hopSplit = hop.split("\\(");
@@ -31,21 +30,14 @@ public class DeviceHandler {
                 if (previousHop != null) {
                     //System.out.println(previousHop + " -> " + currentHop);
                     // previousHop and currentHop are HWid of physical devices.
-                    if (RGPIO.deviceTree.addLink(displayName(previousHop), displayName(currentHop))) {
-                        topologyChanged = true;
-                    }
+                    RGPIO.deviceTree.addLink(
+                            RGPIO.PDeviceMap.vDeviceName(previousHop), 
+                            RGPIO.PDeviceMap.vDeviceName(currentHop));
                 }
                 previousHop = currentHop;
             }
             //         System.out.println(previousHop + " -> " + "RGPIO");
-            if (RGPIO.deviceTree.addLink(displayName(previousHop), "RGPIO")) {
-                topologyChanged = true;
-            }
-            if (topologyChanged) {
-                for (String s : RGPIO.deviceTree.generateLayout()) {
-                    RGPIO.webSocketServer.sendToAll(s);
-                }
-            }
+            RGPIO.deviceTree.addLink(RGPIO.PDeviceMap.vDeviceName(previousHop), "RGPIO");
 
         } else if (msg.command.equals("REPORT")) {
             String HWid = msg.from;
@@ -119,20 +111,6 @@ public class DeviceHandler {
 
     }
 
-    static String displayName(String HWid) {
-        // returns the name of the vdevice where this pdevice is assigned to
-        // if there is no vdevice, just return HWid
-        PDevice pdevice;
-        String name = HWid;
-        pdevice = RGPIO.PDeviceMap.get(HWid);
-        if (pdevice != null) {
-            //System.out.println(" pdevice exists for " + HWid);
-            if (pdevice.vdevice != null) {
-                //System.out.println(" vdevice exists for " + HWid);
-                name = pdevice.vdevice.name;
-            }
-        }
-        return name;
-    }
     
+
 }

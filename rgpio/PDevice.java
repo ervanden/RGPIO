@@ -6,7 +6,7 @@ import udputils.UDPSender;
 
 public class PDevice {
 
-    // status changes are forwarded to updateFeed. All access must be via methods. status field is private
+    // status field is private, all access via methods so we can react on changes
     private PDeviceStatus status = PDeviceStatus.NULL;
 
     public String modelName = null;
@@ -51,20 +51,20 @@ public class PDevice {
                 vdevice.stateChange();
             }
             updateVIOMembers();
-        }
 
-        MessageEvent e = new MessageEvent(MessageType.DeviceNotResponding);
-        e.description = msg;
-        e.ipAddress = ipAddress;
-        e.HWid = HWid;
-        RGPIO.message(e);
+            MessageEvent e = new MessageEvent(MessageType.DeviceNotResponding);
+            e.description = msg;
+            e.ipAddress = ipAddress;
+            e.HWid = HWid;
+            RGPIO.message(e);
 
-        // web update all the pins to display NOTRESPONDING
-        for (PInput ip : inputs.values()) {
-            RGPIO.webSocketServer.sendToAll(ip.toJSON());
-        }
-        for (POutput op : outputs.values()) {
-            RGPIO.webSocketServer.sendToAll(op.toJSON());
+            // web update all the pins to display NOTRESPONDING
+            for (PInput ip : inputs.values()) {
+                RGPIO.webSocketServer.sendToAll(ip.toJSON());
+            }
+            for (POutput op : outputs.values()) {
+                RGPIO.webSocketServer.sendToAll(op.toJSON());
+            }
         }
     }
 
@@ -135,7 +135,7 @@ public class PDevice {
         json.addProperty("message", message);
         sendPacket(json.asString());
     }
-    
+
     public void sendACKREPORT() {
         JSONString json = new JSONString();
         json.addProperty("command", "ACKREPORT");
@@ -143,7 +143,7 @@ public class PDevice {
         json.addProperty("from", "RGPIO");
         json.addProperty("to", HWid);
         sendPacket(json.asString());
-    } 
+    }
 
     public void sendPacket(String message) {
 
